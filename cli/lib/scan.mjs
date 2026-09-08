@@ -6,6 +6,7 @@ import { execFileSync } from 'node:child_process';
 import { parseCsFile } from './csharp.mjs';
 import { buildEdges, layout, toPlantUML } from './diagram.mjs';
 import { artisanDir, ensureDir, hid, normalizeDiagram, readJSON, writeJSON, uid } from './store.mjs';
+import { writeEmbedded, findEditorDist } from './embed.mjs';
 
 const SKIP_DIRS = new Set([
   '.artisan', '.git', 'node_modules', 'Library', 'obj', 'bin', 'Temp', 'Logs',
@@ -57,34 +58,17 @@ function mergeOld(newDiagram, oldDiagram) {
   if (oldDiagram.cam && oldDiagram.cam.z !== 1) newDiagram.cam = oldDiagram.cam;
 }
 
-function findEditorDist() {
-  const here = path.dirname(new URL(import.meta.url).pathname);
-  const candidates = [
-    process.env.ARTISAN_EDITOR,
-    path.resolve(here, '../../editor/dist'),
-    path.resolve(process.cwd(), 'editor/dist'),
-    path.resolve(here, 'editor-dist'),
-  ].filter(Boolean);
-  for (const c of candidates) {
-    try {
-      if (fs.statSync(path.join(c, 'index.html')).isFile()) return c;
-    } catch {
-      /* try next */
-    }
-  }
-  return null;
-}
-
 function copyEditor() {
   const dist = findEditorDist();
   const target = artisanDir('editor');
   if (!dist) {
     console.log('  (editor build not found — set ARTISAN_EDITOR or build editor/ first; skipping copy)');
-    return;
+    return null;
   }
   fs.rmSync(target, { recursive: true, force: true });
   fs.cpSync(dist, target, { recursive: true });
   console.log(`  editor copied → ${target}/`);
+  return dist;
 }
 
 export function runScan({ src = '.', lang = 'csharp' }) {
@@ -156,13 +140,21 @@ export function runScan({ src = '.', lang = 'csharp' }) {
   if (!readJSON(artisanDir('last-human.json'))) writeJSON(artisanDir('last-human.json'), diagram);
   if (!readJSON(artisanDir('pending.json'))) writeJSON(artisanDir('pending.json'), []);
   appendLog('scan', `scanned ${files.length} files → ${diagram.nodes.length} types, ${diagram.edges.length} relations`);
-  copyEditor();
+  const dist = copyEditor();
+  if (dist) {
+    try {
+      writeEmbedded(dist, diagram, readJSON(artisanDir('pending.json')) || []);
+      console.log('  .artisan/diagram.html written (self-contained editor)');
+    } catch (e) {
+      console.log(`  (diagram.html skipped: ${e.message})`);
+    }
+  }
 
   console.log(`\nArtisan scan complete: ${diagram.nodes.length} types, ${diagram.edges.length} relations.`);
   console.log(`  .artisan/diagram.json  (source of truth)`);
   console.log(`  .artisan/diagram.puml  (PlantUML mirror for AI)`);
   console.log(`  .artisan/map.json      (type → source file)`);
-  console.log(`\nOpen the editor:  artisan serve   →  http://localhost:4173`);
+  console.log(`\nOpen the editor:  double-click .artisan/diagram.html  (or: artisan serve)`);
 }
 
 export function appendLog(actor, summary) {

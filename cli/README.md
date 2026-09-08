@@ -11,13 +11,16 @@ The `.artisan/` directory in your project holds the state:
 | `last-ai.json` / `last-human.json` | change-tracking baselines |
 | `pending.json` | AI changes the human hasn't seen yet |
 | `changelog.json` | history of consumed changes |
-| `editor/` | bundled diagram editor (served by `artisan serve`) |
+| `editor/` | bundled editor assets (inlined into `diagram.html`) |
+| `diagram.html` | the editor as a single self-contained file |
 
 ## Commands
 
 ```
 artisan scan        parse C# → diagram (merges your edits: positions, notes survive)
-artisan serve       editor at http://localhost:4173 (autosaves to diagram.json)
+                    + writes .artisan/diagram.html — the editor as ONE file,
+                    double-click to open (Connect file button autosaves edits)
+artisan serve       (optional) editor at http://localhost:4173, live autosave
 artisan diff        human diagram edits → markdown report for the AI; consumes them
 artisan mark-ai     record AI-made diagram.json edits as pending (amber in editor)
 artisan ack         human confirms AI changes seen (or "Mark seen" button in editor)

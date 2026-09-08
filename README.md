@@ -21,9 +21,10 @@ C# first (Unity-friendly), more languages later.
 
 ```bash
 cd your-project
-artisan scan     # C# → .artisan/diagram.json + diagram.puml (PlantUML mirror)
-artisan serve    # open http://localhost:4173 — view & edit the diagram
+artisan scan     # C# → .artisan/diagram.json + diagram.puml + diagram.html
 ```
+
+Open **`.artisan/diagram.html`** — the whole editor in one file, double-click, no server. Click **Connect file** once to autosave edits back to `diagram.json` (Chrome/Edge; `artisan serve` works everywhere).
 
 Edit the diagram (rename things, add classes, leave notes), then let your agent run `/artisan scaffold` or `/artisan implement` — diagram edits land in your code:
 

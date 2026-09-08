@@ -38,9 +38,11 @@ import {
   saveThrottled,
   seedData,
   serverRef,
+  fileRef,
   undo,
   updateUndoButtons,
 } from './storage';
+import type { SerializedDiagram } from './storage';
 import {
   DEFAULT_HINT,
   activeMenuRef,
@@ -782,8 +784,27 @@ btnClear.addEventListener('click', () => {
 
 const btnNotes = document.getElementById('btn-notes') as HTMLButtonElement;
 const btnAck = document.getElementById('btn-ack') as HTMLButtonElement;
+const btnConnect = document.getElementById('btn-connect') as HTMLButtonElement;
 
 btnNotes.addEventListener('click', openProjectNotes);
+
+btnConnect.addEventListener('click', async () => {
+  try {
+    const picker = (window as unknown as { showOpenFilePicker?: (o: unknown) => Promise<unknown[]> }).showOpenFilePicker;
+    if (!picker) {
+      toast('Autosave needs Chrome/Edge — use Export JSON instead');
+      return;
+    }
+    const handles = await picker.call(window, {
+      types: [{ description: 'Artisan diagram', accept: { 'application/json': ['.json'] } }],
+    });
+    fileRef.handle = handles[0];
+    btnConnect.style.display = 'none';
+    toast('Connected — edits now autosave to your diagram.json');
+  } catch {
+    /* picker cancelled */
+  }
+});
 
 function syncAckButton(): void {
   const count = state.aiPending.length;
@@ -808,6 +829,10 @@ async function refreshPending(): Promise<void> {
 }
 
 btnAck.addEventListener('click', async () => {
+  if (!serverRef.current) {
+    toast('Run `artisan ack` in your project to confirm');
+    return;
+  }
   try {
     const res = await fetch('/api/ack', { method: 'POST' });
     if (!res.ok) return;
@@ -836,23 +861,42 @@ async function tryServerBoot(): Promise<boolean> {
   }
 }
 
+interface EmbeddedPayload {
+  diagram?: SerializedDiagram;
+  pending?: PendingRef[];
+}
+
+const embedded: EmbeddedPayload | undefined = (window as unknown as { __ARTISAN__?: EmbeddedPayload }).__ARTISAN__;
+
 async function boot(): Promise<void> {
-  const raw = localStorage.getItem(LS_KEY);
   let fresh = true;
-  if (raw) {
+  if (embedded?.diagram && Array.isArray(embedded.diagram.nodes)) {
+    loadInto(embedded.diagram);
+    state.aiPending = Array.isArray(embedded.pending) ? embedded.pending : [];
+    fresh = false;
+  } else {
+    let raw: string | null = null;
     try {
-      loadInto(JSON.parse(raw));
-      fresh = false;
+      raw = localStorage.getItem(LS_KEY);
     } catch {
+      /* storage unavailable */
+    }
+    if (raw) {
+      try {
+        loadInto(JSON.parse(raw));
+        fresh = false;
+      } catch {
+        loadInto(seedData());
+      }
+    } else {
       loadInto(seedData());
     }
-  } else {
-    loadInto(seedData());
   }
   syncColorize();
   applyThemeIcon();
   updateUndoButtons();
   syncAckButton();
+  if (!serverRef.current) btnConnect.style.display = embedded ? '' : 'none';
   renderAll();
   if (fresh) fitView();
   else applyCam();
@@ -861,6 +905,7 @@ async function boot(): Promise<void> {
   if (await tryServerBoot()) {
     renderAll();
     applyCam();
+    btnConnect.style.display = 'none';
     toast('Synced with artisan server');
   }
 }

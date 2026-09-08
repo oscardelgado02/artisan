@@ -19,6 +19,7 @@ export interface SerializedDiagram {
 }
 
 export const serverRef: { current: boolean } = { current: false };
+export const fileRef: { handle: any } = { handle: null };
 
 export function serialize(): string {
   const diagram: SerializedDiagram = {
@@ -36,9 +37,10 @@ export function save(): void {
   try {
     localStorage.setItem(LS_KEY, serialize());
   } catch {
-    /* storage unavailable */
+    /* storage unavailable (file:// may throw) */
   }
   if (serverRef.current) putToServer();
+  if (fileRef.handle) saveFileThrottled();
 }
 
 let putTimer: ReturnType<typeof setTimeout> | null = null;
@@ -50,6 +52,22 @@ function putToServer(): void {
     fetch('/api/diagram', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: serialize() }).catch(
       () => undefined
     );
+  }, 500);
+}
+
+let fileTimer: ReturnType<typeof setTimeout> | null = null;
+
+function saveFileThrottled(): void {
+  if (fileTimer) return;
+  fileTimer = setTimeout(() => {
+    fileTimer = null;
+    fileRef.handle
+      .createWritable()
+      .then(async (w: any) => {
+        await w.write(serialize());
+        await w.close();
+      })
+      .catch(() => undefined);
   }, 500);
 }
 

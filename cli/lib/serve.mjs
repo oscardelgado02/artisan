@@ -8,6 +8,7 @@ import { spawn } from 'node:child_process';
 import { toPlantUML } from './diagram.mjs';
 import { appendLog } from './scan.mjs';
 import { artisanDir, normalizeDiagram, readJSON, writeJSON } from './store.mjs';
+import { refreshEmbedded } from './embed.mjs';
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -45,6 +46,7 @@ function saveDiagram(raw) {
   const diagram = normalizeDiagram(JSON.parse(raw));
   writeJSON(artisanDir('diagram.json'), diagram);
   fs.writeFileSync(artisanDir('diagram.puml'), toPlantUML(diagram));
+  refreshEmbedded();
   return diagram;
 }
 
@@ -54,6 +56,7 @@ export function runServe({ port = 4173 }) {
     console.error('No editor in .artisan/editor — run `artisan scan` first.');
     process.exit(1);
   }
+  refreshEmbedded(); // diagram.html present/fresh even if scan ran elsewhere
   const server = http.createServer(async (req, res) => {
     const url = (req.url || '/').split('?')[0];
     try {
