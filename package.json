@@ -1,0 +1,11 @@
+{
+  "name": "artisan-uml-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Artisan — human-first class diagrams for agentic coding. Editor + CLI + agent packs.",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm --filter artisan-uml-editor build",
+    "test": "node cli/test/run.mjs"
+  }
+}
