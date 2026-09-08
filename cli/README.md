@@ -27,7 +27,20 @@ artisan ack         human confirms AI changes seen (or "Mark seen" button in edi
 artisan status      diagram size, pending changes both directions
 ```
 
-Scan skips `Library/`, `obj/`, `bin/`, `Temp/`, `Logs/`, `Packages/`, `Editor/` test dirs? — see `lib/scan.mjs` for the current ignore list (Unity-aware).
+Scan skips `Library/`, `obj/`, `bin/`, `Temp/`, `Logs/`, `Packages/`, `Editor/` — see `lib/scan.mjs` for the ignore list (Unity-aware).
+
+### How relations are detected
+
+| Kind | Detected from |
+|------|---------------|
+| inheritance | `class Dog : Animal` |
+| realization | `class Dog : IPet` (interface base; Unity convention: `IFoo` → `Foo` also linked) |
+| composition | field initialized inline: `Engine engine = new Engine();` |
+| aggregation | collection-typed field: `List<Weapon> weapons;` / `Weapon[] slots;` |
+| association | plain field of a scanned type: `Engine engine;` |
+| dependency | method parameter/return type references a scanned type (only when no stronger edge links the pair) |
+
+Layout is layered: roots (no parents) on top, children below, so inheritance trees read top-down. These are pragmatic heuristics — hand-tune relations and positions in the editor; re-scan keeps your edits.
 
 ## Install into a project
 

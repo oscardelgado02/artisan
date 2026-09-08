@@ -131,6 +131,10 @@ export function runScan({ src = '.', lang = 'csharp' }) {
   const old = readJSON(artisanDir('diagram.json'));
   mergeOld(diagram, normalizeDiagram(old));
   if (!old) layout(diagram);
+  else {
+    const fresh = new Set(diagram.nodes.filter((n) => n.x == null || n.y == null).map((n) => n.id));
+    if (fresh.size) layout(diagram, fresh);
+  }
 
   ensureDir();
   writeJSON(artisanDir('diagram.json'), diagram);
@@ -151,6 +155,9 @@ export function runScan({ src = '.', lang = 'csharp' }) {
   }
 
   console.log(`\nArtisan scan complete: ${diagram.nodes.length} types, ${diagram.edges.length} relations.`);
+  const byKind = {};
+  for (const e of diagram.edges) byKind[e.kind] = (byKind[e.kind] || 0) + 1;
+  console.log(`  relations: ${Object.entries(byKind).map(([k, c]) => `${c} ${k}`).join(', ') || 'none'}`);
   console.log(`  .artisan/diagram.json  (source of truth)`);
   console.log(`  .artisan/diagram.puml  (PlantUML mirror for AI)`);
   console.log(`  .artisan/map.json      (type → source file)`);

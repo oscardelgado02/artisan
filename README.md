@@ -26,6 +26,8 @@ artisan scan     # C# → .artisan/diagram.json + diagram.puml + diagram.html
 
 Open **`.artisan/diagram.html`** — the whole editor in one file, double-click, no server. Click **Connect file** once to autosave edits back to `diagram.json` (Chrome/Edge; `artisan serve` works everywhere).
 
+The scan detects every UML relation — inheritance, realization, composition (`= new X()` fields), aggregation (collection fields), association, dependency — and lays the diagram out in layers, roots on top, so the architecture reads top-down.
+
 Edit the diagram (rename things, add classes, leave notes), then let your agent run `/artisan scaffold` or `/artisan implement` — diagram edits land in your code:
 
 - **renames** are detected as renames and refactored
