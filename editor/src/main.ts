@@ -6,6 +6,7 @@ import {
   VISIBILITY,
   edgeById,
   memberKey,
+  movedNodes,
   nodeById,
   selEdge,
   selNode,
@@ -475,6 +476,7 @@ document.addEventListener('mousemove', (e: MouseEvent) => {
   const dy = e.clientY - drag.sy;
   if (!drag.moved && Math.hypot(dx, dy) < 3) return;
   drag.moved = true;
+  movedNodes.add(drag.id);
   const n = nodeById(drag.id);
   if (!n) return;
   n.x = drag.ox + dx / state.cam.z;

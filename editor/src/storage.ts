@@ -1,4 +1,4 @@
-import { state } from './model';
+import { state, movedNodes } from './model';
 import type { Camera, UmlEdge, UmlNode } from './model';
 import { applyCam, renderAll, syncColorize } from './render';
 
@@ -82,6 +82,7 @@ export function saveThrottled(): void {
 }
 
 export function loadInto(data: SerializedDiagram): void {
+  movedNodes.clear();
   state.seq = data.seq ?? 1;
   state.nodes = Array.isArray(data.nodes) ? data.nodes : [];
   state.edges = Array.isArray(data.edges) ? data.edges : [];

@@ -5,6 +5,7 @@ import {
   clamp,
   esc,
   isPending,
+  movedNodes,
   nodeById,
   selEdge,
   selNode,
@@ -216,6 +217,134 @@ function edgeLabelText(x: number, y: number, txt: string, cls: string): SVGTextE
   return t;
 }
 
+// Does a straight segment pass through any node box (besides a/b)?
+function segBlocked(x: number, y1: number, y2: number, skipA: string, skipB: string): boolean {
+  const lo = Math.min(y1, y2);
+  const hi = Math.max(y1, y2);
+  for (const n of state.nodes) {
+    if (n.id === skipA || n.id === skipB) continue;
+    if (x > n.x + 6 && x < n.x + (n._w ?? 220) - 6 && n.y + (n._h ?? 100) > lo + 6 && n.y < hi - 6) return true;
+  }
+  return false;
+}
+
+function segBlockedH(y: number, x1: number, x2: number, skipA: string, skipB: string): boolean {
+  const lo = Math.min(x1, x2);
+  const hi = Math.max(x1, x2);
+  for (const n of state.nodes) {
+    if (n.id === skipA || n.id === skipB) continue;
+    if (y > n.y + 6 && y < n.y + (n._h ?? 100) - 6 && n.x + (n._w ?? 220) > lo + 6 && n.x < hi - 6) return true;
+  }
+  return false;
+}
+
+// Nearest free vertical channel: midpoint between neighbouring node columns.
+function corridorX(x1: number, x2: number, y1: number, y2: number, skipA: string, skipB: string): number {
+  const bounds = new Set<number>();
+  for (const n of state.nodes) {
+    bounds.add(n.x);
+    bounds.add(n.x + (n._w ?? 220));
+  }
+  const cand = [...bounds].sort((p, q) => p - q);
+  const mids: number[] = [cand[0] - 60, cand[cand.length - 1] + 40];
+  for (let i = 0; i < cand.length - 1; i++) mids.push((cand[i] + cand[i + 1]) / 2);
+  mids.sort((p, q) => Math.abs(p - (x1 + x2) / 2) - Math.abs(q - (x1 + x2) / 2));
+  for (const m of mids) if (!segBlocked(m, y1, y2, skipA, skipB)) return Math.round(m);
+  return Math.round((x1 + x2) / 2);
+}
+
+function corridorY(y1: number, y2: number, x1: number, x2: number, skipA: string, skipB: string): number {
+  const bounds = new Set<number>();
+  for (const n of state.nodes) {
+    bounds.add(n.y);
+    bounds.add(n.y + (n._h ?? 100));
+  }
+  const cand = [...bounds].sort((p, q) => p - q);
+  const mids: number[] = [cand[0] - 40, cand[cand.length - 1] + 40];
+  for (let i = 0; i < cand.length - 1; i++) mids.push((cand[i] + cand[i + 1]) / 2);
+  mids.sort((p, q) => Math.abs(p - (y1 + y2) / 2) - Math.abs(q - (y1 + y2) / 2));
+  for (const m of mids) if (!segBlockedH(m, x1, x2, skipA, skipB)) return Math.round(m);
+  return Math.round((y1 + y2) / 2);
+}
+
+function edgeRoute(
+  a: UmlNode,
+  b: UmlNode
+): { d: string; s: { x: number; y: number }; e: { x: number; y: number }; mid: { x: number; y: number } } {
+  const aw = a._w ?? 220;
+  const ah = a._h ?? 100;
+  const bw = b._w ?? 220;
+  const bh = b._h ?? 100;
+  const acx = a.x + aw / 2;
+  const acy = a.y + ah / 2;
+  const bcx = b.x + bw / 2;
+  const bcy = b.y + bh / 2;
+  const sepX = Math.max(0, Math.max(a.x, b.x) - Math.min(a.x + aw, b.x + bw));
+  const sepY = Math.max(0, Math.max(a.y, b.y) - Math.min(a.y + ah, b.y + bh));
+  if (sepX === 0 && sepY === 0) {
+    // overlapping boxes: straight center-to-center
+    return {
+      d: `M ${acx} ${acy} L ${bcx} ${bcy}`,
+      s: { x: acx, y: acy },
+      e: { x: bcx, y: bcy },
+      mid: { x: (acx + bcx) / 2, y: (acy + bcy) / 2 },
+    };
+  }
+  if (sepX >= sepY) {
+    const right = bcx > acx;
+    const sx = right ? a.x + aw : a.x;
+    const ex = right ? b.x : b.x + bw;
+    const sy = acy;
+    const ey = bcy;
+    // detour through a free horizontal channel when the straight run is blocked
+    if (segBlocked(sy, sx, ex, a.id, b.id)) {
+      const ch = corridorY(sy, ey, sx, ex, a.id, b.id);
+      const m1 = right ? sx + 16 : sx - 16;
+      const m2 = right ? ex - 16 : ex + 16;
+      if ((right && m2 > m1) || (!right && m2 < m1)) {
+        return {
+          d: `M ${sx} ${sy} H ${m1} V ${ch} H ${m2} V ${ey}`,
+          s: { x: sx, y: sy },
+          e: { x: ex, y: ey },
+          mid: { x: m2, y: ch },
+        };
+      }
+    }
+    const mx = (sx + ex) / 2;
+    return {
+      d: `M ${sx} ${sy} H ${mx} V ${ey} H ${ex}`,
+      s: { x: sx, y: sy },
+      e: { x: ex, y: ey },
+      mid: { x: mx, y: (sy + ey) / 2 },
+    };
+  }
+  const down = bcy > acy;
+  const sy = down ? a.y + ah : a.y;
+  const ey = down ? b.y : b.y + bh;
+  const sx = acx;
+  const ex = bcx;
+  if (segBlocked(sx, sy, ey, a.id, b.id)) {
+    const ch = corridorX(sx, ex, sy, ey, a.id, b.id);
+    const m1 = down ? sy + 16 : sy - 16;
+    const m2 = down ? ey - 16 : ey + 16;
+    if ((down && m2 > m1) || (!down && m2 < m1)) {
+      return {
+        d: `M ${sx} ${sy} V ${m1} H ${ch} V ${m2} H ${ex} V ${ey}`,
+        s: { x: sx, y: sy },
+        e: { x: ex, y: ey },
+        mid: { x: ch, y: (m1 + m2) / 2 },
+      };
+    }
+  }
+  const my = (sy + ey) / 2;
+  return {
+    d: `M ${sx} ${sy} V ${my} H ${ex} V ${ey}`,
+    s: { x: sx, y: sy },
+    e: { x: ex, y: ey },
+    mid: { x: (sx + ex) / 2, y: my },
+  };
+}
+
 export function renderEdges(): void {
   edgePaths.textContent = '';
   (document.getElementById('link-ghost') as SVGGElement | null)?.replaceChildren();
@@ -263,37 +392,66 @@ export function renderEdges(): void {
       labelX = x + 66;
       labelY = (y1 + y2) / 2;
     } else {
-      const p1 = anchor(a, b);
-      const p2 = anchor(b, a);
-      const hit = svgEl('line') as SVGLineElement;
-      hit.setAttribute('x1', String(p1.x));
-      hit.setAttribute('y1', String(p1.y));
-      hit.setAttribute('x2', String(p2.x));
-      hit.setAttribute('y2', String(p2.y));
+      const pts = e.points;
+      const usePts = !!pts && pts.length >= 2 && !movedNodes.has(a.id) && !movedNodes.has(b.id);
+      const route = usePts ? null : edgeRoute(a, b);
+      const d = usePts
+        ? 'M ' + pts!.map(p => `${p.x} ${p.y}`).join(' L ')
+        : route!.d;
+      const hit = svgEl('path') as SVGPathElement;
+      hit.setAttribute('d', d);
       hit.setAttribute('class', 'edge-hit');
       g.appendChild(hit);
 
-      const line = svgEl('line') as SVGLineElement;
-      line.setAttribute('x1', String(p1.x));
-      line.setAttribute('y1', String(p1.y));
-      line.setAttribute('x2', String(p2.x));
-      line.setAttribute('y2', String(p2.y));
+      const line = svgEl('path') as SVGPathElement;
+      line.setAttribute('d', d);
       line.setAttribute('class', 'edge-line' + (def.dashed ? ' dashed' : ''));
       line.setAttribute('marker-start', markerStart);
       line.setAttribute('marker-end', markerEnd);
       g.appendChild(line);
 
-      const dx = p2.x - p1.x;
-      const dy = p2.y - p1.y;
-      const len = Math.hypot(dx, dy) || 1;
-      const ux = dx / len;
-      const uy = dy / len;
-      if (e.fromMult)
-        g.appendChild(edgeLabelText(p1.x + ux * 20, p1.y + uy * 20 - 4, e.fromMult, 'edge-mult'));
-      if (e.toMult)
-        g.appendChild(edgeLabelText(p2.x - ux * 20, p2.y - uy * 20 - 4, e.toMult, 'edge-mult'));
-      labelX = (p1.x + p2.x) / 2;
-      labelY = (p1.y + p2.y) / 2 - 6;
+      if (usePts) {
+        const dir = (ax: number, ay: number, bx: number, by: number) => {
+          const l = Math.hypot(bx - ax, by - ay) || 1;
+          return { x: (bx - ax) / l, y: (by - ay) / l };
+        };
+        const P0 = pts![0];
+        const PL = pts![pts!.length - 1];
+        if (e.fromMult) {
+          const u1 = dir(P0.x, P0.y, pts![1].x, pts![1].y);
+          g.appendChild(edgeLabelText(P0.x + u1.x * 18, P0.y + u1.y * 18 - 4, e.fromMult, 'edge-mult'));
+        }
+        if (e.toMult) {
+          const u2 = dir(PL.x, PL.y, pts![pts!.length - 2].x, pts![pts!.length - 2].y);
+          g.appendChild(edgeLabelText(PL.x + u2.x * 18, PL.y + u2.y * 18 - 4, e.toMult, 'edge-mult'));
+        }
+        const mp = pts![Math.floor(pts!.length / 2)];
+        labelX = mp.x;
+        labelY = mp.y - 6;
+      } else {
+        if (e.fromMult) {
+          const horiz = Math.abs(route!.e.x - route!.s.x) > Math.abs(route!.e.y - route!.s.y);
+          if (horiz) {
+            const dir2 = route!.e.x > route!.s.x ? 1 : -1;
+            g.appendChild(edgeLabelText(route!.s.x + dir2 * 20, route!.s.y - 6, e.fromMult, 'edge-mult'));
+          } else {
+            const dir2 = route!.e.y > route!.s.y ? 1 : -1;
+            g.appendChild(edgeLabelText(route!.s.x + 8, route!.s.y + dir2 * 18, e.fromMult, 'edge-mult'));
+          }
+        }
+        if (e.toMult) {
+          const horiz = Math.abs(route!.e.x - route!.s.x) > Math.abs(route!.e.y - route!.s.y);
+          if (horiz) {
+            const dir2 = route!.e.x > route!.s.x ? 1 : -1;
+            g.appendChild(edgeLabelText(route!.e.x - dir2 * 20, route!.e.y - 6, e.toMult, 'edge-mult'));
+          } else {
+            const dir2 = route!.e.y > route!.s.y ? 1 : -1;
+            g.appendChild(edgeLabelText(route!.e.x + 8, route!.e.y - dir2 * 14, e.toMult, 'edge-mult'));
+          }
+        }
+        labelX = route!.mid.x;
+        labelY = route!.mid.y - 6;
+      }
     }
 
     if (e.label) g.appendChild(edgeLabelText(labelX, labelY, e.label, 'edge-label'));

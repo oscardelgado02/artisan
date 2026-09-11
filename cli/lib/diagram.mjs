@@ -1,4 +1,7 @@
-// Diagram helpers: edges from C# metadata, layered auto-layout, PlantUML export.
+// Diagram helpers: edges from C# metadata, dagre auto-layout, PlantUML export.
+// Layout engine: vendored dagre (MIT, same engine mermaid uses) — proper
+// ranking/ordering/coordinates, and edge polylines that avoid node boxes.
+import { Graph, layout as dagreLayout } from './vendor/dagre.mjs';
 
 export const ARROW = {
   inheritance: '<|--',
@@ -111,109 +114,121 @@ export function buildEdges(entries) {
   return edges;
 }
 
-// Layered layout (Sugiyama-lite):
-// 1) layer = longest path from a root, following child→parent edges
-//    (inheritance/realization parents sit ABOVE their children; associations
-//    count too so used-together classes spread out).
-// 2) within a layer, order by namespace then barycenter of parents (2 passes).
-// 3) x by column, y by layer using estimated node heights.
-// Relation-less nodes land in a loose grid at the bottom.
+// dagre layout (fresh scans): parents rank above children (inheritance edges
+// are reversed for ranking, then points un-reversed), strong relations get
+// extra weight so they stay straight. Edge polylines are stored on `e.points`
+// and the editor renders exactly those routes.
+// Rescan mode (`only`): existing nodes keep their positions; fresh ones are
+// anchored near their placed neighbours and spiral out to a free spot.
 export function layout(diagram, only = null) {
   const nodes = diagram.nodes;
   if (!nodes.length) return;
-  const byId = new Map(nodes.map((n) => [n.id, n]));
-  const parents = new Map(nodes.map((n) => [n.id, new Set()]));
-  const children = new Map(nodes.map((n) => [n.id, new Set()]));
+  const keep = only instanceof Set ? only : null;
+  if (keep && keep.size === 0) return;
+
+  const ids = new Set(nodes.map((n) => n.id));
+  const neighbors = new Map(nodes.map((n) => [n.id, new Set()]));
   for (const e of diagram.edges) {
-    // e.from depends on e.to; render e.to above e.from.
-    if (byId.has(e.from) && byId.has(e.to) && e.from !== e.to) {
-      parents.get(e.from).add(e.to);
-      children.get(e.to).add(e.from);
-    }
+    if (!ids.has(e.from) || !ids.has(e.to) || e.from === e.to) continue;
+    neighbors.get(e.from).add(e.to);
+    neighbors.get(e.to).add(e.from);
   }
 
-  // Layer via cycle-guarded longest path from roots.
-  const layer = new Map();
-  const ROOT_LAYER = 0;
-  for (const n of nodes) {
-    if (layer.has(n.id)) continue;
-    // treat any node with no parents as a root
-    if (parents.get(n.id).size > 0) continue;
-    const stack = [[n.id, ROOT_LAYER]];
-    while (stack.length) {
-      const [id, depth] = stack.pop();
-      if ((layer.get(id) ?? -1) >= depth) continue;
-      layer.set(id, depth);
-      for (const c of children.get(id)) {
-        // cycle guard: depth cap = node count
-        if (depth < nodes.length) stack.push([c, depth + 1]);
-      }
-    }
-  }
-  // Nodes unreachable from roots (cycles): lay them at max layer + 1.
-  let maxLayer = 0;
-  for (const n of nodes) maxLayer = Math.max(maxLayer, layer.get(n.id) ?? 0);
-  for (const n of nodes) if (!layer.has(n.id)) layer.set(n.id, maxLayer + 1);
-
-  // Estimated node height: header + members.
   const heightOf = (n) => 62 + (n.attributes.length + n.methods.length) * 20;
+  // Editor nodes are width:max-content — estimate width from the longest
+  // member line (JetBrains Mono 12px ≈ 7.3px/char) so columns never overlap.
+  const memberLen = (m, isMethod) =>
+    m.mods.join(' ').length + m.name.length + 3 + (isMethod ? (m.params?.length ?? 0) + 2 : m.type.length + 2);
+  const widthOf = (n) =>
+    Math.min(
+      660,
+      Math.max(
+        220,
+        34 +
+          7.3 * Math.max(12, ...n.attributes.map((m) => memberLen(m, false)), ...n.methods.map((m) => memberLen(m, true)))
+      )
+    );
 
-  // Group by layer, order by namespace then barycenter of parents.
-  const layers = new Map();
-  for (const n of nodes) {
-    const L = layer.get(n.id);
-    if (!layers.has(L)) layers.set(L, []);
-    layers.get(L).push(n);
+  if (!keep) {
+    const g = new Graph({ multigraph: true });
+    g.setGraph({ rankdir: 'TB', nodesep: 70, ranksep: 90, marginx: 40, marginy: 40 });
+    g.setDefaultEdgeLabel(() => ({}));
+    for (const n of nodes) g.setNode(n.id, { width: widthOf(n), height: heightOf(n) });
+    for (const e of diagram.edges) {
+      if (!ids.has(e.from) || !ids.has(e.to) || e.from === e.to) continue;
+      const reversed = e.kind === 'inheritance' || e.kind === 'realization';
+      const strong = e.kind === 'inheritance' || e.kind === 'realization' || e.kind === 'composition';
+      g.setEdge(reversed ? e.to : e.from, reversed ? e.from : e.to, { weight: strong ? 3 : 1, minlen: 1 }, e.id);
+    }
+    dagreLayout(g);
+    for (const n of nodes) {
+      const p = g.node(n.id);
+      n.x = Math.round(p.x - p.width / 2);
+      n.y = Math.round(p.y - p.height / 2);
+    }
+    for (const e of diagram.edges) {
+      if (e.from === e.to) continue;
+      const reversed = e.kind === 'inheritance' || e.kind === 'realization';
+      const obj = reversed ? { v: e.to, w: e.from, name: e.id } : { v: e.from, w: e.to, name: e.id };
+      const pts = g.edge(obj)?.points?.map((p) => ({ x: Math.round(p.x), y: Math.round(p.y) }));
+      if (pts && pts.length >= 2) e.points = reversed ? pts.reverse() : pts;
+    }
+    return;
   }
-  const layerKeys = [...layers.keys()].sort((a, b) => a - b);
-  for (const L of layerKeys) {
-    const row = layers.get(L);
-    row.sort((a, b) => (a.namespace || '').localeCompare(b.namespace || ''));
-    for (let pass = 0; pass < 2; pass++) {
-      const bary = new Map();
-      for (const n of row) {
-        const ps = [...parents.get(n.id)].filter((p) => layer.get(p) === L - 1);
-        const xs = ps.map((p) => byId.get(p)._col ?? 0);
-        bary.set(n.id, xs.length ? xs.reduce((s, x) => s + x, 0) / xs.length : null);
-      }
-      row.sort((a, b) => {
-        const ba = bary.get(a.id);
-        const bb = bary.get(b.id);
-        if (ba != null && bb != null && ba !== bb) return ba - bb;
-        if (ba != null && bb == null) return -1;
-        if (ba == null && bb != null) return 1;
-        return (a.namespace || '').localeCompare(b.namespace || '');
-      });
-      row.forEach((n, i) => (byId.get(n.id)._col = i));
+
+  // Rescan: place only fresh ids. Each new node is anchored to the average
+  // position of its already-placed neighbours, then spirals out to the first
+  // free spot — new classes appear next to what they belong to. Nodes with
+  // no placed neighbours are appended right of everything.
+  const taken = new Set();
+  const placed = new Map();
+  for (const n of nodes) {
+    if (!keep.has(n.id) && n.x != null && n.y != null) {
+      taken.add(`${Math.round(n.x)},${Math.round(n.y)}`);
+      placed.set(n.id, { x: n.x, y: n.y });
     }
   }
-  // Place: per-layer rows sized by tallest node; column count by widest row.
-  // `only` (optional set): on rescan, keep stored positions for existing nodes
-  // and place just the new ones in layered spots (nudged right if occupied).
-  const W = 300;
-  const H_GAP = 70;
-  let y = 60;
-  const taken = new Set();
-  if (only) {
-    for (const n of nodes) if (!only.has(n.id)) taken.add(`${Math.round(n.x)},${Math.round(n.y)}`);
-  }
-  for (const L of layerKeys) {
-    const row = layers.get(L);
-    const rowH = Math.max(...row.map(heightOf));
-    const cols = Math.max(1, Math.min(row.length, Math.ceil(1400 / W)));
-    row.forEach((n, i) => {
-      if (only && !only.has(n.id)) return;
-      let x = 60 + (i % cols) * W + Math.floor(i / cols) * 24;
-      let ny = y + Math.floor(i / cols) * (rowH + H_GAP);
-      if (only) {
-        while (taken.has(`${Math.round(x)},${Math.round(ny)}`)) x += W;
-        taken.add(`${Math.round(x)},${Math.round(ny)}`);
+  const fresh = nodes.filter((n) => keep.has(n.id));
+  fresh.sort((a, b) => neighbors.get(b.id).size - neighbors.get(a.id).size);
+  const GRID = 40;
+  for (const n of fresh) {
+    const anchors = [...neighbors.get(n.id)].map((id) => placed.get(id)).filter(Boolean);
+    let best;
+    if (anchors.length) {
+      best = {
+        x: anchors.reduce((s, p) => s + p.x, 0) / anchors.length,
+        y: anchors.reduce((s, p) => s + p.y, 0) / anchors.length,
+      };
+    } else {
+      let maxX = 60;
+      let maxY = 60;
+      for (const p of placed.values()) {
+        maxX = Math.max(maxX, p.x);
+        maxY = Math.max(maxY, p.y);
       }
-      n.x = x;
-      n.y = ny;
-    });
-    const rows = Math.ceil(row.length / cols);
-    y += rows * (rowH + H_GAP);
+      best = { x: maxX + 380, y: maxY };
+    }
+    const w = widthOf(n);
+    let done = false;
+    for (let ring = 0; ring < 24 && !done; ring++) {
+      for (let dy = -ring; dy <= ring && !done; dy++) {
+        for (let dx = -ring; dx <= ring && !done; dx++) {
+          if (Math.max(Math.abs(dx), Math.abs(dy)) !== ring) continue;
+          const cx = Math.round((best.x + dx * w) / GRID) * GRID;
+          const cy = Math.round((best.y + dy * 90) / GRID) * GRID;
+          if (taken.has(`${cx},${cy}`)) continue;
+          n.x = cx;
+          n.y = cy;
+          taken.add(`${cx},${cy}`);
+          placed.set(n.id, { x: cx, y: cy });
+          done = true;
+        }
+      }
+    }
+    if (!done) {
+      n.x = Math.round(best.x);
+      n.y = Math.round(best.y);
+    }
   }
 }
 

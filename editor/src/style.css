@@ -301,7 +301,8 @@ button {
 .node {
   position: absolute;
   min-width: 210px;
-  max-width: 340px;
+  width: max-content;
+  max-width: 640px;
   background-color: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: 1rem;
@@ -483,9 +484,17 @@ button {
   padding: 2px 8px;
   border-radius: 6px;
   cursor: pointer;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+}
+
+.member > span {
+  min-width: 0;
+}
+
+.m-name,
+.m-type,
+.m-params {
+  overflow-wrap: anywhere;
 }
 
 .member:hover {
