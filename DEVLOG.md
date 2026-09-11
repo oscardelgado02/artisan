@@ -10,6 +10,8 @@
 - Curves: fewest-bend routing (straight → L → Z, box-collision checked), Catmull-Rom spline with clamped handles (no end loops).
 - Smooth = rectangular waypoints with axis-snapped runs and rounded bends only.
 - Tidy no longer stores dagre polylines; all edges render live and dodge nearby classes.
+- Parallel edges get axis-safe lane offsets (stem slides sideways, bends stay 90°).
+- Curve labels sit at the true midpoint of the route, not near the target class.
 
 ## 10.09.2026
 - Layout rewritten with vendored dagre (Mermaid's engine): inheritance top-down, routed edge polylines.

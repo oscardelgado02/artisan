@@ -97,10 +97,7 @@ export interface UmlEdge {
   fromMult: string;
   toMult: string;
   note?: string;
-  points?: { x: number; y: number }[];
 }
-
-export const movedNodes = new Set<string>();
 
 export interface PendingRef {
   type: 'node' | 'edge' | 'member';

@@ -5,7 +5,6 @@ import {
   clamp,
   esc,
   isPending,
-  movedNodes,
   nodeById,
   selEdge,
   selNode,
@@ -570,6 +569,25 @@ function orthoSnap(pts: Waypoint[]): Waypoint[] {
   return dedup;
 }
 
+// Point at half the polyline's total length — the true visual middle of the
+// route, no matter how many waypoints cluster near either box.
+function polyMid(pts: Waypoint[]): Waypoint {
+  if (pts.length < 3) {
+    return { x: (pts[0].x + pts[pts.length - 1].x) / 2, y: (pts[0].y + pts[pts.length - 1].y) / 2 };
+  }
+  let total = 0;
+  for (let i = 1; i < pts.length; i++) total += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
+  let rem = total / 2;
+  for (let i = 1; i < pts.length; i++) {
+    const dx = pts[i].x - pts[i - 1].x;
+    const dy = pts[i].y - pts[i - 1].y;
+    const len = Math.hypot(dx, dy);
+    if (len > 0 && rem <= len) return { x: pts[i - 1].x + (dx / len) * rem, y: pts[i - 1].y + (dy / len) * rem };
+    rem -= len;
+  }
+  return pts[pts.length - 1];
+}
+
 // Build the path `d` for a polyline in the current edge style:
 // 'straight' = simple lines, 'ortho' = right angles, 'smooth' = rounded corners,
 // 'elliptic' (label: curves) = Catmull-Rom spline through fewest-bend waypoints.
@@ -604,9 +622,56 @@ export function pathFromPoints(pts: Waypoint[], style: string): string {
   return 'M ' + pts.map(p => `${p.x} ${p.y}`).join(' L ');
 }
 
+// Give a parallel edge its own lane by sliding ONLY the two endpoints of the
+// route's middle stem segment along the direction of the segment before it —
+// this translates the stem without ever breaking a 90° bend.
+function applyLane(pts: Waypoint[], lane: number, skipA: string, skipB: string): Waypoint[] {
+  if (pts.length < 4) return pts;
+  let best = 0;
+  let k = -1;
+  for (let i = 1; i <= pts.length - 3; i++) {
+    const l = Math.hypot(pts[i + 1].x - pts[i].x, pts[i + 1].y - pts[i].y);
+    // the shift stays axis-aligned only if the segments around the stem are parallel
+    const cross =
+      (pts[i].x - pts[i - 1].x) * (pts[i + 2].y - pts[i + 1].y) - (pts[i].y - pts[i - 1].y) * (pts[i + 2].x - pts[i + 1].x);
+    if (l > best && Math.abs(cross) < 0.01) {
+      best = l;
+      k = i;
+    }
+  }
+  if (k < 0) return pts;
+  const d = dir(pts[k - 1].x, pts[k - 1].y, pts[k].x, pts[k].y);
+  const off = lane * 16;
+  const shifted = pts.map((p, i) =>
+    i === k || i === k + 1 ? { x: p.x + d.x * off, y: p.y + d.y * off } : p
+  );
+  // keep the lane inside free space if the default side is blocked
+  let ok = true;
+  for (let i = 0; i < shifted.length - 1; i++) {
+    if (segHitsBoxes(shifted[i], shifted[i + 1], skipA, skipB)) {
+      ok = false;
+      break;
+    }
+  }
+  if (ok) return shifted;
+  return pts.map((p, i) =>
+    i === k || i === k + 1 ? { x: p.x - d.x * off, y: p.y - d.y * off } : p
+  );
+}
+
 export function renderEdges(): void {
   edgePaths.textContent = '';
   (document.getElementById('link-ghost') as SVGGElement | null)?.replaceChildren();
+  const laneOf = new Map<string, number>();
+  const groupCount = new Map<string, number>();
+  for (const e of state.edges) {
+    if (e.from === e.to) continue;
+    const key = [e.from, e.to].sort().join('|');
+    const n = groupCount.get(key) ?? 0;
+    laneOf.set(e.id, n);
+    groupCount.set(key, n + 1);
+  }
+  const labels: Array<{ el: SVGTextElement; x: number; y: number }> = [];
   for (const e of state.edges) {
     const a = nodeById(e.from);
     const b = nodeById(e.to);
@@ -662,17 +727,18 @@ export function renderEdges(): void {
       } else if (style === 'elliptic') {
         // fewest possible bends: straight, then L, then Z; corridor route only as last resort
         pts = minimalBendRoute(a, b) ?? edgeRoute(a, b).pts;
-        mid = pts[Math.floor(pts.length / 2)];
+        mid = polyMid(pts);
       } else {
-        const usePts = !!e.points && e.points.length >= 2 && !movedNodes.has(a.id) && !movedNodes.has(b.id);
-        if (usePts) {
-          pts = e.points!;
-          mid = pts[Math.floor(pts.length / 2)];
-        } else {
-          const route = edgeRoute(a, b);
-          pts = route.pts;
-          mid = route.mid;
-        }
+        // rectangular/smooth always route live from current box positions
+        const route = edgeRoute(a, b);
+        pts = route.pts;
+        mid = route.mid;
+      }
+      // parallel edges between the same two boxes run as separate lanes
+      const lane = laneOf.get(e.id) ?? 0;
+      if (lane > 0) {
+        pts = applyLane(pts, lane, a.id, b.id);
+        mid = polyMid(pts);
       }
       const d = pathFromPoints(pts, style);
       const hit = svgEl('path') as SVGPathElement;
@@ -701,9 +767,24 @@ export function renderEdges(): void {
       labelY = mid.y - 6;
     }
 
-    if (e.label) g.appendChild(edgeLabelText(labelX, labelY, e.label, 'edge-label'));
+    if (e.label) {
+      const el = edgeLabelText(labelX, labelY, e.label, 'edge-label');
+      g.appendChild(el);
+      labels.push({ el, x: labelX, y: labelY });
+    }
 
     edgePaths.appendChild(g);
+  }
+
+  // de-collision: push stacked relation labels apart so every word stays readable
+  labels.sort((p, q) => p.y - q.y);
+  for (let i = 1; i < labels.length; i++) {
+    for (let j = 0; j < i; j++) {
+      if (Math.abs(labels[i].y - labels[j].y) < 14 && Math.abs(labels[i].x - labels[j].x) < 90) {
+        labels[i].y = labels[j].y + 16;
+      }
+    }
+    labels[i].el.setAttribute('y', String(labels[i].y));
   }
 }
 
@@ -761,9 +842,6 @@ function resolveOverlaps(): void {
       el.style.left = n.x + 'px';
       el.style.top = n.y + 'px';
     }
-  }
-  for (const e of state.edges) {
-    if (moved.has(e.from) || moved.has(e.to)) delete e.points;
   }
 }
 

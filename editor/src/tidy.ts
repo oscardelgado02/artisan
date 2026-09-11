@@ -1,6 +1,6 @@
 // @ts-expect-error vendored dagre ESM, no type declarations
 import { Graph, layout as dagreLayout } from './vendor/dagre.mjs';
-import { movedNodes, state } from './model';
+import { state } from './model';
 import { renderAll } from './render';
 import { save } from './storage';
 
@@ -26,8 +26,6 @@ export function tidyAll(): void {
     n.x = Math.round(p.x - p.width / 2);
     n.y = Math.round(p.y - p.height / 2);
   }
-  for (const e of state.edges) delete e.points;
-  movedNodes.clear();
   renderAll();
   save();
 }

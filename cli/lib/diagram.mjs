@@ -212,13 +212,8 @@ export function layout(diagram, only = null) {
       n.x = Math.round(p.x - p.width / 2);
       n.y = Math.round(p.y - p.height / 2);
     }
-    for (const e of diagram.edges) {
-      if (e.from === e.to) continue;
-      const reversed = e.kind === 'inheritance' || e.kind === 'realization';
-      const obj = reversed ? { v: e.to, w: e.from, name: e.id } : { v: e.from, w: e.to, name: e.id };
-      const pts = g.edge(obj)?.points?.map((p) => ({ x: Math.round(p.x), y: Math.round(p.y) }));
-      if (pts && pts.length >= 2) e.points = reversed ? pts.reverse() : pts;
-    }
+    // No stored polylines: the editor draws edges live from box positions,
+    // dodging whatever is nearby, so lines always adapt.
     return;
   }
 
