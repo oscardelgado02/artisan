@@ -4,6 +4,8 @@
 - Tidy button: re-run dagre layout inside the editor using real measured box sizes.
 - Params wrap like names (shared leftover-space budget); type/vis/mods stay locked on one line.
 - Git history purge: removed accidentally committed `tmp-output/` from `improved-ui` (rebuilt history, force-pushed).
+- Wider member-editor popover (440px), name field flexed up; type input widened too.
+- Arrow fix: detoured elbow edges now end with a stub into the box side instead of pointing parallel to it.
 
 ## 10.09.2026
 - Layout rewritten with vendored dagre (Mermaid's engine): inheritance top-down, routed edge polylines.

@@ -370,7 +370,7 @@ function edgeRoute(
       const m2 = right ? ex - 16 : ex + 16;
       if ((right && m2 > m1) || (!right && m2 < m1)) {
         return {
-          d: `M ${sx} ${sy} H ${m1} V ${ch} H ${m2} V ${ey}`,
+          d: `M ${sx} ${sy} H ${m1} V ${ch} H ${m2} V ${ey} H ${ex}`,
           s: { x: sx, y: sy },
           e: { x: ex, y: ey },
           mid: { x: m2, y: ch },
