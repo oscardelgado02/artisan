@@ -605,7 +605,8 @@ button {
 .popover {
   position: fixed;
   z-index: 110;
-  width: 290px;
+  width: 440px;
+  max-width: calc(100vw - 20px);
   background: var(--card-bg);
   border: 1px solid var(--card-border-hover);
   border-radius: 12px;
@@ -642,7 +643,7 @@ button {
 }
 
 .popover .f-name {
-  flex: 1.2;
+  flex: 2;
 }
 
 .popover .f-type {
