@@ -903,7 +903,7 @@ async function boot(): Promise<void> {
   if (fresh) fitView();
   else applyCam();
   setHint(DEFAULT_HINT);
-  if (document.fonts?.ready) document.fonts.ready.then(() => renderEdges());
+  if (document.fonts?.ready) document.fonts.ready.then(() => renderAll());
   if (await tryServerBoot()) {
     renderAll();
     applyCam();

@@ -120,6 +120,39 @@ export function buildEdges(entries) {
 // and the editor renders exactly those routes.
 // Rescan mode (`only`): existing nodes keep their positions; fresh ones are
 // anchored near their placed neighbours and spiral out to a free spot.
+// Mirror the editor's CSS: JetBrains Mono 12px ≈ 7.4px/char; member name
+// wraps at 240px (locked parts — vis/mods/type/params — never wrap), so
+// width uses min(name, 33 chars) and wrapped names add line height.
+const CHAR = 7.4;
+const NAME_CAP_CHARS = 33;
+export function nameLines(m) {
+  return Math.max(1, Math.ceil((m.name.length * CHAR) / 240));
+}
+const lockedLen = (m, isMethod) =>
+  m.mods.join(' ').length + 3 + (isMethod ? (m.params?.length ?? 0) + 2 : m.type.length + 2);
+export function widthOf(n) {
+  return Math.min(
+    640, // editor .node max-width
+    Math.max(
+      220,
+      40 +
+        CHAR *
+          Math.max(
+            12,
+            ...n.attributes.map((m) => Math.min(m.name.length, NAME_CAP_CHARS) + lockedLen(m, false)),
+            ...n.methods.map((m) => Math.min(m.name.length, NAME_CAP_CHARS) + lockedLen(m, true))
+          )
+    )
+  );
+}
+export function heightOf(n) {
+  return (
+    62 +
+    (n.attributes.length + n.methods.length) * 20 +
+    19 * [...n.attributes, ...n.methods].reduce((s, m) => s + (nameLines(m) - 1), 0)
+  );
+}
+
 export function layout(diagram, only = null) {
   const nodes = diagram.nodes;
   if (!nodes.length) return;
@@ -134,24 +167,14 @@ export function layout(diagram, only = null) {
     neighbors.get(e.to).add(e.from);
   }
 
-  const heightOf = (n) => 62 + (n.attributes.length + n.methods.length) * 20;
-  // Editor nodes are width:max-content — estimate width from the longest
-  // member line (JetBrains Mono 12px ≈ 7.3px/char) so columns never overlap.
-  const memberLen = (m, isMethod) =>
-    m.mods.join(' ').length + m.name.length + 3 + (isMethod ? (m.params?.length ?? 0) + 2 : m.type.length + 2);
-  const widthOf = (n) =>
-    Math.min(
-      660,
-      Math.max(
-        220,
-        34 +
-          7.3 * Math.max(12, ...n.attributes.map((m) => memberLen(m, false)), ...n.methods.map((m) => memberLen(m, true)))
-      )
-    );
+  // Mirror the editor's CSS: JetBrains Mono 12px ≈ 7.4px/char; member name
+  // wraps at 240px (locked parts — vis/mods/type/params — never wrap), so
+  // width uses min(name, 33 chars) and wrapped names add line height.
+  // (widthOf/heightOf live at module scope so tests can use the same math.)
 
   if (!keep) {
     const g = new Graph({ multigraph: true });
-    g.setGraph({ rankdir: 'TB', nodesep: 70, ranksep: 90, marginx: 40, marginy: 40 });
+    g.setGraph({ rankdir: 'TB', nodesep: 110, ranksep: 120, marginx: 40, marginy: 40 });
     g.setDefaultEdgeLabel(() => ({}));
     for (const n of nodes) g.setNode(n.id, { width: widthOf(n), height: heightOf(n) });
     for (const e of diagram.edges) {

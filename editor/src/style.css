@@ -484,17 +484,20 @@ button {
   padding: 2px 8px;
   border-radius: 6px;
   cursor: pointer;
-  white-space: normal;
+  white-space: nowrap;
 }
 
 .member > span {
   min-width: 0;
 }
 
-.m-name,
-.m-type,
-.m-params {
+/* Only the name may wrap (JS pre-wraps it with \n); vis/mods/type/params stay
+   on one line. */
+.m-name {
+  white-space: pre-line;
   overflow-wrap: anywhere;
+  max-width: 240px;
+  flex: 0 1 auto;
 }
 
 .member:hover {

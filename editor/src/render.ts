@@ -23,6 +23,44 @@ const btnColorize = document.getElementById('btn-colorize') as HTMLButtonElement
 
 export { wrap, nodesLayer };
 
+// Deterministic member-name wrapping: measure with canvas so long names break
+// into lines here (mirrors the CLI's 240px estimate) instead of trusting flex
+// quirks. Visibility/mods/type/params stay on one line (CSS nowrap).
+const NAME_MAX_PX = 240;
+let measureCtx: CanvasRenderingContext2D | null = null;
+function measureCtxOf(): CanvasRenderingContext2D | null {
+  if (measureCtx !== null) return measureCtx;
+  const c = document.createElement('canvas');
+  measureCtx = c.getContext('2d');
+  return measureCtx;
+}
+
+export function wrapName(name: string): string {
+  if (!name || name.length < 34) return name;
+  const ctx = measureCtxOf();
+  if (!ctx) return name;
+  ctx.font = '12px "JetBrains Mono", monospace';
+  const px = (s: string) => ctx.measureText(s).width;
+  const lines: string[] = [];
+  let cur = '';
+  for (let word of name.split(' ')) {
+    while (px(word) > NAME_MAX_PX) {
+      let i = word.length;
+      while (i > 1 && px(word.slice(0, i)) > NAME_MAX_PX) i--;
+      lines.push((cur ? cur + ' ' : '') + word.slice(0, i));
+      cur = '';
+      word = word.slice(i);
+    }
+    const cand = cur ? cur + ' ' + word : word;
+    if (px(cand) > NAME_MAX_PX && cur) {
+      lines.push(cur);
+      cur = word;
+    } else cur = cand;
+  }
+  if (cur) lines.push(cur);
+  return lines.join('\n');
+}
+
 export function svgEl(tag: string): SVGElement {
   return document.createElementNS(SVG_NS, tag);
 }
@@ -100,7 +138,7 @@ function memberRow(n: UmlNode, m: Member, key: MemberSection): HTMLDivElement {
   if (m.note) row.title = m.note;
   const isEnum = n.kind === 'enum';
   if (isEnum) {
-    const name = m.name ? esc(m.name) : '<span class="unnamed">(unnamed)</span>';
+    const name = m.name ? esc(wrapName(m.name)) : '<span class="unnamed">(unnamed)</span>';
     const val = m.type ? `<span class="m-type"> = ${esc(m.type)}</span>` : '';
     row.innerHTML = `<span class="m-name">${name}</span>${val}`;
     return row;
@@ -108,7 +146,7 @@ function memberRow(n: UmlNode, m: Member, key: MemberSection): HTMLDivElement {
   const mods = m.mods.length ? `<span class="m-mods">${esc(m.mods.join(' '))} </span>` : '';
   const vis = m.vis ? `<span class="m-vis">${esc(m.vis)}</span>` : '';
   const params = key === 'methods' ? `<span class="m-params">(${esc(m.params ?? '')})</span>` : '';
-  const name = m.name ? esc(m.name) : '<span class="unnamed">(unnamed)</span>';
+  const name = m.name ? esc(wrapName(m.name)) : '<span class="unnamed">(unnamed)</span>';
   const type = m.type ? `<span class="m-type">: ${esc(m.type)}</span>` : '';
   const note = m.note ? '<span class="note-glyph">\u270E</span>' : '';
   row.innerHTML = `${note}${mods}${vis}${vis ? ' ' : ''}<span class="m-name">${name}</span>${params}${type}`;
@@ -460,8 +498,69 @@ export function renderEdges(): void {
   }
 }
 
+// Final safety net: push apart nodes that still overlap, using their measured
+// real sizes (CLI estimates can miss; fallback fonts differ). Edges touching
+// moved nodes lose their stored polyline and fall back to live elbow routing.
+function resolveOverlaps(): void {
+  const GAP = 16;
+  const moved = new Set<string>();
+  for (let pass = 0; pass < 60; pass++) {
+    let any = false;
+    const ns = state.nodes;
+    for (let i = 0; i < ns.length; i++) {
+      for (let j = i + 1; j < ns.length; j++) {
+        const a = ns[i];
+        const b = ns[j];
+        const aw = a._w ?? 220;
+        const ah = a._h ?? 100;
+        const bw = b._w ?? 220;
+        const bh = b._h ?? 100;
+        const ox = Math.min(a.x + aw, b.x + bw) - Math.max(a.x, b.x);
+        const oy = Math.min(a.y + ah, b.y + bh) - Math.max(a.y, b.y);
+        if (ox <= 0 || oy <= 0) continue;
+        any = true;
+        if (ox < oy) {
+          const d = (ox + GAP) / 2;
+          if (a.x + aw / 2 <= b.x + bw / 2) {
+            a.x -= d;
+            b.x += d;
+          } else {
+            a.x += d;
+            b.x -= d;
+          }
+        } else {
+          const d = (oy + GAP) / 2;
+          if (a.y + ah / 2 <= b.y + bh / 2) {
+            a.y -= d;
+            b.y += d;
+          } else {
+            a.y += d;
+            b.y -= d;
+          }
+        }
+        moved.add(a.id);
+        moved.add(b.id);
+      }
+    }
+    if (!any) break;
+  }
+  if (!moved.size) return;
+  for (const n of state.nodes) {
+    if (!moved.has(n.id)) continue;
+    const el = nodesLayer.querySelector<HTMLElement>(`.node[data-id="${n.id}"]`);
+    if (el) {
+      el.style.left = n.x + 'px';
+      el.style.top = n.y + 'px';
+    }
+  }
+  for (const e of state.edges) {
+    if (moved.has(e.from) || moved.has(e.to)) delete e.points;
+  }
+}
+
 export function renderAll(): void {
   renderNodes();
+  resolveOverlaps();
   renderEdges();
 }
 

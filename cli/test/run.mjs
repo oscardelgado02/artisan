@@ -6,7 +6,7 @@ import os from 'node:os';
 import process from 'node:process';
 
 import { parseCsFile } from '../lib/csharp.mjs';
-import { buildEdges, toPlantUML } from '../lib/diagram.mjs';
+import { buildEdges, toPlantUML, layout, widthOf, heightOf, nameLines } from '../lib/diagram.mjs';
 import { diffDiagram, pendingRefs, formatReport } from '../lib/diff.mjs';
 import { normalizeDiagram } from '../lib/store.mjs';
 import { runScan } from '../lib/scan.mjs';
@@ -231,6 +231,90 @@ const kept = rescan.nodes.find((n) => n.name === 'Animal');
 assert.equal(kept.note, 'root of all creatures', 'note survived rescan');
 assert.equal(kept.x, 777, 'position survived rescan');
 ok('rescan preserves human notes + positions');
+
+// ---- layout guarantees: no overlapping boxes with real size estimates ----
+section('layout: measured sizes + no overlap');
+
+// width mirrors the editor rule: name capped at 240px, locked parts nowrap
+const longNameNode = {
+  id: 'ln',
+  kind: 'class',
+  name: 'CosmicShaderCreatorWindow',
+  x: 0,
+  y: 0,
+  attributes: [{ id: 'a1', vis: '-', mods: ['readonly'], name: 'VeryLongPropertyNameIndeed', type: 'Dictionary<string, UnityEngine.Rendering.VolumeProfile>', note: '' }],
+  methods: [],
+};
+const wideNode = {
+  id: 'wn',
+  kind: 'class',
+  name: 'Wide',
+  x: 0,
+  y: 0,
+  attributes: [{ id: 'a2', vis: '+', mods: [], name: 'n', type: 'string', note: '' }],
+  methods: [],
+};
+assert.ok(widthOf(longNameNode) <= 640, 'width respects editor max-width 640: ' + widthOf(longNameNode));
+// name contribution is capped at 240px (33 chars) regardless of name length
+const capProbe = (nameLen) => ({
+  ...longNameNode,
+  attributes: [{ ...longNameNode.attributes[0], name: 'N'.repeat(nameLen) }],
+});
+assert.equal(widthOf(capProbe(33)), widthOf(capProbe(60)), 'name wider than 240px does not widen the box');
+assert.equal(nameLines({ name: 'N'.repeat(60) }), 2, '60-char name estimates 2 lines');
+assert.ok(heightOf(capProbe(60)) > heightOf(capProbe(32)), 'wrapped name adds height');
+ok('widthOf/heightOf mirror editor CSS rules');
+
+// dagre layout must place boxes without overlap for a synthetic messy project
+const mk = (name, kind, attrs, methods) => ({
+  id: 'id_' + name,
+  kind,
+  name,
+  x: null,
+  y: null,
+  attributes: attrs.map(([n, t]) => ({ id: 'a_' + name + n, vis: '-', mods: [], name: n, type: t, note: '' })),
+  methods: methods.map(([n, p, t]) => ({ id: 'm_' + name + n, vis: '+', mods: [], name: n, params: p, type: t, note: '' })),
+  note: '',
+});
+const messy = { seq: 1, nodes: [], edges: [], projectNotes: '' };
+const names = [];
+for (let i = 0; i < 24; i++) {
+  const n = 'CosmicallyNamedService' + i;
+  names.push(n);
+  messy.nodes.push(
+    mk(n, 'class', [['someVeryLongFieldNameThatWrapsAround', 'List<UnityEngine.Rendering.VolumeProfile>']], [['DoAThing', 'string input, int count', 'IEnumerator']])
+  );
+}
+messy.nodes.push(mk('BaseProviderOfThings', 'abstract', [['config', 'Config']], []));
+for (let i = 0; i < 8; i++) messy.edges.push({ id: 'e_i' + i, kind: 'inheritance', from: 'id_CosmicallyNamedService' + i, to: 'id_BaseProviderOfThings', label: '', fromMult: '', toMult: '', note: '' });
+for (let i = 0; i < 11; i++) messy.edges.push({ id: 'e_a' + i, kind: 'association', from: 'id_CosmicallyNamedService' + i, to: 'id_CosmicallyNamedService' + (i + 1), label: 'next', fromMult: '', toMult: '', note: '' });
+messy.edges.push({ id: 'e_c1', kind: 'association', from: 'id_CosmicallyNamedService10', to: 'id_CosmicallyNamedService3', label: 'cycle', fromMult: '', toMult: '', note: '' });
+messy.edges.push({ id: 'e_c2', kind: 'association', from: 'id_CosmicallyNamedService3', to: 'id_CosmicallyNamedService10', label: 'cycle2', fromMult: '', toMult: '', note: '' });
+layout(messy);
+let overlaps = 0;
+for (let i = 0; i < messy.nodes.length; i++) {
+  for (let j = i + 1; j < messy.nodes.length; j++) {
+    const a = messy.nodes[i];
+    const b = messy.nodes[j];
+    if (a.x < b.x + widthOf(b) && b.x < a.x + widthOf(a) && a.y < b.y + heightOf(b) && b.y < a.y + heightOf(a)) overlaps++;
+  }
+}
+assert.equal(overlaps, 0, 'dagre boxes overlap: ' + overlaps);
+assert.ok(messy.nodes.every((n) => n.x != null && n.y != null), 'every node placed');
+ok('dagre layout: 25-node messy graph, zero overlapping boxes');
+
+// CSS contract the editor must keep (name wraps, rest locked)
+const css = fs.readFileSync(new URL('../../editor/src/style.css', import.meta.url), 'utf8');
+const mname = css.slice(css.indexOf('.m-name {'), css.indexOf('}', css.indexOf('.m-name {')));
+assert.match(mname, /white-space:\s*pre-line/, '.m-name wraps pre-line');
+assert.match(mname, /max-width:\s*240px/, '.m-name capped at 240px');
+const member = css.slice(css.indexOf('.member {'), css.indexOf('}', css.indexOf('.member {')));
+assert.match(member, /white-space:\s*nowrap/, '.member row stays one line for locked parts');
+for (const part of ['.m-type', '.m-params']) {
+  const block = css.slice(css.indexOf(part + ' {'), css.indexOf('}', css.indexOf(part + ' {')));
+  assert.doesNotMatch(block, /white-space:\s*normal|overflow-wrap/, part + ' must never wrap');
+}
+ok('editor CSS contract: name wraps, locked parts nowrap');
 
 process.chdir('/');
 fs.rmSync(tmp, { recursive: true, force: true });
