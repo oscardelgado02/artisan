@@ -269,8 +269,12 @@ function parseMembers(clean, t) {
         attributes.push({ vis, name, type, mods: [...mods], params: null });
         re.lastIndex = matchingBrace(text, m.index + m[0].length - 1) + 1; // skip get/set block
       } else if (tail === '=') {
-        attributes.push({ vis, name, type, mods: [...mods], params: null });
-        re.lastIndex = skipToSemicolon(text, m.index + m[0].length); // field init / expression-bodied
+        const semi = skipToSemicolon(text, m.index + m[0].length); // field init / expression-bodied
+        const init = text.slice(m.index + m[0].length, semi - 1);
+        const attr = { vis, name, type, mods: [...mods], params: null };
+        if (/\bnew\s+[\w<>\[\],.\s]+\(/.test(init)) attr.init = 'new';
+        attributes.push(attr);
+        re.lastIndex = semi;
       } else {
         // ';' — plain field
         attributes.push({ vis, name, type, mods: [...mods], params: null });
@@ -312,8 +316,6 @@ export function parseCsFile(src, file) {
       id: hid(t.full),
       kind: t.kind,
       name: t.name,
-      x: 0,
-      y: 0,
       attributes: attributes.map((m) => ({ ...m, id: hid(t.full + '|a|' + m.name + '|' + m.type) })),
       methods: methods.map((m) => ({ ...m, id: hid(t.full + '|m|' + m.name + '|' + m.params) })),
     };

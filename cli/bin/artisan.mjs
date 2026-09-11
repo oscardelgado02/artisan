@@ -11,21 +11,23 @@ const HELP = `artisan — human-first class diagrams for agentic coding
 Usage: artisan <command> [options]
 
 Commands:
-  scan    [--src DIR] [--lang csharp]   Parse code into .artisan/diagram.json (+ .puml),
-                                        copy the editor into .artisan/editor.
+  scan    [--src DIR] [--lang csharp]   Parse code into .artisan/diagram.json (+ .puml)
+                                        and write .artisan/diagram.html — a single
+                                        self-contained editor file; just open it.
                                         Re-scan keeps your positions and notes.
-  serve   [--port N]                    Serve the diagram editor at localhost and
-                                        autosave edits to .artisan/diagram.json.
+  serve   [--port N]                    (Optional) serve the editor at localhost
+                                        with live autosave to .artisan/diagram.json.
   diff    [--json]                      Report human diagram changes the AI has not
                                         consumed yet (renames detected). Marks them seen.
   mark-ai                                After the AI edits .artisan/diagram.json:
                                         records changes as pending for the human
-                                        (shown amber in the editor).
+                                        (shown amber in the editor + diagram.html).
   ack                                   Mark pending AI changes as seen by the human.
   status                                Show unseen human changes / pending AI changes.
 
 Files under .artisan/:
   diagram.json   the source of truth (edit it in the editor)
+  diagram.html   the editor as ONE file — double-click to open, no server needed
   diagram.puml   PlantUML mirror for AI consumption
   map.json       node id -> source file / namespace
   last-ai.json   snapshot the AI last consumed

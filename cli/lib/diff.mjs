@@ -7,6 +7,7 @@ import fs from 'node:fs';
 import { toPlantUML } from './diagram.mjs';
 import { appendLog } from './scan.mjs';
 import { artisanDir, normalizeDiagram, readJSON, writeJSON } from './store.mjs';
+import { refreshEmbedded } from './embed.mjs';
 
 // --- similarity -------------------------------------------------------------
 function lev(a, b) {
@@ -291,6 +292,7 @@ export function runDiff({ json = false } = {}) {
     );
   }
   writeJSON(artisanDir('last-ai.json'), cur); // AI has now consumed these
+  refreshEmbedded(); // every command keeps diagram.html present/fresh
 }
 
 export function markAi() {
@@ -302,6 +304,7 @@ export function markAi() {
   writeJSON(artisanDir('last-ai.json'), cur); // AI knows its own edits
   const n = changeCount(diffRes) - (diffRes.notes?.length || 0);
   appendLog('ai', `${n} architecture changes marked pending for human`);
+  refreshEmbedded();
   console.log(`${n} AI change(s) marked pending. The human sees them highlighted in the editor and confirms with \`artisan ack\` or the editor's "Mark seen" button.`);
 }
 
@@ -311,6 +314,7 @@ export function runAck() {
   writeJSON(artisanDir('pending.json'), []);
   writeJSON(artisanDir('last-human.json'), cur);
   appendLog('human', `acknowledged ${pending.length} AI changes`);
+  refreshEmbedded();
   console.log(`Acknowledged ${pending.length} AI change(s). Highlights cleared.`);
 }
 
@@ -327,4 +331,5 @@ export function runStatus() {
   console.log(`Unseen human changes (AI: run \`artisan diff\`): ${changeCount(humanDiff)}`);
   console.log(`Pending AI changes (human: review in the editor): ${pending.length}`);
   for (const p of pending.slice(0, 10)) console.log(`  - [${p.change}] ${p.summary}`);
+  refreshEmbedded();
 }

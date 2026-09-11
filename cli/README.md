@@ -11,20 +11,36 @@ The `.artisan/` directory in your project holds the state:
 | `last-ai.json` / `last-human.json` | change-tracking baselines |
 | `pending.json` | AI changes the human hasn't seen yet |
 | `changelog.json` | history of consumed changes |
-| `editor/` | bundled diagram editor (served by `artisan serve`) |
+| `editor/` | bundled editor assets (inlined into `diagram.html`) |
+| `diagram.html` | the editor as a single self-contained file |
 
 ## Commands
 
 ```
 artisan scan        parse C# → diagram (merges your edits: positions, notes survive)
-artisan serve       editor at http://localhost:4173 (autosaves to diagram.json)
+                    + writes .artisan/diagram.html — the editor as ONE file,
+                    double-click to open (Connect file button autosaves edits)
+artisan serve       (optional) editor at http://localhost:4173, live autosave
 artisan diff        human diagram edits → markdown report for the AI; consumes them
 artisan mark-ai     record AI-made diagram.json edits as pending (amber in editor)
 artisan ack         human confirms AI changes seen (or "Mark seen" button in editor)
 artisan status      diagram size, pending changes both directions
 ```
 
-Scan skips `Library/`, `obj/`, `bin/`, `Temp/`, `Logs/`, `Packages/`, `Editor/` test dirs? — see `lib/scan.mjs` for the current ignore list (Unity-aware).
+Scan skips `Library/`, `obj/`, `bin/`, `Temp/`, `Logs/`, `Packages/`, `Editor/` — see `lib/scan.mjs` for the ignore list (Unity-aware).
+
+### How relations are detected
+
+| Kind | Detected from |
+|------|---------------|
+| inheritance | `class Dog : Animal` |
+| realization | `class Dog : IPet` (interface base; Unity convention: `IFoo` → `Foo` also linked) |
+| composition | field initialized inline: `Engine engine = new Engine();` |
+| aggregation | collection-typed field: `List<Weapon> weapons;` / `Weapon[] slots;` |
+| association | plain field of a scanned type: `Engine engine;` |
+| dependency | method parameter/return type references a scanned type (only when no stronger edge links the pair) |
+
+Layout is layered: roots (no parents) on top, children below, so inheritance trees read top-down. These are pragmatic heuristics — hand-tune relations and positions in the editor; re-scan keeps your edits.
 
 ## Install into a project
 

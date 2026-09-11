@@ -12,7 +12,7 @@ import {
   state,
   uid,
 } from './model';
-import type { EdgeKind, NodeKind } from './model';
+import type { EdgeKind, EdgeStyle, NodeKind } from './model';
 import {
   applyCam,
   fitView,
@@ -38,9 +38,12 @@ import {
   saveThrottled,
   seedData,
   serverRef,
+  fileRef,
   undo,
   updateUndoButtons,
 } from './storage';
+import { tidyAll } from './tidy';
+import type { SerializedDiagram } from './storage';
 import {
   DEFAULT_HINT,
   activeMenuRef,
@@ -61,6 +64,8 @@ import type { PendingRef } from './model';
 
 const btnAddNode = document.getElementById('btn-add-node') as HTMLButtonElement;
 const btnColorize = document.getElementById('btn-colorize') as HTMLButtonElement;
+const btnTidy = document.getElementById('btn-tidy') as HTMLButtonElement;
+const selLines = document.getElementById('sel-lines') as HTMLSelectElement;
 const btnUndo = document.getElementById('btn-undo') as HTMLButtonElement;
 const btnRedo = document.getElementById('btn-redo') as HTMLButtonElement;
 const btnExport = document.getElementById('btn-export') as HTMLButtonElement;
@@ -716,8 +721,21 @@ btnAddNode.addEventListener('click', () => {
   openMenu(r.left, r.bottom + 6, kindMenuEntries(kind => addNodeAt(kind)));
 });
 
-btnColorize.addEventListener('click', () => {
-  state.colorize = !state.colorize;
+btnTidy.addEventListener('click', () => {
+  tidyAll();
+  toast('Layout tidied');
+});
+
+selLines.addEventListener('change', () => {
+  const v = selLines.value as EdgeStyle;
+  if (v === 'straight' || v === 'ortho' || v === 'smooth' || v === 'elliptic') {
+    state.edgeStyle = v;
+    renderAll();
+    save();
+  }
+});
+
+btnColorize.addEventListener('click', () => {  state.colorize = !state.colorize;
   syncColorize();
   renderEdges();
   save();
@@ -782,8 +800,27 @@ btnClear.addEventListener('click', () => {
 
 const btnNotes = document.getElementById('btn-notes') as HTMLButtonElement;
 const btnAck = document.getElementById('btn-ack') as HTMLButtonElement;
+const btnConnect = document.getElementById('btn-connect') as HTMLButtonElement;
 
 btnNotes.addEventListener('click', openProjectNotes);
+
+btnConnect.addEventListener('click', async () => {
+  try {
+    const picker = (window as unknown as { showOpenFilePicker?: (o: unknown) => Promise<unknown[]> }).showOpenFilePicker;
+    if (!picker) {
+      toast('Autosave needs Chrome/Edge — use Export JSON instead');
+      return;
+    }
+    const handles = await picker.call(window, {
+      types: [{ description: 'Artisan diagram', accept: { 'application/json': ['.json'] } }],
+    });
+    fileRef.handle = handles[0];
+    btnConnect.style.display = 'none';
+    toast('Connected — edits now autosave to your diagram.json');
+  } catch {
+    /* picker cancelled */
+  }
+});
 
 function syncAckButton(): void {
   const count = state.aiPending.length;
@@ -808,6 +845,10 @@ async function refreshPending(): Promise<void> {
 }
 
 btnAck.addEventListener('click', async () => {
+  if (!serverRef.current) {
+    toast('Run `artisan ack` in your project to confirm');
+    return;
+  }
   try {
     const res = await fetch('/api/ack', { method: 'POST' });
     if (!res.ok) return;
@@ -836,31 +877,52 @@ async function tryServerBoot(): Promise<boolean> {
   }
 }
 
+interface EmbeddedPayload {
+  diagram?: SerializedDiagram;
+  pending?: PendingRef[];
+}
+
+const embedded: EmbeddedPayload | undefined = (window as unknown as { __ARTISAN__?: EmbeddedPayload }).__ARTISAN__;
+
 async function boot(): Promise<void> {
-  const raw = localStorage.getItem(LS_KEY);
   let fresh = true;
-  if (raw) {
+  if (embedded?.diagram && Array.isArray(embedded.diagram.nodes)) {
+    loadInto(embedded.diagram);
+    state.aiPending = Array.isArray(embedded.pending) ? embedded.pending : [];
+    fresh = false;
+  } else {
+    let raw: string | null = null;
     try {
-      loadInto(JSON.parse(raw));
-      fresh = false;
+      raw = localStorage.getItem(LS_KEY);
     } catch {
+      /* storage unavailable */
+    }
+    if (raw) {
+      try {
+        loadInto(JSON.parse(raw));
+        fresh = false;
+      } catch {
+        loadInto(seedData());
+      }
+    } else {
       loadInto(seedData());
     }
-  } else {
-    loadInto(seedData());
   }
   syncColorize();
   applyThemeIcon();
+  selLines.value = state.edgeStyle;
   updateUndoButtons();
   syncAckButton();
+  if (!serverRef.current) btnConnect.style.display = embedded ? '' : 'none';
   renderAll();
   if (fresh) fitView();
   else applyCam();
   setHint(DEFAULT_HINT);
-  if (document.fonts?.ready) document.fonts.ready.then(() => renderEdges());
+  if (document.fonts?.ready) document.fonts.ready.then(() => renderAll());
   if (await tryServerBoot()) {
     renderAll();
     applyCam();
+    btnConnect.style.display = 'none';
     toast('Synced with artisan server');
   }
 }

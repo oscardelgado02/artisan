@@ -1,3 +1,4 @@
 node_modules
 dist
 .artisan
+tmp-output

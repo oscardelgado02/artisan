@@ -23,7 +23,12 @@ html {
   --ai-change-bg: rgba(245, 158, 11, 0.15);
 }
 
+html {
+  color-scheme: light;
+}
+
 html.dark {
+  color-scheme: dark;
   --background: #0d0d0d;
   --foreground: #ededed;
   --foreground-2: rgba(237, 237, 237, 0.85);
@@ -301,7 +306,8 @@ button {
 .node {
   position: absolute;
   min-width: 210px;
-  max-width: 340px;
+  width: max-content;
+  max-width: 640px;
   background-color: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: 1rem;
@@ -484,8 +490,19 @@ button {
   border-radius: 6px;
   cursor: pointer;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.member > span {
+  min-width: 0;
+}
+
+/* Only the name may wrap (JS pre-wraps it with \n); vis/mods/type/params stay
+   on one line. */
+.m-name {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  max-width: 240px;
+  flex: 0 1 auto;
 }
 
 .member:hover {
@@ -512,8 +529,12 @@ button {
   margin-left: 5px;
 }
 
+/* Params may wrap (JS pre-wraps with \n at its budget); type stays locked. */
 .m-params {
   color: var(--foreground-2);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  max-width: 240px;
 }
 
 .m-mods {
@@ -589,7 +610,8 @@ button {
 .popover {
   position: fixed;
   z-index: 110;
-  width: 290px;
+  width: 440px;
+  max-width: calc(100vw - 20px);
   background: var(--card-bg);
   border: 1px solid var(--card-border-hover);
   border-radius: 12px;
@@ -626,11 +648,11 @@ button {
 }
 
 .popover .f-name {
-  flex: 1.2;
+  flex: 2;
 }
 
 .popover .f-type {
-  flex: 1;
+  flex: 1.4;
 }
 
 .popover .f-wide {
