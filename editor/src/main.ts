@@ -43,6 +43,7 @@ import {
   undo,
   updateUndoButtons,
 } from './storage';
+import { tidyAll } from './tidy';
 import type { SerializedDiagram } from './storage';
 import {
   DEFAULT_HINT,
@@ -64,6 +65,7 @@ import type { PendingRef } from './model';
 
 const btnAddNode = document.getElementById('btn-add-node') as HTMLButtonElement;
 const btnColorize = document.getElementById('btn-colorize') as HTMLButtonElement;
+const btnTidy = document.getElementById('btn-tidy') as HTMLButtonElement;
 const btnUndo = document.getElementById('btn-undo') as HTMLButtonElement;
 const btnRedo = document.getElementById('btn-redo') as HTMLButtonElement;
 const btnExport = document.getElementById('btn-export') as HTMLButtonElement;
@@ -720,8 +722,12 @@ btnAddNode.addEventListener('click', () => {
   openMenu(r.left, r.bottom + 6, kindMenuEntries(kind => addNodeAt(kind)));
 });
 
-btnColorize.addEventListener('click', () => {
-  state.colorize = !state.colorize;
+btnTidy.addEventListener('click', () => {
+  tidyAll();
+  toast('Layout tidied');
+});
+
+btnColorize.addEventListener('click', () => {  state.colorize = !state.colorize;
   syncColorize();
   renderEdges();
   save();

@@ -6,7 +6,7 @@ import os from 'node:os';
 import process from 'node:process';
 
 import { parseCsFile } from '../lib/csharp.mjs';
-import { buildEdges, toPlantUML, layout, widthOf, heightOf, nameLines } from '../lib/diagram.mjs';
+import { buildEdges, toPlantUML, layout, widthOf, heightOf, nameLines, rowParts } from '../lib/diagram.mjs';
 import { diffDiagram, pendingRefs, formatReport } from '../lib/diff.mjs';
 import { normalizeDiagram } from '../lib/store.mjs';
 import { runScan } from '../lib/scan.mjs';
@@ -263,7 +263,39 @@ const capProbe = (nameLen) => ({
 assert.equal(widthOf(capProbe(33)), widthOf(capProbe(60)), 'name wider than 240px does not widen the box');
 assert.equal(nameLines({ name: 'N'.repeat(60) }), 2, '60-char name estimates 2 lines');
 assert.ok(heightOf(capProbe(60)) > heightOf(capProbe(32)), 'wrapped name adds height');
-ok('widthOf/heightOf mirror editor CSS rules');
+// long locked part squeezes the name budget so the row still fits 640px
+const squeeze = {
+  id: 'sq',
+  kind: 'class',
+  name: 'HandleMassivelyLongParameterLists',
+  x: 0,
+  y: 0,
+  attributes: [],
+  methods: [
+    {
+      id: 'm1',
+      vis: '+',
+      mods: ['static'],
+      name: 'HandleMassivelyLongParameterLists',
+      params: 'string veryLongArgumentName, int anotherVeryLongArgumentName, bool thirdArgument, Vector3 spawnPosition',
+      type: 'Task<IReadOnlyList<CosmicShaderProfileSetting>>',
+      note: '',
+    },
+  ],
+};
+const sq = rowParts(squeeze.methods[0], true, false, false);
+assert.ok(sq.nameBudget < 240, 'long locked part shrinks name budget: ' + sq.nameBudget);
+assert.ok(sq.nameBudget >= 120, 'name budget never below 120px');
+assert.ok(sq.paramsBudget < 240, 'long params get squeezed too: ' + sq.paramsBudget);
+assert.ok(sq.paramsBudget >= 80, 'params budget never below 80px');
+assert.ok(widthOf(squeeze) <= 640, 'wide locked row stays within 640: ' + widthOf(squeeze));
+// params wrap adds height
+const pProbe = (params) => ({
+  ...squeeze,
+  methods: [{ ...squeeze.methods[0], params }],
+});
+assert.ok(heightOf(pProbe('a '.repeat(60))) > heightOf(pProbe('a')), 'wrapped params add height');
+ok('widthOf/heightOf mirror editor CSS rules (name + params wrap)');
 
 // dagre layout must place boxes without overlap for a synthetic messy project
 const mk = (name, kind, attrs, methods) => ({
@@ -303,16 +335,19 @@ assert.equal(overlaps, 0, 'dagre boxes overlap: ' + overlaps);
 assert.ok(messy.nodes.every((n) => n.x != null && n.y != null), 'every node placed');
 ok('dagre layout: 25-node messy graph, zero overlapping boxes');
 
-// CSS contract the editor must keep (name wraps, rest locked)
+// CSS contract the editor must keep (name + params wrap, type/row locked)
 const css = fs.readFileSync(new URL('../../editor/src/style.css', import.meta.url), 'utf8');
 const mname = css.slice(css.indexOf('.m-name {'), css.indexOf('}', css.indexOf('.m-name {')));
 assert.match(mname, /white-space:\s*pre-line/, '.m-name wraps pre-line');
 assert.match(mname, /max-width:\s*240px/, '.m-name capped at 240px');
+const mparams = css.slice(css.indexOf('.m-params {'), css.indexOf('}', css.indexOf('.m-params {')));
+assert.match(mparams, /white-space:\s*pre-line/, '.m-params wraps pre-line');
+assert.match(mparams, /max-width:\s*240px/, '.m-params capped at 240px');
 const member = css.slice(css.indexOf('.member {'), css.indexOf('}', css.indexOf('.member {')));
 assert.match(member, /white-space:\s*nowrap/, '.member row stays one line for locked parts');
-for (const part of ['.m-type', '.m-params']) {
+for (const part of ['.m-type', '.m-mods', '.m-vis']) {
   const block = css.slice(css.indexOf(part + ' {'), css.indexOf('}', css.indexOf(part + ' {')));
-  assert.doesNotMatch(block, /white-space:\s*normal|overflow-wrap/, part + ' must never wrap');
+  assert.doesNotMatch(block, /white-space:\s*normal|white-space:\s*pre-line|overflow-wrap/, part + ' must never wrap');
 }
 ok('editor CSS contract: name wraps, locked parts nowrap');
 

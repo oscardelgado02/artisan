@@ -24,9 +24,10 @@ const btnColorize = document.getElementById('btn-colorize') as HTMLButtonElement
 export { wrap, nodesLayer };
 
 // Deterministic member-name wrapping: measure with canvas so long names break
-// into lines here (mirrors the CLI's 240px estimate) instead of trusting flex
-// quirks. Visibility/mods/type/params stay on one line (CSS nowrap).
-const NAME_MAX_PX = 240;
+// into lines here instead of trusting flex quirks. The name's budget shrinks
+// when the locked parts (vis/mods/type/params) are long, so the whole row
+// always fits the 640px node cap — only the name ever wraps.
+const NODE_MAX_PX = 640;
 let measureCtx: CanvasRenderingContext2D | null = null;
 function measureCtxOf(): CanvasRenderingContext2D | null {
   if (measureCtx !== null) return measureCtx;
@@ -35,8 +36,19 @@ function measureCtxOf(): CanvasRenderingContext2D | null {
   return measureCtx;
 }
 
-export function wrapName(name: string): string {
-  if (!name || name.length < 34) return name;
+function lockedText(m: Member, isEnum: boolean): string {
+  if (isEnum) return m.type ? ' = ' + m.type : '';
+  let s = '';
+  if (m.mods.length) s += m.mods.join(' ') + ' ';
+  if (m.vis) s += m.vis + ' ';
+  s += ' ';
+  if (m.type) s += ': ' + m.type;
+  return s;
+}
+
+export function wrapName(name: string, budgetPx = 240): string {
+  if (!name) return name;
+  if (name.length < 34 && budgetPx >= 240) return name;
   const ctx = measureCtxOf();
   if (!ctx) return name;
   ctx.font = '12px "JetBrains Mono", monospace';
@@ -44,21 +56,37 @@ export function wrapName(name: string): string {
   const lines: string[] = [];
   let cur = '';
   for (let word of name.split(' ')) {
-    while (px(word) > NAME_MAX_PX) {
+    while (px(word) > budgetPx) {
       let i = word.length;
-      while (i > 1 && px(word.slice(0, i)) > NAME_MAX_PX) i--;
+      while (i > 1 && px(word.slice(0, i)) > budgetPx) i--;
       lines.push((cur ? cur + ' ' : '') + word.slice(0, i));
       cur = '';
       word = word.slice(i);
     }
     const cand = cur ? cur + ' ' + word : word;
-    if (px(cand) > NAME_MAX_PX && cur) {
+    if (px(cand) > budgetPx && cur) {
       lines.push(cur);
       cur = word;
     } else cur = cand;
   }
   if (cur) lines.push(cur);
   return lines.join('\n');
+}
+
+// Per-row wrap budgets: name and params may both break into lines; they share
+// the space left by the locked parts (mods/vis/type + node padding).
+// Name takes the leftover first (240px cap, 120px floor); params get the rest
+// (240px cap, 80px floor). Mirrors rowParts() in cli/lib/diagram.mjs.
+export function rowBudgets(m: Member, isMethod: boolean, isEnum: boolean): { nameBudget: number; paramsBudget: number } {
+  const ctx = measureCtxOf();
+  if (!ctx) return { nameBudget: 240, paramsBudget: 240 };
+  ctx.font = '12px "JetBrains Mono", monospace';
+  const lockedPx = ctx.measureText(lockedText(m, isEnum)).width;
+  const remaining = NODE_MAX_PX - 48 - (m.note ? 14 : 0) - lockedPx;
+  const nameBudget = Math.min(240, Math.max(120, remaining));
+  const used = Math.min(ctx.measureText(m.name ?? '').width, nameBudget);
+  const paramsBudget = isMethod ? Math.min(240, Math.max(80, remaining - used)) : 240;
+  return { nameBudget, paramsBudget };
 }
 
 export function svgEl(tag: string): SVGElement {
@@ -137,16 +165,17 @@ function memberRow(n: UmlNode, m: Member, key: MemberSection): HTMLDivElement {
   row.dataset.mid = m.id;
   if (m.note) row.title = m.note;
   const isEnum = n.kind === 'enum';
+  const b = rowBudgets(m, key === 'methods', isEnum);
   if (isEnum) {
-    const name = m.name ? esc(wrapName(m.name)) : '<span class="unnamed">(unnamed)</span>';
+    const name = m.name ? esc(wrapName(m.name, b.nameBudget)) : '<span class="unnamed">(unnamed)</span>';
     const val = m.type ? `<span class="m-type"> = ${esc(m.type)}</span>` : '';
     row.innerHTML = `<span class="m-name">${name}</span>${val}`;
     return row;
   }
   const mods = m.mods.length ? `<span class="m-mods">${esc(m.mods.join(' '))} </span>` : '';
   const vis = m.vis ? `<span class="m-vis">${esc(m.vis)}</span>` : '';
-  const params = key === 'methods' ? `<span class="m-params">(${esc(m.params ?? '')})</span>` : '';
-  const name = m.name ? esc(wrapName(m.name)) : '<span class="unnamed">(unnamed)</span>';
+  const params = key === 'methods' ? `<span class="m-params">(${esc(wrapName(m.params ?? '', b.paramsBudget))})</span>` : '';
+  const name = m.name ? esc(wrapName(m.name, b.nameBudget)) : '<span class="unnamed">(unnamed)</span>';
   const type = m.type ? `<span class="m-type">: ${esc(m.type)}</span>` : '';
   const note = m.note ? '<span class="note-glyph">\u270E</span>' : '';
   row.innerHTML = `${note}${mods}${vis}${vis ? ' ' : ''}<span class="m-name">${name}</span>${params}${type}`;

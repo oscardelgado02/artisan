@@ -120,37 +120,60 @@ export function buildEdges(entries) {
 // and the editor renders exactly those routes.
 // Rescan mode (`only`): existing nodes keep their positions; fresh ones are
 // anchored near their placed neighbours and spiral out to a free spot.
-// Mirror the editor's CSS: JetBrains Mono 12px ≈ 7.4px/char; member name
-// wraps at 240px (locked parts — vis/mods/type/params — never wrap), so
-// width uses min(name, 33 chars) and wrapped names add line height.
+// Mirror the editor's CSS: JetBrains Mono 12px ≈ 7.4px/char; node cap 640px.
+// Per row, the NAME and (for methods) the PARAMS may wrap into lines; they
+// share the space left by the locked parts (mods/vis/type). Name takes the
+// leftover first (240px cap, 120px floor), params get the rest (240 cap,
+// 80 floor). Must stay in sync with rowBudgets() in editor/src/render.ts.
 const CHAR = 7.4;
-const NAME_CAP_CHARS = 33;
-export function nameLines(m) {
-  return Math.max(1, Math.ceil((m.name.length * CHAR) / 240));
+const NODE_MAX = 640;
+export function rowParts(m, isMethod, isEnum, hasNote) {
+  let locked = isEnum
+    ? m.type
+      ? ' = ' + m.type
+      : ''
+    : (m.mods.length ? m.mods.join(' ') + ' ' : '') +
+      (m.vis ? m.vis + ' ' : '') +
+      ' ' +
+      (m.type ? ': ' + m.type : '');
+  const lockedPx = locked.length * CHAR;
+  const remaining = NODE_MAX - 48 - (hasNote ? 14 : 0) - lockedPx;
+  const nameBudget = Math.min(240, Math.max(120, remaining));
+  const namePx = m.name.length * CHAR;
+  const used = Math.min(namePx, nameBudget);
+  const paramsStr = isMethod ? '(' + (m.params ?? '') + ')' : '';
+  const paramsPx = paramsStr.length * CHAR;
+  const paramsBudget = isMethod ? Math.min(240, Math.max(80, remaining - used)) : 240;
+  return { lockedPx, nameBudget, paramsBudget, namePx, paramsPx };
 }
-const lockedLen = (m, isMethod) =>
-  m.mods.join(' ').length + 3 + (isMethod ? (m.params?.length ?? 0) + 2 : m.type.length + 2);
+export function nameLines(m, budgetPx = 240) {
+  return Math.max(1, Math.ceil((m.name.length * CHAR) / budgetPx));
+}
+export function paramsLines(m, budgetPx = 240) {
+  const px = ((m.params ?? '').length + 2) * CHAR;
+  return Math.max(1, Math.ceil(px / budgetPx));
+}
 export function widthOf(n) {
-  return Math.min(
-    640, // editor .node max-width
-    Math.max(
-      220,
-      40 +
-        CHAR *
-          Math.max(
-            12,
-            ...n.attributes.map((m) => Math.min(m.name.length, NAME_CAP_CHARS) + lockedLen(m, false)),
-            ...n.methods.map((m) => Math.min(m.name.length, NAME_CAP_CHARS) + lockedLen(m, true))
-          )
-    )
-  );
+  const isEnum = n.kind === 'enum';
+  const members = [...n.attributes, ...n.methods];
+  let w = 0;
+  for (let i = 0; i < members.length; i++) {
+    const m = members[i];
+    const isMethod = i >= n.attributes.length;
+    const p = rowParts(m, isMethod, isEnum, !!m.note);
+    w = Math.max(w, 48 + p.lockedPx + Math.min(p.namePx, p.nameBudget) + Math.min(p.paramsPx, p.paramsBudget));
+  }
+  return Math.min(NODE_MAX, Math.max(220, w));
 }
 export function heightOf(n) {
-  return (
-    62 +
-    (n.attributes.length + n.methods.length) * 20 +
-    19 * [...n.attributes, ...n.methods].reduce((s, m) => s + (nameLines(m) - 1), 0)
-  );
+  const isEnum = n.kind === 'enum';
+  const members = [...n.attributes, ...n.methods];
+  const extra = members.reduce((s, m, i) => {
+    const isMethod = i >= n.attributes.length;
+    const p = rowParts(m, isMethod, isEnum, !!m.note);
+    return s + (nameLines(m, p.nameBudget) - 1) + (isMethod ? paramsLines(m, p.paramsBudget) - 1 : 0);
+  }, 0);
+  return 62 + members.length * 20 + 19 * extra;
 }
 
 export function layout(diagram, only = null) {

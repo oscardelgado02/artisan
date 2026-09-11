@@ -524,8 +524,12 @@ button {
   margin-left: 5px;
 }
 
+/* Params may wrap (JS pre-wraps with \n at its budget); type stays locked. */
 .m-params {
   color: var(--foreground-2);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  max-width: 240px;
 }
 
 .m-mods {
