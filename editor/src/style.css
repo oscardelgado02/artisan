@@ -23,7 +23,12 @@ html {
   --ai-change-bg: rgba(245, 158, 11, 0.15);
 }
 
+html {
+  color-scheme: light;
+}
+
 html.dark {
+  color-scheme: dark;
   --background: #0d0d0d;
   --foreground: #ededed;
   --foreground-2: rgba(237, 237, 237, 0.85);

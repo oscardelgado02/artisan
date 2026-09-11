@@ -13,7 +13,7 @@ import {
   state,
   uid,
 } from './model';
-import type { EdgeKind, NodeKind } from './model';
+import type { EdgeKind, EdgeStyle, NodeKind } from './model';
 import {
   applyCam,
   fitView,
@@ -66,6 +66,7 @@ import type { PendingRef } from './model';
 const btnAddNode = document.getElementById('btn-add-node') as HTMLButtonElement;
 const btnColorize = document.getElementById('btn-colorize') as HTMLButtonElement;
 const btnTidy = document.getElementById('btn-tidy') as HTMLButtonElement;
+const selLines = document.getElementById('sel-lines') as HTMLSelectElement;
 const btnUndo = document.getElementById('btn-undo') as HTMLButtonElement;
 const btnRedo = document.getElementById('btn-redo') as HTMLButtonElement;
 const btnExport = document.getElementById('btn-export') as HTMLButtonElement;
@@ -727,6 +728,15 @@ btnTidy.addEventListener('click', () => {
   toast('Layout tidied');
 });
 
+selLines.addEventListener('change', () => {
+  const v = selLines.value as EdgeStyle;
+  if (v === 'straight' || v === 'ortho' || v === 'smooth' || v === 'elliptic') {
+    state.edgeStyle = v;
+    renderAll();
+    save();
+  }
+});
+
 btnColorize.addEventListener('click', () => {  state.colorize = !state.colorize;
   syncColorize();
   renderEdges();
@@ -902,6 +912,7 @@ async function boot(): Promise<void> {
   }
   syncColorize();
   applyThemeIcon();
+  selLines.value = state.edgeStyle;
   updateUndoButtons();
   syncAckButton();
   if (!serverRef.current) btnConnect.style.display = embedded ? '' : 'none';

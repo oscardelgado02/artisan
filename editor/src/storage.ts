@@ -1,5 +1,5 @@
 import { state, movedNodes } from './model';
-import type { Camera, UmlEdge, UmlNode } from './model';
+import type { Camera, EdgeStyle, UmlEdge, UmlNode } from './model';
 import { applyCam, renderAll, syncColorize } from './render';
 
 export const LS_KEY = 'wise-uml-v1';
@@ -16,6 +16,7 @@ export interface SerializedDiagram {
   colorize?: boolean;
   cam?: Camera | null;
   projectNotes?: string;
+  edgeStyle?: string;
 }
 
 export const serverRef: { current: boolean } = { current: false };
@@ -29,6 +30,7 @@ export function serialize(): string {
     colorize: state.colorize,
     cam: state.cam,
     projectNotes: state.projectNotes,
+    edgeStyle: state.edgeStyle,
   };
   return JSON.stringify(diagram);
 }
@@ -88,6 +90,8 @@ export function loadInto(data: SerializedDiagram): void {
   state.edges = Array.isArray(data.edges) ? data.edges : [];
   state.colorize = !!data.colorize;
   state.projectNotes = typeof data.projectNotes === 'string' ? data.projectNotes : '';
+  const es = data.edgeStyle;
+  state.edgeStyle = typeof es === 'string' && (['ortho', 'smooth', 'straight', 'elliptic'] as string[]).includes(es) ? (es as EdgeStyle) : 'straight';
   state.cam =
     data.cam && typeof data.cam.z === 'number'
       ? { ...data.cam }

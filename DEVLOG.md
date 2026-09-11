@@ -6,6 +6,10 @@
 - Git history purge: removed accidentally committed `tmp-output/` from `improved-ui` (rebuilt history, force-pushed).
 - Wider member-editor popover (440px), name field flexed up; type input widened too.
 - Arrow fix: detoured elbow edges now end with a stub into the box side instead of pointing parallel to it.
+- Line-style dropdown: straight / rectangular / smooth / curves, persisted per diagram.
+- Curves: fewest-bend routing (straight → L → Z, box-collision checked), Catmull-Rom spline with clamped handles (no end loops).
+- Smooth = rectangular waypoints with axis-snapped runs and rounded bends only.
+- Tidy no longer stores dagre polylines; all edges render live and dodge nearby classes.
 
 ## 10.09.2026
 - Layout rewritten with vendored dagre (Mermaid's engine): inheritance top-down, routed edge polylines.

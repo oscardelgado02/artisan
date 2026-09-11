@@ -121,6 +121,8 @@ export interface Selection {
   id: string;
 }
 
+export type EdgeStyle = 'straight' | 'ortho' | 'smooth' | 'elliptic';
+
 export interface AppState {
   seq: number;
   nodes: UmlNode[];
@@ -133,6 +135,7 @@ export interface AppState {
   cam: Camera;
   projectNotes: string;
   aiPending: PendingRef[];
+  edgeStyle: EdgeStyle;
 }
 
 export const state: AppState = {
@@ -147,6 +150,7 @@ export const state: AppState = {
   cam: { x: 0, y: 0, z: 1 },
   projectNotes: '',
   aiPending: [],
+  edgeStyle: 'straight',
 };
 
 export const isPending = (type: PendingRef['type'], id: string): boolean =>

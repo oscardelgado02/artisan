@@ -5,7 +5,8 @@ import { renderAll } from './render';
 import { save } from './storage';
 
 // Re-runs the full dagre auto-layout (same engine + knobs as `artisan scan`)
-// using the editor's REAL measured box sizes, then stores routed polylines.
+// using the editor's REAL measured box sizes. No stored polylines: edges are
+// drawn live by the current style (curves dodge nearby classes at render time).
 export function tidyAll(): void {
   if (!state.nodes.length) return;
   const ids = new Set(state.nodes.map((n) => n.id));
@@ -25,13 +26,7 @@ export function tidyAll(): void {
     n.x = Math.round(p.x - p.width / 2);
     n.y = Math.round(p.y - p.height / 2);
   }
-  for (const e of state.edges) {
-    if (!ids.has(e.from) || !ids.has(e.to) || e.from === e.to) continue;
-    const reversed = e.kind === 'inheritance' || e.kind === 'realization';
-    const obj = reversed ? { v: e.to, w: e.from, name: e.id } : { v: e.from, w: e.to, name: e.id };
-    const pts = g.edge(obj)?.points?.map((p: { x: number; y: number }) => ({ x: Math.round(p.x), y: Math.round(p.y) }));
-    if (pts && pts.length >= 2) e.points = reversed ? pts.reverse() : pts;
-  }
+  for (const e of state.edges) delete e.points;
   movedNodes.clear();
   renderAll();
   save();

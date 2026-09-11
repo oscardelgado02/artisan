@@ -334,10 +334,12 @@ function corridorY(y1: number, y2: number, x1: number, x2: number, skipA: string
   return Math.round((y1 + y2) / 2);
 }
 
+type Waypoint = { x: number; y: number };
+
 function edgeRoute(
   a: UmlNode,
   b: UmlNode
-): { d: string; s: { x: number; y: number }; e: { x: number; y: number }; mid: { x: number; y: number } } {
+): { pts: Waypoint[]; mid: { x: number; y: number } } {
   const aw = a._w ?? 220;
   const ah = a._h ?? 100;
   const bw = b._w ?? 220;
@@ -351,9 +353,7 @@ function edgeRoute(
   if (sepX === 0 && sepY === 0) {
     // overlapping boxes: straight center-to-center
     return {
-      d: `M ${acx} ${acy} L ${bcx} ${bcy}`,
-      s: { x: acx, y: acy },
-      e: { x: bcx, y: bcy },
+      pts: [{ x: acx, y: acy }, { x: bcx, y: bcy }],
       mid: { x: (acx + bcx) / 2, y: (acy + bcy) / 2 },
     };
   }
@@ -364,24 +364,32 @@ function edgeRoute(
     const sy = acy;
     const ey = bcy;
     // detour through a free horizontal channel when the straight run is blocked
-    if (segBlocked(sy, sx, ex, a.id, b.id)) {
+    if (segBlockedH(sy, sx, ex, a.id, b.id)) {
       const ch = corridorY(sy, ey, sx, ex, a.id, b.id);
       const m1 = right ? sx + 16 : sx - 16;
       const m2 = right ? ex - 16 : ex + 16;
       if ((right && m2 > m1) || (!right && m2 < m1)) {
         return {
-          d: `M ${sx} ${sy} H ${m1} V ${ch} H ${m2} V ${ey} H ${ex}`,
-          s: { x: sx, y: sy },
-          e: { x: ex, y: ey },
+          pts: [
+            { x: sx, y: sy },
+            { x: m1, y: sy },
+            { x: m1, y: ch },
+            { x: m2, y: ch },
+            { x: m2, y: ey },
+            { x: ex, y: ey },
+          ],
           mid: { x: m2, y: ch },
         };
       }
     }
     const mx = (sx + ex) / 2;
     return {
-      d: `M ${sx} ${sy} H ${mx} V ${ey} H ${ex}`,
-      s: { x: sx, y: sy },
-      e: { x: ex, y: ey },
+      pts: [
+        { x: sx, y: sy },
+        { x: mx, y: sy },
+        { x: mx, y: ey },
+        { x: ex, y: ey },
+      ],
       mid: { x: mx, y: (sy + ey) / 2 },
     };
   }
@@ -396,20 +404,204 @@ function edgeRoute(
     const m2 = down ? ey - 16 : ey + 16;
     if ((down && m2 > m1) || (!down && m2 < m1)) {
       return {
-        d: `M ${sx} ${sy} V ${m1} H ${ch} V ${m2} H ${ex} V ${ey}`,
-        s: { x: sx, y: sy },
-        e: { x: ex, y: ey },
+        pts: [
+          { x: sx, y: sy },
+          { x: sx, y: m1 },
+          { x: ch, y: m1 },
+          { x: ch, y: m2 },
+          { x: ex, y: m2 },
+          { x: ex, y: ey },
+        ],
         mid: { x: ch, y: (m1 + m2) / 2 },
       };
     }
   }
   const my = (sy + ey) / 2;
   return {
-    d: `M ${sx} ${sy} V ${my} H ${ex} V ${ey}`,
-    s: { x: sx, y: sy },
-    e: { x: ex, y: ey },
+    pts: [
+      { x: sx, y: sy },
+      { x: sx, y: my },
+      { x: ex, y: my },
+      { x: ex, y: ey },
+    ],
     mid: { x: (sx + ex) / 2, y: my },
   };
+}
+
+const dir = (ax: number, ay: number, bx: number, by: number) => {
+  const l = Math.hypot(bx - ax, by - ay) || 1;
+  return { x: (bx - ax) / l, y: (by - ay) / l };
+};
+
+function segIntersect(p1: Waypoint, p2: Waypoint, p3: Waypoint, p4: Waypoint): boolean {
+  const d = (p2.x - p1.x) * (p4.y - p3.y) - (p2.y - p1.y) * (p4.x - p3.x);
+  if (!d) return false;
+  const t = ((p3.x - p1.x) * (p4.y - p3.y) - (p3.y - p1.y) * (p4.x - p3.x)) / d;
+  const u = ((p3.x - p1.x) * (p2.y - p1.y) - (p3.y - p1.y) * (p2.x - p1.x)) / d;
+  return t >= 0 && t <= 1 && u >= 0 && u <= 1;
+}
+
+// Does the segment cross any node box (besides a/b)? 2px inset so border-grazes count.
+function segHitsBoxes(a: Waypoint, b: Waypoint, skipA: string, skipB: string): boolean {
+  for (const n of state.nodes) {
+    if (n.id === skipA || n.id === skipB) continue;
+    const w = n._w ?? 220;
+    const h = n._h ?? 100;
+    const x0 = n.x + 2;
+    const y0 = n.y + 2;
+    const x1 = n.x + w - 2;
+    const y1 = n.y + h - 2;
+    const inside = (p: Waypoint) => p.x > x0 && p.x < x1 && p.y > y0 && p.y < y1;
+    if (inside(a) || inside(b)) return true;
+    const r0: Waypoint = { x: x0, y: y0 };
+    const r1: Waypoint = { x: x1, y: y0 };
+    const r2: Waypoint = { x: x1, y: y1 };
+    const r3: Waypoint = { x: x0, y: y1 };
+    if (segIntersect(a, b, r0, r1) || segIntersect(a, b, r1, r2) || segIntersect(a, b, r2, r3) || segIntersect(a, b, r3, r0))
+      return true;
+  }
+  return false;
+}
+
+// Fewest-bend route from a's border to b's border that dodges all boxes.
+// Tries straight, then one-bend L, then two-bend Z (both orientations).
+function minimalBendRoute(a: UmlNode, b: UmlNode): Waypoint[] | null {
+  const s = anchor(a, b);
+  const e = anchor(b, a);
+  const mx = (s.x + e.x) / 2;
+  const my = (s.y + e.y) / 2;
+  const cands: Waypoint[][] = [
+    [s, e],
+    [s, { x: e.x, y: s.y }, e],
+    [s, { x: s.x, y: e.y }, e],
+    [s, { x: mx, y: s.y }, { x: mx, y: e.y }, e],
+    [s, { x: s.x, y: my }, { x: e.x, y: my }, e],
+  ];
+  for (const c of cands) {
+    let ok = true;
+    for (let i = 0; i < c.length - 1; i++) {
+      if (segHitsBoxes(c[i], c[i + 1], a.id, b.id)) {
+        ok = false;
+        break;
+      }
+    }
+    if (ok) return c;
+  }
+  return null;
+}
+
+// Ramer–Douglas–Peucker: drop collinear/wobbling points (dagre polylines bend far too often).
+function rdp(pts: Waypoint[], eps: number): Waypoint[] {
+  if (pts.length < 3) return pts.slice();
+  const keep = new Array<boolean>(pts.length).fill(false);
+  keep[0] = keep[pts.length - 1] = true;
+  const stack: Array<[number, number]> = [[0, pts.length - 1]];
+  const segDist = (p: Waypoint, a: Waypoint, b: Waypoint): number => {
+    const l2 = (b.x - a.x) ** 2 + (b.y - a.y) ** 2;
+    if (!l2) return Math.hypot(p.x - a.x, p.y - a.y);
+    let t = ((p.x - a.x) * (b.x - a.x) + (p.y - a.y) * (b.y - a.y)) / l2;
+    t = Math.max(0, Math.min(1, t));
+    return Math.hypot(p.x - (a.x + t * (b.x - a.x)), p.y - (a.y + t * (b.y - a.y)));
+  };
+  while (stack.length) {
+    const [i, j] = stack.pop()!;
+    let maxD = 0;
+    let idx = -1;
+    for (let k = i + 1; k < j; k++) {
+      const d = segDist(pts[k], pts[i], pts[j]);
+      if (d > maxD) {
+        maxD = d;
+        idx = k;
+      }
+    }
+    if (maxD > eps && idx > 0) {
+      keep[idx] = true;
+      stack.push([i, idx], [idx, j]);
+    }
+  }
+  return pts.filter((_, i) => keep[i]);
+}
+
+// Catmull–Rom spline through the waypoints as cubic beziers — flowing curves.
+// Handles are clamped to 40% of their segment so short stubs can't swing the
+// curve around (no circles at line ends: the exit follows the first segment).
+function crPath(p: Waypoint[]): string {
+  if (p.length < 3) return 'M ' + p.map(q => `${q.x} ${q.y}`).join(' L ');
+  const parts: string[] = [`M ${p[0].x} ${p[0].y}`];
+  for (let i = 0; i < p.length - 1; i++) {
+    const p0 = p[Math.max(0, i - 1)];
+    const p1 = p[i];
+    const p2 = p[i + 1];
+    const p3 = p[Math.min(p.length - 1, i + 2)];
+    const cap = Math.hypot(p2.x - p1.x, p2.y - p1.y) * 0.4;
+    let h1x = (p2.x - p0.x) / 6;
+    let h1y = (p2.y - p0.y) / 6;
+    let h2x = (p3.x - p1.x) / 6;
+    let h2y = (p3.y - p1.y) / 6;
+    const l1 = Math.hypot(h1x, h1y);
+    if (l1 > cap && l1 > 0) {
+      h1x = (h1x * cap) / l1;
+      h1y = (h1y * cap) / l1;
+    }
+    const l2 = Math.hypot(h2x, h2y);
+    if (l2 > cap && l2 > 0) {
+      h2x = (h2x * cap) / l2;
+      h2y = (h2y * cap) / l2;
+    }
+    parts.push(`C ${p1.x + h1x} ${p1.y + h1y} ${p2.x - h2x} ${p2.y - h2y} ${p2.x} ${p2.y}`);
+  }
+  return parts.join(' ');
+}
+
+// Snap a polyline to axis-aligned segments: any diagonal run becomes a right angle.
+function orthoSnap(pts: Waypoint[]): Waypoint[] {
+  const out: Waypoint[] = [{ x: pts[0].x, y: pts[0].y }];
+  for (let i = 1; i < pts.length; i++) {
+    const prev = out[out.length - 1];
+    const p = pts[i];
+    if (Math.abs(p.x - prev.x) > 1 && Math.abs(p.y - prev.y) > 1) out.push({ x: p.x, y: prev.y });
+    out.push({ x: p.x, y: p.y });
+  }
+  const dedup: Waypoint[] = [];
+  for (const p of out) {
+    const q = dedup[dedup.length - 1];
+    if (!q || Math.hypot(p.x - q.x, p.y - q.y) > 0.5) dedup.push(p);
+  }
+  return dedup;
+}
+
+// Build the path `d` for a polyline in the current edge style:
+// 'straight' = simple lines, 'ortho' = right angles, 'smooth' = rounded corners,
+// 'elliptic' (label: curves) = Catmull-Rom spline through fewest-bend waypoints.
+export function pathFromPoints(pts: Waypoint[], style: string): string {
+  if (style === 'elliptic') return crPath(pts);
+  const r = 24;
+  if (style === 'smooth' && pts.length >= 3) {
+    const sp = rdp(orthoSnap(pts), 6);
+    const parts: string[] = [`M ${sp[0].x} ${sp[0].y}`];
+    let cur = sp[0];
+    for (let i = 1; i < sp.length - 1; i++) {
+      const p = sp[i];
+      const next = sp[i + 1];
+      const uIn = dir(cur.x, cur.y, p.x, p.y);
+      const uOut = dir(p.x, p.y, next.x, next.y);
+      const lin = Math.hypot(p.x - cur.x, p.y - cur.y);
+      const lout = Math.hypot(next.x - p.x, next.y - p.y);
+      if (lin < 1 || lout < 1) continue;
+      const rad = Math.min(r, lin / 2, lout / 2);
+      const ax = p.x - uIn.x * rad;
+      const ay = p.y - uIn.y * rad;
+      const bx = p.x + uOut.x * rad;
+      const by = p.y + uOut.y * rad;
+      if (Math.hypot(ax - cur.x, ay - cur.y) > 0.5) parts.push(`L ${ax} ${ay}`);
+      parts.push(`Q ${p.x} ${p.y} ${bx} ${by}`);
+      cur = { x: bx, y: by };
+    }
+    const last = sp[sp.length - 1];
+    if (Math.hypot(last.x - cur.x, last.y - cur.y) > 0.5) parts.push(`L ${last.x} ${last.y}`);
+    return parts.join(' ');
+  }
+  return 'M ' + pts.map(p => `${p.x} ${p.y}`).join(' L ');
 }
 
 export function renderEdges(): void {
@@ -459,12 +651,30 @@ export function renderEdges(): void {
       labelX = x + 66;
       labelY = (y1 + y2) / 2;
     } else {
-      const pts = e.points;
-      const usePts = !!pts && pts.length >= 2 && !movedNodes.has(a.id) && !movedNodes.has(b.id);
-      const route = usePts ? null : edgeRoute(a, b);
-      const d = usePts
-        ? 'M ' + pts!.map(p => `${p.x} ${p.y}`).join(' L ')
-        : route!.d;
+      const style = state.edgeStyle;
+      let pts: Waypoint[];
+      let mid: { x: number; y: number };
+      if (style === 'straight') {
+        const s = anchor(a, b);
+        const en = anchor(b, a);
+        pts = [s, en];
+        mid = { x: (s.x + en.x) / 2, y: (s.y + en.y) / 2 };
+      } else if (style === 'elliptic') {
+        // fewest possible bends: straight, then L, then Z; corridor route only as last resort
+        pts = minimalBendRoute(a, b) ?? edgeRoute(a, b).pts;
+        mid = pts[Math.floor(pts.length / 2)];
+      } else {
+        const usePts = !!e.points && e.points.length >= 2 && !movedNodes.has(a.id) && !movedNodes.has(b.id);
+        if (usePts) {
+          pts = e.points!;
+          mid = pts[Math.floor(pts.length / 2)];
+        } else {
+          const route = edgeRoute(a, b);
+          pts = route.pts;
+          mid = route.mid;
+        }
+      }
+      const d = pathFromPoints(pts, style);
       const hit = svgEl('path') as SVGPathElement;
       hit.setAttribute('d', d);
       hit.setAttribute('class', 'edge-hit');
@@ -477,48 +687,18 @@ export function renderEdges(): void {
       line.setAttribute('marker-end', markerEnd);
       g.appendChild(line);
 
-      if (usePts) {
-        const dir = (ax: number, ay: number, bx: number, by: number) => {
-          const l = Math.hypot(bx - ax, by - ay) || 1;
-          return { x: (bx - ax) / l, y: (by - ay) / l };
-        };
-        const P0 = pts![0];
-        const PL = pts![pts!.length - 1];
-        if (e.fromMult) {
-          const u1 = dir(P0.x, P0.y, pts![1].x, pts![1].y);
-          g.appendChild(edgeLabelText(P0.x + u1.x * 18, P0.y + u1.y * 18 - 4, e.fromMult, 'edge-mult'));
-        }
-        if (e.toMult) {
-          const u2 = dir(PL.x, PL.y, pts![pts!.length - 2].x, pts![pts!.length - 2].y);
-          g.appendChild(edgeLabelText(PL.x + u2.x * 18, PL.y + u2.y * 18 - 4, e.toMult, 'edge-mult'));
-        }
-        const mp = pts![Math.floor(pts!.length / 2)];
-        labelX = mp.x;
-        labelY = mp.y - 6;
-      } else {
-        if (e.fromMult) {
-          const horiz = Math.abs(route!.e.x - route!.s.x) > Math.abs(route!.e.y - route!.s.y);
-          if (horiz) {
-            const dir2 = route!.e.x > route!.s.x ? 1 : -1;
-            g.appendChild(edgeLabelText(route!.s.x + dir2 * 20, route!.s.y - 6, e.fromMult, 'edge-mult'));
-          } else {
-            const dir2 = route!.e.y > route!.s.y ? 1 : -1;
-            g.appendChild(edgeLabelText(route!.s.x + 8, route!.s.y + dir2 * 18, e.fromMult, 'edge-mult'));
-          }
-        }
-        if (e.toMult) {
-          const horiz = Math.abs(route!.e.x - route!.s.x) > Math.abs(route!.e.y - route!.s.y);
-          if (horiz) {
-            const dir2 = route!.e.x > route!.s.x ? 1 : -1;
-            g.appendChild(edgeLabelText(route!.e.x - dir2 * 20, route!.e.y - 6, e.toMult, 'edge-mult'));
-          } else {
-            const dir2 = route!.e.y > route!.s.y ? 1 : -1;
-            g.appendChild(edgeLabelText(route!.e.x + 8, route!.e.y - dir2 * 14, e.toMult, 'edge-mult'));
-          }
-        }
-        labelX = route!.mid.x;
-        labelY = route!.mid.y - 6;
+      const P0 = pts[0];
+      const PL = pts[pts.length - 1];
+      if (e.fromMult) {
+        const u1 = dir(P0.x, P0.y, pts[1].x, pts[1].y);
+        g.appendChild(edgeLabelText(P0.x + u1.x * 18, P0.y + u1.y * 18 - 4, e.fromMult, 'edge-mult'));
       }
+      if (e.toMult) {
+        const u2 = dir(PL.x, PL.y, pts[pts.length - 2].x, pts[pts.length - 2].y);
+        g.appendChild(edgeLabelText(PL.x + u2.x * 18, PL.y + u2.y * 18 - 4, e.toMult, 'edge-mult'));
+      }
+      labelX = mid.x;
+      labelY = mid.y - 6;
     }
 
     if (e.label) g.appendChild(edgeLabelText(labelX, labelY, e.label, 'edge-label'));
