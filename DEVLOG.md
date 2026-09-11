@@ -1,0 +1,25 @@
+# Devlog
+
+## 11.09.2026
+- Tidy button: re-run dagre layout inside the editor using real measured box sizes.
+- Params wrap like names (shared leftover-space budget); type/vis/mods stay locked on one line.
+- Git history purge: removed accidentally committed `tmp-output/` from `improved-ui` (rebuilt history, force-pushed).
+
+## 10.09.2026
+- Layout rewritten with vendored dagre (Mermaid's engine): inheritance top-down, routed edge polylines.
+- Bigger nodesep/ranksep; name-only text wrapping (locked vis/mods/type stay one line).
+- Long names wrap deterministically (canvas-measured); overlap resolver pushes apart boxes that still touch.
+- Tests grown to 33: width/height mirror CSS, zero-overlap layout on messy graph, CSS contract.
+
+## 09.09.2026
+- Self-contained `.artisan/diagram.html`: editor inlined, opens by double-click, no server (`artisan serve` optional).
+- "Connect file" autosaves editor edits back to `diagram.json` (File System Access API).
+- All 6 UML relations detected: inheritance, realization, composition, aggregation, association, dependency.
+- Layered auto-layout; rescan keeps human positions/notes.
+
+## 08.09.2026
+- `artisan` CLI (scan/diff/mark-ai/ack/status): C# parser, PlantUML export, change tracking, rename detection.
+- Editor (vanilla TS + Vite): class diagrams with drag, undo/redo, notes on classes/members/edges/project, dark theme.
+- Change tracking both ways: human edits → diff report for AI; AI edits → amber highlights + "Mark seen".
+- Agent packs: `/artisan-*` commands for opencode, Claude Code, Codex.
+- Repo scaffolding: MIT license, FUNDING, README, install.sh, self-tests (30 checks).
