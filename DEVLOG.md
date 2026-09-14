@@ -1,33 +1,9 @@
 # Devlog
 
-## 11.09.2026
-- Tidy button: re-run dagre layout inside the editor using real measured box sizes.
-- Params wrap like names (shared leftover-space budget); type/vis/mods stay locked on one line.
-- Git history purge: removed accidentally committed `tmp-output/` from `improved-ui` (rebuilt history, force-pushed).
-- Wider member-editor popover (440px), name field flexed up; type input widened too.
-- Arrow fix: detoured elbow edges now end with a stub into the box side instead of pointing parallel to it.
-- Line-style dropdown: straight / rectangular / smooth / curves, persisted per diagram.
-- Curves: fewest-bend routing (straight → L → Z, box-collision checked), Catmull-Rom spline with clamped handles (no end loops).
-- Smooth = rectangular waypoints with axis-snapped runs and rounded bends only.
-- Tidy no longer stores dagre polylines; all edges render live and dodge nearby classes.
-- Parallel edges get axis-safe lane offsets (stem slides sideways, bends stay 90°).
-- Curve labels sit at the true midpoint of the route, not near the target class.
-
-## 10.09.2026
-- Layout rewritten with vendored dagre (Mermaid's engine): inheritance top-down, routed edge polylines.
-- Bigger nodesep/ranksep; name-only text wrapping (locked vis/mods/type stay one line).
-- Long names wrap deterministically (canvas-measured); overlap resolver pushes apart boxes that still touch.
-- Tests grown to 33: width/height mirror CSS, zero-overlap layout on messy graph, CSS contract.
-
-## 09.09.2026
-- Self-contained `.artisan/diagram.html`: editor inlined, opens by double-click, no server (`artisan serve` optional).
-- "Connect file" autosaves editor edits back to `diagram.json` (File System Access API).
-- All 6 UML relations detected: inheritance, realization, composition, aggregation, association, dependency.
-- Layered auto-layout; rescan keeps human positions/notes.
-
-## 08.09.2026
-- `artisan` CLI (scan/diff/mark-ai/ack/status): C# parser, PlantUML export, change tracking, rename detection.
-- Editor (vanilla TS + Vite): class diagrams with drag, undo/redo, notes on classes/members/edges/project, dark theme.
-- Change tracking both ways: human edits → diff report for AI; AI edits → amber highlights + "Mark seen".
-- Agent packs: `/artisan-*` commands for opencode, Claude Code, Codex.
-- Repo scaffolding: MIT license, FUNDING, README, install.sh, self-tests (30 checks).
+## 14.09.2026
+- Repo restructured into the plugin hub: the editor and CLI moved out to their own repos and are imported from npm (`artisan-uml`, `artisan-uml-cli`).
+- Agent packs: six `/artisan-*` commands (`scan`, `scaffold`, `implement`, `architect`, `edit`, `status`) for opencode, Claude Code and Codex, with the `pnpm dlx artisan-uml-cli` fallback built into every pack.
+- `install.sh`: installs the CLI globally and copies the packs into each tool's command folder.
+- Docs site rebuilt (docsify, `docs/`), GitHub Pages deploy workflow added.
+- README redone: brass "Artisan" wordmark, package table, agent loop, packs, "Why I built this".
+- Community files: CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, FUNDING.

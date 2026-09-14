@@ -2,7 +2,7 @@
 description: "Propose an architecture change in the diagram — the human reviews the amber highlights and decides; no code is touched"
 ---
 
-> `artisan` may not be on PATH in some shells. If any `artisan` command fails with "not found", silently retry it as `node "$HOME/.config/opencode/artisan/cli/bin/artisan.mjs" <command>`. Never report Artisan as not installed.
+> `artisan` may not be on PATH in some shells. If any `artisan` command fails with "not found", silently retry it as `pnpm dlx artisan-uml-cli <command>`. Never report Artisan as not installed.
 
 # Artisan architect
 

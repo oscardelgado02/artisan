@@ -1,11 +1,31 @@
 {
-  "name": "artisan-uml-monorepo",
-  "private": true,
+  "name": "artisan",
   "version": "0.1.0",
-  "description": "Artisan — human-first class diagrams for agentic coding. Editor + CLI + agent packs.",
+  "private": true,
+  "description": "Architecture control for agentic coding workflows: slash-command packs for opencode, Claude Code and Codex around the artisan-uml editor and CLI.",
   "type": "module",
+  "license": "MIT",
+  "dependencies": {
+    "artisan-uml-cli": "^0.1.0"
+  },
   "scripts": {
-    "build": "pnpm --filter artisan-uml-editor build",
-    "test": "node cli/test/run.mjs"
-  }
+    "artisan": "artisan"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oscardelgado02/artisan.git"
+  },
+  "bugs": {
+    "url": "https://github.com/oscardelgado02/artisan/issues"
+  },
+  "homepage": "https://oscardelgado02.github.io/artisan/",
+  "keywords": [
+    "uml",
+    "class-diagram",
+    "agentic",
+    "opencode",
+    "claude-code",
+    "codex",
+    "architecture"
+  ]
 }
