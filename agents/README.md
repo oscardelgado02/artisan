@@ -1,6 +1,6 @@
 # Agent packs
 
-`/artisan-*` chat commands for each agentic tool. Same five commands everywhere:
+`/artisan-*` chat commands for each agentic tool. Same six commands everywhere:
 
 | Command | What it does |
 |---------|--------------|
@@ -8,6 +8,7 @@
 | `/artisan-scaffold` | your diagram edits → code stubs (renames detected, existing code untouched) |
 | `/artisan-implement` | your diagram edits → real code with bodies, per notes |
 | `/artisan-architect` | AI proposes an architecture change in the diagram (amber highlights); you review |
+| `/artisan-edit` | your spoken architecture changes applied to the diagram (add/edit/remove, counted as human edits) |
 | `/artisan-status` | who changed what, what's pending |
 
 | Tool | Pack | Install (project root) |
@@ -17,9 +18,9 @@
 | Codex | `agents/codex/artisan-*.md` | copy to `~/.codex/prompts/` |
 
 ```bash
-# from the repo root
-mkdir -p ~/.config/opencode/command && cp agents/opencode/artisan-*.md ~/.config/opencode/command/
-mkdir -p ~/.claude/commands && cp agents/claude/artisan-*.md ~/.claude/commands/
+./install.sh   # or copy the files manually as shown above
 ```
 
-Also install the CLI once: `npm install -g artisan-uml` (or `pnpm add -g artisan-uml`).
+Also install the CLI once: `pnpm add -g artisan-uml-cli` (or `npm install -g
+artisan-uml-cli`). Without a global install, any pack can fall back to
+`pnpm dlx artisan-uml-cli <command>`.

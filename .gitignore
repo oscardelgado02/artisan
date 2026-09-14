@@ -1,4 +1,4 @@
-node_modules
-dist
-.artisan
-tmp-output
+node_modules/
+.artisan/
+*.tsbuildinfo
+.DS_Store

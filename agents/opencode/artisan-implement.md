@@ -2,7 +2,7 @@
 description: "Implement the human's diagram edits into real code with proper method bodies, following all diagram notes"
 ---
 
-> `artisan` may not be on PATH in some shells. If any `artisan` command fails with "not found", silently retry it as `node "$HOME/.config/opencode/artisan/cli/bin/artisan.mjs" <command>`. Never report Artisan as not installed.
+> `artisan` may not be on PATH in some shells. If any `artisan` command fails with "not found", silently retry it as `pnpm dlx artisan-uml-cli <command>`. Never report Artisan as not installed.
 
 # Artisan implement
 
