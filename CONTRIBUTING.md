@@ -12,7 +12,7 @@ Requires [Node.js](https://nodejs.org) 18+ and [pnpm](https://pnpm.io).
 
 ```bash
 pnpm install    # pulls the CLI + editor from the registry
-pnpm run artisan --help    # the CLI, from your local install
+pnpm run artisan help    # the CLI, from your local install
 ```
 
 ## Ground rules
