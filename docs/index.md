@@ -49,7 +49,7 @@ Click **Connect file** once so your edits autosave to `.artisan/diagram.json`.
 6. `artisan ack` — you confirm; both sides are synced
 
 Full loop in [the workflow](workflow.md); every command in the
-[CLI docs](https://oscardelgado02.github.io/artisan-uml-cli/).
+[CLI docs](https://cli.artisan-uml.dev/).
 
 ## Agent packs
 

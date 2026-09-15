@@ -61,8 +61,8 @@ to `.artisan/diagram.json`.
 5. **`/artisan-architect`** — the agent proposes; you review amber highlights
 6. **`artisan scan`** again — the picture stays current
 
-Full loop: [the workflow docs](https://oscardelgado02.github.io/artisan/#/workflow).
-Every command: [CLI docs](https://oscardelgado02.github.io/artisan-uml-cli/).
+Full loop: [the workflow docs](https://artisan-uml.dev/#/workflow).
+Every command: [CLI docs](https://cli.artisan-uml.dev/).
 
 ## The packs
 
@@ -81,7 +81,7 @@ Codex:
 Any agent works without packs too — Cursor, Windsurf, Gemini CLI, anything that
 runs commands. Install the CLI, then point the agent at `artisan diff` and the
 rules in [agents/README.md](agents/README.md). Full guide:
-[Any other agent](https://oscardelgado02.github.io/artisan/#/agent-packs).
+[Any other agent](https://artisan-uml.dev/#/agent-packs).
 
 ## Why I built this
 
@@ -106,11 +106,11 @@ helps you stay in the driver's seat of your next project, it was worth building.
 
 ## Documentation
 
-Hosted on GitHub Pages: **[Documentation](https://oscardelgado02.github.io/artisan/)** —
+Hosted on GitHub Pages: **[Documentation](https://artisan-uml.dev/)** —
 getting started, the workflow and agent-pack reference. The same pages live in
 [`docs/`](docs/) as plain markdown for offline reading. Editor and CLI have their
-own docs ([editor](https://oscardelgado02.github.io/artisan-uml/docs/),
-[CLI](https://oscardelgado02.github.io/artisan-uml-cli/)).
+own docs ([editor](https://editor.artisan-uml.dev/docs/),
+[CLI](https://cli.artisan-uml.dev/)).
 
 ## Community
 
