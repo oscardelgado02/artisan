@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Artisan — Architecture control for agentic workflows</title>
+  <meta name="description" content="Artisan turns your codebase into a living class diagram you design, and your coding agent implements. You keep the architecture; the agent keeps the speed." />
+  <meta property="og:title" content="Artisan — Architecture control for agentic workflows" />
+  <meta property="og:description" content="A living class diagram of your project: you design in a fluid visual editor, the agent implements at full speed, and artisan keeps track of who changed what." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://artisan-uml.dev/" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+  />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23b45309'/%3E%3Cpath d='M16 7v18M9 13h14M11 25l7-10' stroke='%23faf8f5' stroke-width='2.4' stroke-linecap='round' fill='none'/%3E%3C/svg%3E" />
+  <style>
+    /* ===== Palette — the editor's Default (warm brass) ===== */
+    :root {
+      --bg: #faf8f5;
+      --fg: #2b2320;
+      --fg2: rgba(43, 35, 32, 0.85);
+      --muted: rgba(43, 35, 32, 0.62);
+      --secondary: #f3efe9;
+      --primary-from: #b45309;
+      --primary-to: #c2711c;
+      --accent-glow: rgba(180, 83, 9, 0.35);
+      --card: #fffdf9;
+      --card-border: rgba(180, 83, 9, 0.35);
+      --card-border-hover: #b45309;
+      --card-shadow: 0 2px 8px rgba(87, 60, 28, 0.07);
+      --border: rgba(43, 35, 32, 0.14);
+      --node-sep: rgba(43, 35, 32, 0.08);
+      --edge-default: rgba(43, 35, 32, 0.55);
+      --vis-orange: #d97706;
+      --type-cyan: #0891b2;
+      --mod-purple: #7c3aed;
+      --ai-change: #f59e0b;
+      --ai-change-bg: rgba(245, 158, 11, 0.15);
+      --canvas-bg: #f3efe9;
+      --term-bg: #201b15;
+      --term-fg: #ede8e2;
+      --term-muted: rgba(237, 232, 226, 0.55);
+      --term-cyan: #67e8f9;
+      --term-amber: #fbbf24;
+      --term-green: #86efac;
+      --term-prompt: #fbbf24;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #141210;
+        --fg: #ede8e2;
+        --fg2: rgba(237, 232, 226, 0.85);
+        --muted: rgba(237, 232, 226, 0.6);
+        --secondary: #1c1915;
+        --primary-from: #d19a66;
+        --primary-to: #c98a4b;
+        --accent-glow: rgba(209, 154, 102, 0.35);
+        --card: #1d1a16;
+        --card-border: rgba(209, 154, 102, 0.35);
+        --card-border-hover: #d19a66;
+        --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        --border: rgba(237, 232, 226, 0.16);
+        --node-sep: rgba(255, 255, 255, 0.09);
+        --edge-default: rgba(237, 232, 226, 0.55);
+        --vis-orange: #fbbf24;
+        --type-cyan: #22d3ee;
+        --mod-purple: #a78bfa;
+        --ai-change: #f59e0b;
+        --ai-change-bg: rgba(245, 158, 11, 0.18);
+        --canvas-bg: #191512;
+        --term-bg: #191512;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    section, footer { scroll-margin-top: 76px; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: "Lora", Georgia, serif;
+      font-size: 17px;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+    code, pre, .mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+    a { color: var(--primary-from); }
+
+    /* ===== Nav ===== */
+    .nav {
+      position: sticky; top: 0; z-index: 50;
+      display: flex; align-items: center; gap: 28px;
+      padding: 14px clamp(20px, 6vw, 64px);
+      background: color-mix(in srgb, var(--bg) 82%, transparent);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav .wordmark { display: flex; align-items: center; text-decoration: none; }
+    .nav .wordmark { height: 30px; width: auto; display: block; }
+    .nav .spacer { flex: 1; }
+    .nav a.link {
+      color: var(--fg2); text-decoration: none; font-size: 15px;
+      border-bottom: 2px solid transparent; padding-bottom: 2px;
+    }
+    .nav a.link:hover { color: var(--primary-from); border-color: var(--accent-glow); }
+    @media (max-width: 720px) { .nav a.link:not(.keep) { display: none; } }
+    @media (max-width: 480px) { .nav .wordmark { width: 118px; height: auto; } }
+
+    .btn {
+      display: inline-block;
+      font-family: "Lora", Georgia, serif;
+      font-size: 15.5px; font-weight: 600; line-height: 1;
+      text-decoration: none; text-align: center; cursor: pointer;
+      padding: 11px 20px; border-radius: 10px;
+      border: 1px solid var(--card-border-hover);
+      color: #faf8f5;
+      background: linear-gradient(120deg, var(--primary-from), var(--primary-to));
+      box-shadow: 0 2px 12px var(--accent-glow);
+      transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+    }
+    .btn:hover { transform: translateY(-1px); filter: brightness(1.05); box-shadow: 0 4px 18px var(--accent-glow); }
+    .btn.ghost {
+      background: transparent; color: var(--fg2);
+      border-color: var(--border);
+    }
+    .btn.ghost:hover { color: var(--primary-from); border-color: var(--card-border-hover); }
+    .btn.small { padding: 8px 14px; font-size: 14px; }
+
+    /* ===== Layout ===== */
+    .wrap { max-width: 1140px; margin: 0 auto; padding: 0 clamp(20px, 5vw, 48px); }
+    section { padding: clamp(56px, 9vw, 96px) 0; }
+    .kicker {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--primary-from); margin: 0 0 10px;
+    }
+    h2 {
+      font-size: clamp(26px, 3.4vw, 38px); line-height: 1.25;
+      margin: 0 0 14px; letter-spacing: -0.01em;
+    }
+    .lede { color: var(--fg2); max-width: 62ch; margin: 0 0 8px; }
+
+    /* ===== Hero ===== */
+    .hero { padding-top: clamp(48px, 7vw, 88px); padding-bottom: 0; }
+    .hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 56px); align-items: center; }
+    @media (max-width: 960px) { .hero-grid { grid-template-columns: 1fr; } }
+    .hero h1 {
+      font-size: clamp(30px, 4.4vw, 50px); line-height: 1.18;
+      margin: 14px 0 18px; letter-spacing: -0.015em;
+    }
+    .hero .sub { font-size: clamp(16px, 1.8vw, 19px); color: var(--fg2); margin: 0 0 28px; max-width: 34em; }
+    .hero .sub strong { color: var(--fg); }
+    .cta-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+    .install-chip {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-family: "JetBrains Mono", monospace; font-size: 13.5px;
+      background: var(--secondary); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 12px 10px 14px;
+      color: var(--fg); cursor: pointer; user-select: none;
+      transition: border-color .15s ease;
+    }
+    .install-chip:hover { border-color: var(--card-border-hover); }
+    .install-chip .cp { color: var(--muted); font-size: 11.5px; letter-spacing: .06em; }
+    .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+    .badge {
+      font-family: "JetBrains Mono", monospace; font-size: 11.5px;
+      border: 1px solid var(--border); border-radius: 999px;
+      padding: 4px 11px; color: var(--muted); background: var(--card);
+    }
+
+    /* ===== Panels (terminal + canvas) ===== */
+    .panel {
+      background: var(--term-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 18px 48px rgba(20, 14, 8, 0.22), var(--card-shadow);
+      overflow: hidden;
+    }
+    .panel-bar {
+      display: flex; align-items: center; gap: 7px;
+      padding: 11px 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .dot { width: 11px; height: 11px; border-radius: 50%; background: rgba(237, 232, 226, 0.22); }
+    .dot.r { background: #e0574f; } .dot.y { background: #d9a13b; } .dot.g { background: #5aab6e; }
+    .panel-title {
+      font-family: "JetBrains Mono", monospace; font-size: 11.5px;
+      color: var(--term-muted); margin-left: 8px; letter-spacing: .04em;
+    }
+    .hero-panel-grid { display: grid; gap: 20px; }
+
+    .term {
+      margin: 0; padding: 18px 18px 22px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12.5px; line-height: 1.75;
+      color: var(--term-muted);
+      white-space: pre-wrap; word-break: break-word;
+      height: 384px; overflow-y: auto;
+      scrollbar-width: thin; scrollbar-color: rgba(237,232,226,.25) transparent;
+    }
+    .term .prompt { color: var(--term-prompt); font-weight: 600; }
+    .term .cmd { color: #ede8e2; font-weight: 500; }
+    .term .file { color: var(--term-cyan); }
+    .term .ok { color: var(--term-amber); font-weight: 600; }
+    .term .done { color: var(--term-green); }
+    .term .comment { color: rgba(237, 232, 226, 0.4); font-style: italic; }
+    .term .caret {
+      display: inline-block; width: 8px; height: 15px; vertical-align: -2px;
+      margin-left: 4px;
+      background: var(--term-amber); border-radius: 1px;
+      animation: blink 1s steps(1) infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+    .tabs { display: flex; gap: 4px; margin-left: auto; }
+    .tab {
+      font-family: "JetBrains Mono", monospace; font-size: 11px;
+      color: var(--term-muted); background: none;
+      border: 1px solid transparent; border-radius: 7px;
+      padding: 4px 10px; cursor: pointer;
+    }
+    .tab:hover { color: #ede8e2; border-color: rgba(237, 232, 226, 0.2); }
+    .tab.is-active {
+      color: #141210; background: var(--term-amber);
+      border-color: var(--term-amber); font-weight: 600;
+    }
+    @media (max-width: 620px) { .panel-title { display: none; } }
+
+    /* ===== Diagram canvas — the editor's own components ===== */
+    .canvas-outer { position: relative; background: var(--canvas-bg); overflow-x: auto;
+      background-image: radial-gradient(var(--dot-color, rgba(237,232,226,0.12)) 1px, transparent 1px);
+      background-size: 22px 22px;
+    }
+    .plane { position: relative; width: 880px; height: 460px; margin: 0 auto; }
+    .edge-line { stroke: var(--edge-default); stroke-width: 1.5; fill: none; }
+    .edge-line.amber { stroke: var(--ai-change); }
+    .edge-label { fill: var(--edge-default); font: 10px 'JetBrains Mono', monospace; }
+    .edges-g { opacity: 0; transition: opacity .6s ease; }
+    .edges-g.in { opacity: 1; }
+    .mkf { fill: var(--edge-default); }
+    .mkt { fill: var(--card); stroke: var(--edge-default); stroke-width: 1.2; }
+    .mka { fill: var(--ai-change); }
+    @media (max-width: 900px) { .plane { zoom: 0.62; } }
+    @media (max-width: 420px) { .plane { zoom: 0.44; } }
+    .edges { position: absolute; inset: 0; }
+    .edges path, .edges line { fill: none; }
+
+    .node {
+      position: absolute;
+      min-width: 210px; max-width: 640px;
+      background-color: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 1rem;
+      box-shadow: var(--card-shadow);
+      font-size: 13px;
+      opacity: 0; transform: translateY(10px) scale(0.98);
+      transition: opacity .5s ease, transform .5s ease, border-color .25s ease, box-shadow .25s ease;
+    }
+    .node.in { opacity: 1; transform: none; }
+    .node:hover { border-color: var(--card-border-hover); box-shadow: 0 4px 16px var(--accent-glow); }
+    .node-head {
+      padding: 8px 14px 7px; text-align: center;
+      border-bottom: 1px solid var(--node-sep);
+    }
+    .stereo { font-size: 10.5px; color: var(--muted); letter-spacing: .04em; font-style: italic; }
+    .node-name { font-size: 15px; font-weight: 600; color: var(--fg); white-space: nowrap; }
+    .node-sec { padding: 4px 6px 5px; min-height: 14px; }
+    .sec-methods { border-top: 1px solid var(--node-sep); }
+    .member {
+      display: flex; align-items: baseline;
+      font-family: "JetBrains Mono", monospace; font-size: 12px; line-height: 1.55;
+      padding: 2px 8px; border-radius: 6px; white-space: nowrap;
+    }
+    .m-vis { color: var(--vis-orange); font-weight: 600; margin-right: 6px; }
+    .m-name { color: var(--fg); }
+    .m-params { color: var(--fg2); }
+    .m-type { color: var(--type-cyan); }
+    .m-mods { color: var(--mod-purple); }
+    .note-glyph { color: var(--mod-purple); font-size: 11px; margin-right: 6px; font-style: normal; flex: none; }
+    .note-glyph.node-note { position: absolute; top: 7px; right: 10px; z-index: 2; }
+    .node.ai-change { border-color: var(--ai-change); box-shadow: 0 0 0 3px var(--ai-change-bg), 0 4px 16px rgba(245, 158, 11, 0.35); }
+    .member.ai-change { background-color: var(--ai-change-bg); }
+    .member.ai-change::after {
+      content: "AI"; margin-left: 8px;
+      font-size: 9px; font-weight: 600; letter-spacing: .08em;
+      color: var(--ai-change); align-self: center;
+      animation: pulse 1.6s ease infinite;
+    }
+    @keyframes pulse { 50% { opacity: .35; } }
+
+    .canvas-caption {
+      position: absolute; bottom: 12px; left: 14px; z-index: 3;
+      font-family: "JetBrains Mono", monospace; font-size: 11px;
+      color: var(--term-muted);
+      background: rgba(20, 16, 12, 0.55);
+      padding: 4px 10px; border-radius: 7px;
+      backdrop-filter: blur(3px);
+    }
+    .legend {
+      position: absolute; top: 14px; left: 50%; transform: translateX(-50%); z-index: 3;
+      display: grid; gap: 4px;
+      font-family: "JetBrains Mono", monospace; font-size: 10.5px;
+      color: var(--term-muted);
+      background: rgba(20, 16, 12, 0.55);
+      padding: 8px 12px; border-radius: 9px;
+      backdrop-filter: blur(3px);
+    }
+    .legend i { display: inline-block; width: 18px; height: 0; border-top: 2px solid var(--edge-default); vertical-align: middle; margin-right: 6px; }
+    .legend i.d { border-top-style: dashed; }
+    .legend i.a { border-top-color: var(--ai-change); }
+    .legend span { display: block; line-height: 1.9; }
+
+    /* ===== Steps ===== */
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 34px; margin-top: 36px; }
+    @media (max-width: 900px) { .steps { grid-template-columns: 1fr; } }
+    .step {
+      position: relative;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 20px 20px 18px;
+      box-shadow: var(--card-shadow);
+      transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+    }
+    .step:hover { border-color: var(--card-border-hover); box-shadow: 0 6px 20px var(--accent-glow); transform: translateY(-2px); }
+    .step .n {
+      font-family: "JetBrains Mono", monospace; font-size: 11px;
+      color: var(--primary-from); letter-spacing: .1em; font-weight: 600;
+    }
+    .step h3 { font-size: 17.5px; margin: 8px 0 8px; }
+    .step p { font-size: 14.5px; color: var(--fg2); margin: 0; line-height: 1.65; }
+    .step code { font-size: 12.5px; color: var(--type-cyan); }
+    .step .arrow {
+      position: absolute; right: -27px; top: 50%; transform: translateY(-50%);
+      color: var(--card-border); font-size: 20px; z-index: 2;
+    }
+    .step:nth-child(3n) .arrow { display: none; }
+    @media (max-width: 900px) { .step .arrow { display: none; } }
+
+    /* ===== Two-sided ===== */
+    .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 36px; }
+    @media (max-width: 860px) { .duo { grid-template-columns: 1fr; } }
+    .side {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 24px;
+      box-shadow: var(--card-shadow);
+    }
+    .side.you { border-top: 3px solid var(--primary-from); }
+    .side.agent { border-top: 3px solid var(--ai-change); }
+    .side h3 { margin: 0 0 4px; font-size: 19px; }
+    .side .who { font-family: "JetBrains Mono", monospace; font-size: 11.5px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+    .side ul { margin: 14px 0 0; padding: 0 0 0 2px; list-style: none; }
+    .side li { padding: 7px 0 7px 24px; position: relative; font-size: 15px; color: var(--fg2); }
+    .side li::before { content: "→"; position: absolute; left: 0; color: var(--primary-from); font-family: "JetBrains Mono", monospace; }
+    .side.agent li::before { content: "⚡"; font-size: 13px; color: var(--ai-change); }
+    .side .rule { font-size: 13px; color: var(--muted); font-style: italic; margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 12px; }
+
+    /* ===== Packages ===== */
+    .pkgs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 36px; }
+    @media (max-width: 960px) { .pkgs { grid-template-columns: 1fr; } }
+    .pkg {
+      background: var(--card); border: 1px solid var(--card-border);
+      border-radius: 14px; padding: 22px;
+      box-shadow: var(--card-shadow);
+      display: flex; flex-direction: column;
+      transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+    }
+    .pkg:hover { border-color: var(--card-border-hover); box-shadow: 0 6px 22px var(--accent-glow); transform: translateY(-2px); }
+    .pkg .role { font-family: "JetBrains Mono", monospace; font-size: 11.5px; color: var(--muted); letter-spacing: .07em; text-transform: uppercase; }
+    .pkg h3 { margin: 8px 0 10px; font-size: 19px; }
+    .pkg h3 code { font-size: 16px; color: var(--fg); }
+    .pkg p { font-size: 14.5px; color: var(--fg2); margin: 0 0 16px; }
+    .pkg .grow { flex: 1; }
+    .pkg a.get {
+      font-family: "JetBrains Mono", monospace; font-size: 12.5px;
+      color: var(--primary-from); text-decoration: none;
+    }
+    .pkg a.get:hover { text-decoration: underline; }
+    .pkg .links { display: flex; gap: 14px; margin-top: 10px; font-size: 13.5px; }
+
+    .packs-table { width: 100%; border-collapse: collapse; margin-top: 30px; background: var(--card); border-radius: 14px; overflow: hidden; box-shadow: var(--card-shadow); }
+    .packs-table th, .packs-table td { text-align: left; padding: 12px 18px; border-bottom: 1px solid var(--border); font-size: 14.5px; }
+    .packs-table th { font-family: "JetBrains Mono", monospace; font-size: 11.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); font-weight: 600; background: var(--secondary); }
+    .packs-table tr:last-child td { border-bottom: none; }
+    .packs-table td.cmd { font-family: "JetBrains Mono", monospace; font-size: 13px; color: var(--primary-from); white-space: nowrap; }
+    .packs-table td { color: var(--fg2); }
+
+    /* ===== Install ===== */
+    .install-box {
+      background: var(--term-bg); border: 1px solid var(--border);
+      border-radius: 16px; padding: 6px 0 0; overflow: hidden;
+      box-shadow: 0 10px 32px rgba(20, 14, 8, 0.18);
+    }
+    .install-box pre { margin: 0; padding: 20px 24px; font-size: 13.5px; line-height: 1.9; color: #c9d1d9; color: #ede8e2; }
+    .install-box .prompt { color: var(--term-amber); font-weight: 600; }
+    .install-box .cm { color: rgba(237, 232, 226, 0.45); }
+    .install-alt { font-size: 13.5px; color: var(--muted); margin-top: 14px; }
+    .install-alt code { color: var(--type-cyan); background: var(--secondary); padding: 2px 7px; border-radius: 6px; font-size: 12.5px; }
+
+    /* ===== Why ===== */
+    .why { display: grid; grid-template-columns: 1.1fr .9fr; gap: clamp(28px, 5vw, 56px); align-items: center; }
+    @media (max-width: 900px) { .why { grid-template-columns: 1fr; } }
+    .why blockquote {
+      margin: 0; padding: 20px 24px;
+      background: var(--card); border-left: 3px solid var(--primary-from);
+      border-radius: 0 12px 12px 0; font-style: italic; color: var(--fg2); font-size: 15.5px;
+      box-shadow: var(--card-shadow);
+    }
+    .why .author { font-style: normal; font-size: 13px; color: var(--muted); margin-top: 12px; }
+    .why ul { padding-left: 20px; margin: 14px 0 0; }
+    .why li { margin-bottom: 10px; font-size: 15px; color: var(--fg2); }
+    .why li strong { color: var(--fg); }
+
+    /* ===== Footer ===== */
+    footer { border-top: 1px solid var(--border); padding: 40px 0 56px; }
+    .foot { display: flex; flex-wrap: wrap; gap: 24px 40px; align-items: baseline; justify-content: space-between; }
+    .foot .fm { font-size: 14px; color: var(--muted); }
+    .foot nav { display: flex; flex-wrap: wrap; gap: 18px; font-size: 14px; }
+    .foot a { color: var(--fg2); text-decoration: none; }
+    .foot a:hover { color: var(--primary-from); }
+
+    /* ===== Reveal on scroll ===== */
+    .reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) {
+      .reveal, .node, .edges-g { opacity: 1 !important; transform: none !important; transition: none !important; }
+      .term .caret { animation: none; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a class="nav" href="#" aria-label="Artisan home">
+      <svg class="wordmark" viewBox="0 0 180 64" width="150" height="53" role="img" aria-label="Artisan">
+        <defs>
+          <linearGradient id="brass" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" style="stop-color: var(--primary-from);"/>
+            <stop offset="1" style="stop-color: var(--primary-to);"/>
+          </linearGradient>
+          <filter id="glow" x="-20%" y="-40%" width="140%" height="180%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="1.2" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <text x="90" y="42" text-anchor="middle" font-family="Lora, Georgia, 'Times New Roman', serif" font-size="34" font-weight="600" fill="url(#brass)" filter="url(#glow)">Artisan</text>
+      </svg>
+    </a>
+    <span class="spacer"></span>
+    <a class="link" href="#loop">The loop</a>
+    <a class="link" href="#packages">Packages</a>
+    <a class="link" href="https://editor.artisan-uml.dev/" target="_blank" rel="noopener">Editor</a>
+    <a class="link" href="https://cli.artisan-uml.dev/">CLI</a>
+    <a class="link keep" href="/docs/">Docs</a>
+    <a class="btn small" href="https://github.com/oscardelgado02/artisan" target="_blank" rel="noopener">GitHub</a>
+  </nav>
+
+  <!-- ===== Hero ===== -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="kicker">Architecture control for agentic workflows</p>
+        <h1>Your agent writes the code.<br/>You keep the architecture.</h1>
+        <p class="sub">
+          Artisan turns your codebase into a living <strong>class diagram</strong>:
+          you design in a fluid visual editor, the agent implements at full speed,
+          and <code>artisan</code> keeps track of who changed what.
+        </p>
+        <div class="cta-row">
+          <button class="install-chip" data-copy="npm i -g artisan-uml-cli" title="Copy install command">
+            <span>npm i -g artisan-uml-cli</span><span class="cp">COPY</span>
+          </button>
+          <a class="btn" href="https://editor.artisan-uml.dev/" target="_blank" rel="noopener">Open the editor</a>
+          <a class="btn ghost" href="/docs/">Read the docs</a>
+        </div>
+        <div class="badges">
+          <span class="badge">zero dependencies</span>
+          <span class="badge">node ≥ 18</span>
+          <span class="badge">C# today · more languages planned</span>
+          <span class="badge">opencode · Claude Code · Codex</span>
+          <span class="badge">MIT</span>
+        </div>
+      </div>
+
+      <div class="hero-panel-grid">
+        <!-- Terminal -->
+        <div class="panel">
+          <div class="panel-bar">
+            <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+            <span class="panel-title">your-project — zsh</span>
+            <div class="tabs" id="tabs">
+              <button class="tab is-active" data-sc="scan">scan</button>
+              <button class="tab" data-sc="agent">mark-ai</button>
+              <button class="tab" data-sc="edit">edit</button>
+            </div>
+          </div>
+          <pre class="term" id="term"></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Diagram showcase: real editor components -->
+    <div class="wrap" style="margin-top: 26px;">
+      <div class="panel reveal">
+        <div class="panel-bar">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="panel-title">.artisan/diagram.html — the editor, as the agent never sees it</span>
+        </div>
+        <div class="canvas-outer">
+          <div class="plane" aria-label="Example class diagram rendered with the editor's own components">
+            <!-- edges — hidden until the story reveals them -->
+            <svg class="edges" width="880" height="460">
+              <defs>
+                <marker id="mk-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M0,1 L9,5 L0,9 Z" class="mkf"/>
+                </marker>
+                <marker id="mk-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M0,1 L9,5 L0,9 Z" class="mka"/>
+                </marker>
+                <marker id="mk-tri" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="13" markerHeight="13" orient="auto">
+                  <path d="M1,1 L11,6 L1,11 Z" class="mkt"/>
+                </marker>
+                <marker id="mk-dia" viewBox="0 0 12 12" refX="1" refY="6" markerWidth="11" markerHeight="11" orient="auto">
+                  <path d="M1,6 L6,2.5 L11,6 L6,9.5 Z" class="mkf"/>
+                </marker>
+              </defs>
+              <g id="edges-g" class="edges-g">
+                <path class="edge-line" d="M 440,262 L 226,194" marker-end="url(#mk-tri)"/>
+                <path class="edge-line" id="e-cat" d="M 135,276 L 146,195" marker-end="url(#mk-tri)"/>
+                <path class="edge-line" d="M 510,262 L 714,172" stroke-dasharray="6 4" marker-end="url(#mk-tri)"/>
+                <path class="edge-line" d="M 586,330 L 556,330" marker-start="url(#mk-dia)" marker-end="url(#mk-arrow)"/>
+                <text class="edge-label" x="571" y="316" text-anchor="middle">owns</text>
+                <text class="edge-label" x="583" y="345" text-anchor="middle">1</text>
+                <text class="edge-label" x="556" y="346" text-anchor="middle">0..*</text>
+              </g>
+            </svg>
+
+            <!-- nodes — the editor's real starter example -->
+            <div class="node kind-abstract" id="n-animal" style="left:40px; top:40px; width:220px;">
+              <div class="node-head"><div class="stereo">«abstract»</div><span class="note-glyph node-note" title="no default implementation — every animal overrides Speak">✎</span><div class="node-name">Animal</div></div>
+              <div class="node-sec sec-attributes">
+                <div class="member"><span class="m-vis">#</span><span class="m-name">Name</span><span class="m-type">: string</span></div>
+                <div class="member"><span class="m-vis">#</span><span class="m-name">Age</span><span class="m-type">: int</span></div>
+              </div>
+              <div class="node-sec sec-methods">
+                <div class="member"><span class="m-mods">abstract </span><span class="m-vis">+</span><span class="m-name">Speak</span><span class="m-params">()</span><span class="m-type">: void</span></div>
+              </div>
+            </div>
+
+            <div class="node kind-interface" id="n-ipet" style="left:620px; top:40px; width:190px;">
+              <div class="node-head"><div class="stereo">«interface»</div><div class="node-name">IPet</div></div>
+              <div class="node-sec sec-attributes">
+                <div class="member"><span class="m-vis">+</span><span class="m-name">Name</span><span class="m-type">: string</span></div>
+              </div>
+              <div class="node-sec sec-methods">
+                <div class="member"><span class="m-vis">+</span><span class="m-name">Play</span><span class="m-params">()</span><span class="m-type">: void</span></div>
+              </div>
+            </div>
+
+            <div class="node kind-class" id="n-dog" style="left:330px; top:262px; width:220px;">
+              <div class="node-head"><div class="node-name">Dog</div></div>
+              <div class="node-sec sec-attributes">
+                <div class="member"><span class="m-vis">-</span><span class="m-name">energy</span><span class="m-type">: int</span></div>
+              </div>
+              <div class="node-sec sec-methods">
+                <div class="member"><span class="m-mods">override </span><span class="m-vis">+</span><span class="m-name">Speak</span><span class="m-params">()</span><span class="m-type">: void</span></div>
+                <div class="member" id="m-fetch"><span class="m-vis">+</span><span class="m-name">Fetch</span><span class="m-params">()</span><span class="m-type">: void</span></div>
+                <div class="member ai-change" id="m-bark" style="display:none;"><span class="m-vis">+</span><span class="m-name">Bark</span><span class="m-params">()</span><span class="m-type">: void</span></div>
+              </div>
+            </div>
+
+            <div class="node kind-class" id="n-cat" style="left:30px; top:280px; width:200px;">
+              <div class="node-head"><div class="node-name">Cat</div></div>
+              <div class="node-sec sec-attributes">
+                <div class="member"><span class="m-vis">-</span><span class="m-name">livesLeft</span><span class="m-type">: int</span></div>
+              </div>
+              <div class="node-sec sec-methods">
+                <div class="member"><span class="m-mods">override </span><span class="m-vis">+</span><span class="m-name">Speak</span><span class="m-params">()</span><span class="m-type">: void</span></div>
+              </div>
+            </div>
+
+            <div class="node kind-class" id="n-owner" style="left:590px; top:290px; width:210px;">
+              <div class="node-head"><div class="node-name">Owner</div></div>
+              <div class="node-sec sec-attributes">
+                <div class="member"><span class="m-vis">-</span><span class="m-name">pets</span><span class="m-type">: List&lt;IPet&gt;</span></div>
+              </div>
+              <div class="node-sec sec-methods">
+                <div class="member"><span class="m-vis">+</span><span class="m-name">Adopt</span><span class="m-params">(pet: IPet)</span><span class="m-type">: void</span></div>
+              </div>
+            </div>
+
+            <div class="legend">
+              <span><i></i>inherits / owns / uses</span>
+              <span><i class="d"></i>implements</span>
+              <span><i class="a"></i>agent proposal (amber)</span>
+            </div>
+            <div class="canvas-caption">the editor's starter diagram · the agent proposes in amber · you confirm</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== The loop ===== -->
+  <section id="loop">
+    <div class="wrap">
+      <p class="kicker reveal">The workflow</p>
+      <h2 class="reveal">One loop. Two sides.</h2>
+      <p class="lede reveal">The human designs, the agent implements, and <code>artisan</code> tracks every change in both directions.</p>
+      <div class="steps">
+        <div class="step reveal">
+          <span class="n">01</span>
+          <h3><code>artisan scan</code></h3>
+          <p>C# → diagram: every class, all six UML relations, layered layout, notes preserved. Re-scans merge; nothing you did is lost.</p>
+          <span class="arrow">→</span>
+        </div>
+        <div class="step reveal">
+          <span class="n">02</span>
+          <h3>You redesign</h3>
+          <p>Drag, rename, rewire, add classes, write notes. Notes bind the agent — they end up in the report it executes.</p>
+          <span class="arrow">→</span>
+        </div>
+        <div class="step reveal">
+          <span class="n">03</span>
+          <h3><code>artisan diff</code></h3>
+          <p>Your diagram edits become a markdown report: notes first, renames stay renames, additions are scaffolded.</p>
+          <span class="arrow">→</span>
+        </div>
+        <div class="step reveal">
+          <span class="n">04</span>
+          <h3>The agent implements</h3>
+          <p><code>/artisan-scaffold</code> and <code>/artisan-implement</code> turn the report into code. Existing members are never touched.</p>
+          <span class="arrow">→</span>
+        </div>
+        <div class="step reveal">
+          <span class="n">05</span>
+          <h3>The agent proposes</h3>
+          <p><code>/artisan-architect</code> lets the agent suggest structure. Its changes appear <strong style="color:var(--ai-change)">amber</strong> in your editor until you confirm.</p>
+          <span class="arrow">→</span>
+        </div>
+        <div class="step reveal">
+          <span class="n">06</span>
+          <h3><code>artisan ack</code></h3>
+          <p>You confirm, both sides sync, and the next <code>scan</code> keeps the picture current. Then the loop runs again.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Two sides ===== -->
+  <section style="padding-top: 0;">
+    <div class="wrap">
+      <div class="duo">
+        <div class="side you reveal">
+          <span class="who">the human</span>
+          <h3>You make the decisions</h3>
+          <ul>
+            <li>Design the architecture in a fluid, click-to-edit canvas</li>
+            <li>Every class, member and relation carries a note the agent must honor</li>
+            <li>Review the agent's proposals in amber — accept or push back</li>
+            <li>Dictate changes from the terminal with <code>artisan add/edit/remove</code></li>
+          </ul>
+          <p class="rule">The agent reads the architecture from <code>.artisan/diagram.puml</code> before touching code.</p>
+        </div>
+        <div class="side agent reveal">
+          <span class="who">the agent</span>
+          <h3>The agent does the typing</h3>
+          <ul>
+            <li>Reads a markdown <code>diff</code> report instead of guessing intent</li>
+            <li>Renames are refactored — never delete-and-recreate</li>
+            <li>Existing members are never modified; additions scaffold or implement</li>
+            <li>Its own architecture ideas wait for your confirmation</li>
+          </ul>
+          <p class="rule">No pack needed — any agent that can run <code>artisan diff</code> works.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Packages ===== -->
+  <section id="packages" style="padding-top: 0;">
+    <div class="wrap">
+      <p class="kicker reveal">Two packages, one hub</p>
+      <h2 class="reveal">One picture, three repos</h2>
+      <div class="pkgs">
+        <div class="pkg reveal">
+          <span class="role">GitHub · the hub</span>
+          <h3><code>artisan</code></h3>
+          <p>Installer and slash-command packs for opencode, Claude Code and Codex. The entry point.</p>
+          <div class="grow"></div>
+          <a class="get" href="https://github.com/oscardelgado02/artisan">github.com/oscardelgado02/artisan →</a>
+        </div>
+        <div class="pkg reveal">
+          <span class="role">npm · the editor</span>
+          <h3><code>artisan-uml</code></h3>
+          <p>The class diagram editor. One self-contained HTML file in your project, a web app in the browser, a layout engine you can import.</p>
+          <div class="grow"></div>
+          <div class="links"><a href="https://editor.artisan-uml.dev/" target="_blank" rel="noopener">editor.artisan-uml.dev</a><a href="https://www.npmjs.com/package/artisan-uml" target="_blank" rel="noopener">npm</a></div>
+        </div>
+        <div class="pkg reveal">
+          <span class="role">npm · the CLI</span>
+          <h3><code>artisan-uml-cli</code></h3>
+          <p><code>scan</code>, <code>diff</code>, <code>mark-ai</code>, <code>ack</code>, <code>status</code>, <code>add</code>/<code>edit</code>/<code>remove</code>, <code>editor</code>, <code>serve</code> — everything the loop needs.</p>
+          <div class="grow"></div>
+          <div class="links"><a href="https://cli.artisan-uml.dev/">cli.artisan-uml.dev</a><a href="https://www.npmjs.com/package/artisan-uml-cli" target="_blank" rel="noopener">npm</a></div>
+        </div>
+      </div>
+
+      <table class="packs-table reveal">
+        <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td class="cmd">/artisan-scan</td><td>scan code → diagram + PlantUML, open the editor</td></tr>
+          <tr><td class="cmd">/artisan-scaffold</td><td>diagram edits → code stubs</td></tr>
+          <tr><td class="cmd">/artisan-implement</td><td>diagram edits → real code, per notes</td></tr>
+          <tr><td class="cmd">/artisan-architect</td><td>agent proposes an architecture change; you review</td></tr>
+          <tr><td class="cmd">/artisan-edit</td><td>applies your dictated architecture changes to the diagram</td></tr>
+          <tr><td class="cmd">/artisan-status</td><td>pending changes in both directions</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===== Install ===== -->
+  <section style="padding-top: 0;">
+    <div class="wrap">
+      <p class="kicker reveal">Get started</p>
+      <h2 class="reveal">Live in your project in two minutes</h2>
+      <div class="install-box reveal">
+        <div class="panel-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="panel-title">installer</span></div>
+        <pre><span class="prompt">$</span> git clone https://github.com/oscardelgado02/artisan
+<span class="prompt">$</span> cd artisan
+<span class="prompt">$</span> ./install.sh
+<span class="cm"># installs artisan-uml-cli globally + copies the six /artisan-* commands
+# into opencode, Claude Code and Codex command folders</span>
+<span class="prompt">$</span> cd your-project
+<span class="prompt">$</span> artisan scan</pre>
+      </div>
+      <p class="install-alt reveal">Don't use the packs? <code>npm i -g artisan-uml-cli</code> and point any agent at <code>artisan diff</code> — <a href="/docs/#/agent-packs">full guide</a>.</p>
+    </div>
+  </section>
+
+  <!-- ===== Why ===== -->
+  <section style="padding-top: 0;">
+    <div class="wrap why">
+      <div class="reveal">
+        <p class="kicker">Why this exists</p>
+        <h2>Agents create architecture. Nobody asked them to.</h2>
+        <ul>
+          <li><strong>Drift:</strong> new classes, new abstractions, rewired dependencies — nobody decides, everybody pays.</li>
+          <li><strong>No picture:</strong> the architecture lives only in the last prompt that worked.</li>
+          <li><strong>Lost speed:</strong> fighting drift costs more than the speed agents give back.</li>
+        </ul>
+      </div>
+      <div class="reveal">
+        <blockquote>
+          <p>As a Software Engineer, I like to plan the architecture of my projects with class diagrams. I wanted to bring them closer to the way we build software today, hand in hand with agentic workflows, to make coding fun again.</p>
+        </blockquote>
+        <p class="author">— Óscar Delgado, <a href="https://oscardelgado.dev">oscardelgado.dev</a></p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap foot">
+      <div class="fm">Built by <a href="https://oscardelgado.dev" style="color:var(--primary-from);text-decoration:none;">Óscar Delgado</a> · <a href="https://github.com/oscardelgado02/artisan" style="color:var(--fg2);text-decoration:none;">MIT license</a></div>
+      <nav>
+        <a href="/docs/">Documentation</a>
+        <a href="https://editor.artisan-uml.dev/" target="_blank" rel="noopener">Editor</a>
+        <a href="https://cli.artisan-uml.dev/">CLI</a>
+        <a href="https://github.com/oscardelgado02/artisan" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/oscardelgado02/artisan/blob/main/DEVLOG.md">Devlog</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    // ===== Terminal animation =====
+    // Line content mirrors the real CLI output (artisan-uml-cli/lib/{scan,diff,edit}.mjs).
+    const term = document.getElementById('term');
+    const nodeIds = ['n-animal', 'n-ipet', 'n-dog', 'n-owner'];
+    const caret = document.createElement('span');
+    caret.className = 'caret';
+    let timers = [];
+    let rotate = true;
+    const ORDER = ['scan', 'agent', 'edit'];
+
+    function setTab(key) {
+      document.querySelectorAll('#tabs .tab').forEach(t => t.classList.toggle('is-active', t.dataset.sc === key));
+    }
+
+    const p = (cmd, note = '') => ({ t: `<span class="prompt">$</span> <span class="cmd">${cmd}</span>${note}`, pre: 200, post: 600 });
+    const s = (t) => ({ t });
+    const pause = (ms) => ({ t: null, post: ms });
+    const SCRIPTS = {
+      scan: [
+        p('cd your-project'),
+        p('artisan scan'),
+        pause(700),
+        s(''),
+        { t: '<span class="comment">  (parsing 128 C# files…)</span>', post: 900 },
+        s(''),
+        { t: '<span class="ok">Artisan scan complete: 4 types, 3 relations.</span>', pre: 200, post: 450, pop: true },
+        s('  relations: 1 inheritance, 1 realization, 1 composition'),
+        s('  <span class="file">.artisan/diagram.json</span>  (source of truth)'),
+        s('  <span class="file">.artisan/diagram.puml</span>  (PlantUML mirror for AI)'),
+        s('  <span class="file">.artisan/map.json</span>      (type → source file)'),
+        s(''),
+        s('  Open the editor:  double-click .artisan/diagram.html  (or: artisan serve)'),
+      ],
+      agent: [
+        p('artisan status'),
+        s('Diagram: 4 types, 3 relations (has project notes)'),
+        s('Unseen human changes (AI: run <span class="file">artisan diff</span>): 0'),
+        s('Pending AI changes (human: review in the editor): 0'),
+        { t: '<span class="prompt">$</span> <span class="cmd">/artisan-architect</span>  <span class="comment"># the agent implements: create Cat, add Bark</span>', pre: 200, post: 900 },
+        p('artisan mark-ai'),
+        { t: '3 AI change(s) marked pending. The human sees them highlighted in the editor and confirms with <span class="file">artisan ack</span> or the editor\'s "Mark seen" button.', pre: 200, post: 600, amber: true },
+        p('artisan status'),
+        s('Diagram: 5 types, 4 relations (has project notes)'),
+        s('Unseen human changes (AI: run <span class="file">artisan diff</span>): 0'),
+        s('Pending AI changes (human: review in the editor): 3'),
+        s('  - [modified] Dog: + method Bark() : void'),
+        s('  - [added] new class Cat'),
+        s('  - [added] new relation Cat -> Animal'),
+        { t: '<span class="prompt">$</span> <span class="cmd">artisan ack</span>', pre: 200, post: 700, ack: true },
+        { t: '<span class="done">Acknowledged 3 AI change(s). Highlights cleared.</span>', pre: 200, post: 400, calm: true },
+      ],
+      edit: [
+        p('artisan add node Cat --kind class'),
+        { t: 'Added class Cat at (30, 280).', cat: true },
+        p('artisan add edge Cat Animal --kind inheritance'),
+        { t: 'Added inheritance relation Cat -> Animal.', edge: true },
+        p('artisan add member Dog method Bark --type void'),
+        { t: 'Added method Dog.Bark(): void', bark: true },
+        p('artisan remove member Dog Fetch'),
+        { t: 'Removed Dog.Fetch.', rm: true },
+        p('artisan edit node Animal --note "no default implementation — every animal overrides"'),
+        s('Updated abstract Animal.'),
+        s(''),
+        { t: '<span class="comment">…artisan diff turns all of it into the agent\'s report.</span>', pre: 300 },
+      ],
+    };
+
+    function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+    function showNode(id, delay) {
+      timers.push(setTimeout(() => document.getElementById(id).classList.add('in'), delay));
+    }
+
+    function play(key) {
+      setTab(key);
+      clearTimers();
+      term.textContent = '';
+      term.appendChild(caret);
+      const cat = document.getElementById('n-cat');
+      const ecat = document.getElementById('e-cat');
+      const bark = document.getElementById('m-bark');
+      if (key === 'scan') {
+        nodeIds.forEach(id => { document.getElementById(id).classList.remove('in', 'ai-change'); document.getElementById(id).style.opacity = ''; });
+        document.getElementById('edges-g').classList.remove('in');
+      } else {
+        nodeIds.forEach(id => { document.getElementById(id).classList.add('in'); document.getElementById(id).classList.remove('ai-change'); });
+        document.getElementById('edges-g').classList.add('in');
+      }
+      // Cat: appears only when the story adds it
+      cat.classList.remove('in', 'ai-change');
+      ecat.style.opacity = '0';
+      ecat.classList.remove('amber');
+      bark.style.display = 'none';
+      bark.classList.remove('ai-change');
+      document.getElementById('m-fetch').style.display = '';
+      let t = 350;
+      const lines = SCRIPTS[key];
+      lines.forEach((line, i) => {
+        t += (line.pre || 0);
+        timers.push(setTimeout(() => {
+          const div = document.createElement('div');
+          if (line.t === null) {
+            div.innerHTML = '&nbsp;';
+          } else {
+            div.innerHTML = line.t;
+            div.appendChild(caret);
+            term.appendChild(div);
+          }
+          term.scrollTop = term.scrollHeight;
+          // the diagram reacts to the story
+          if (line.pop) {
+            nodeIds.forEach((id, k) => showNode(id, 200 + k * 240));
+            timers.push(setTimeout(() => document.getElementById('edges-g').classList.add('in'), 1400));
+          }
+          if (line.cat) cat.classList.add('in');
+          if (line.edge) ecat.style.opacity = '';
+          if (line.bark) bark.style.display = '';
+          if (line.rm) document.getElementById('m-fetch').style.display = 'none';
+          if (line.amber) {
+            document.getElementById('n-dog').classList.add('ai-change');
+            bark.style.display = ''; bark.classList.add('ai-change');
+            cat.classList.add('in', 'ai-change');
+            ecat.style.opacity = '1'; ecat.classList.add('amber');
+          }
+          if (line.calm) setTimeout(() => {
+            document.getElementById('n-dog').classList.remove('ai-change');
+            bark.classList.remove('ai-change');
+            cat.classList.remove('ai-change');
+            ecat.classList.remove('amber');
+          }, 500);
+        }, t));
+        t += (line.post || 0);
+        if (line.t) t += line.t.replace(/<[^>]*>/g, '').length * 9; // typing speed
+      });
+      timers.push(setTimeout(() => {
+        if (rotate) play(ORDER[(ORDER.indexOf(key) + 1) % ORDER.length]);
+      }, t + 5000));
+    }
+
+    document.querySelectorAll('#tabs .tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        rotate = false;
+        play(tab.dataset.sc);
+      });
+    });
+    play('scan');
+
+    // ===== Copy install command =====
+    document.querySelectorAll('.install-chip').forEach(chip => {
+      chip.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(chip.dataset.copy); } catch (e) {}
+        const cp = chip.querySelector('.cp');
+        const old = cp.textContent;
+        cp.textContent = 'copied ✓';
+        setTimeout(() => { cp.textContent = old; }, 1200);
+      });
+    });
+
+    // ===== Smooth scroll without leaving # in the URL =====
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const el = document.querySelector(a.getAttribute('href'));
+        if (!el) return;
+        e.preventDefault();
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
+    // ===== Reveal on scroll =====
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+  </script>
+</body>
+</html>
