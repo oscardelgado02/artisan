@@ -52,6 +52,8 @@ to `.artisan/diagram.json`.
 | [`artisan-uml`](https://www.npmjs.com/package/artisan-uml) | the class diagram editor (also a web app) | `diagram.json` |
 | [`artisan-uml-cli`](https://www.npmjs.com/package/artisan-uml-cli) | `scan`, `diff`, `mark-ai`, `ack`, `status`, `add`/`edit`/`remove`, `editor`, `serve` | `.artisan/` |
 
+> **Language support:** C# only, for now. More languages are planned.
+
 ## The agent loop
 
 1. **`artisan scan`** — C# → diagram: all six UML relations, layered layout, notes preserved
