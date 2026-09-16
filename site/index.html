@@ -490,7 +490,6 @@
             <span class="panel-title">my-unity-project — zsh</span>
             <div class="tabs" id="tabs">
               <button class="tab is-active" data-sc="scan">scan</button>
-              <button class="tab" data-sc="diff">diff</button>
               <button class="tab" data-sc="agent">mark-ai</button>
               <button class="tab" data-sc="edit">edit</button>
             </div>
@@ -558,15 +557,15 @@
               </div>
             </div>
 
-            <div class="node kind-class ai-change" id="n-dog" style="left:330px; top:262px; width:220px;">
+            <div class="node kind-class" id="n-dog" style="left:330px; top:262px; width:220px;">
               <div class="node-head"><div class="node-name">Dog</div></div>
               <div class="node-sec sec-attributes">
                 <div class="member"><span class="m-vis">-</span><span class="m-name">energy</span><span class="m-type">: int</span></div>
               </div>
               <div class="node-sec sec-methods">
                 <div class="member"><span class="m-mods">override </span><span class="m-vis">+</span><span class="m-name">Speak</span><span class="m-params">()</span><span class="m-type">: void</span></div>
-                <div class="member"><span class="m-vis">+</span><span class="m-name">Fetch</span><span class="m-params">()</span><span class="m-type">: void</span></div>
-                <div class="member ai-change"><span class="m-vis">+</span><span class="m-name">Bark</span><span class="m-params">()</span><span class="m-type">: void</span></div>
+                <div class="member" id="m-fetch"><span class="m-vis">+</span><span class="m-name">Fetch</span><span class="m-params">()</span><span class="m-type">: void</span></div>
+                <div class="member ai-change" id="m-bark" style="display:none;"><span class="m-vis">+</span><span class="m-name">Bark</span><span class="m-params">()</span><span class="m-type">: void</span></div>
               </div>
             </div>
 
@@ -779,16 +778,12 @@
     // ===== Terminal animation =====
     // Line content mirrors the real CLI output (artisan-uml-cli/lib/{scan,diff,edit}.mjs).
     const term = document.getElementById('term');
-    const nodeIds = ['n-animal', 'n-ipet', 'n-dog', 'n-cat', 'n-owner'];
+    const nodeIds = ['n-animal', 'n-ipet', 'n-dog', 'n-owner'];
     const caret = document.createElement('span');
     caret.className = 'caret';
     let timers = [];
     let rotate = true;
-    const ORDER = ['scan', 'diff', 'agent', 'edit'];
-
-    function setTab(key) {
-      document.querySelectorAll('#tabs .tab').forEach(t => t.classList.toggle('is-active', t.dataset.sc === key));
-    }
+    const ORDER = ['scan', 'agent', 'edit'];
 
     function setTab(key) {
       document.querySelectorAll('#tabs .tab').forEach(t => t.classList.toggle('is-active', t.dataset.sc === key));
@@ -805,55 +800,43 @@
         s(''),
         { t: '<span class="comment">  (parsing 128 C# files…)</span>', post: 900 },
         s(''),
-        { t: '<span class="ok">Artisan scan complete: 5 types, 4 relations.</span>', pre: 200, post: 450, pop: true },
-        s('  relations: 2 inheritance, 1 realization, 1 composition'),
+        { t: '<span class="ok">Artisan scan complete: 4 types, 3 relations.</span>', pre: 200, post: 450, pop: true },
+        s('  relations: 1 inheritance, 1 realization, 1 composition'),
         s('  <span class="file">.artisan/diagram.json</span>  (source of truth)'),
         s('  <span class="file">.artisan/diagram.puml</span>  (PlantUML mirror for AI)'),
         s('  <span class="file">.artisan/map.json</span>      (type → source file)'),
         s(''),
         s('  Open the editor:  double-click .artisan/diagram.html  (or: artisan serve)'),
       ],
-      diff: [
-        p('artisan diff'),
-        s(''),
-        { t: '<span class="ok"># Human changes (unseen by AI)</span>', pre: 200 },
-        { t: '<span class="ok">## Notes — honor these, they are the human\'s intent</span>', pre: 300 },
-        s('- <span class="ok">**Animal.Speak**</span>: "no default implementation — every animal overrides"'),
-        s('- <span class="ok">**Owner.Adopt**</span>: "adopting resets the pet\'s mood to Happy"'),
-        { t: '<span class="ok">## Renames — refactor, do not duplicate</span>', pre: 300 },
-        s('- Dog.Fetch → Retrieve  <span class="comment">(rename member + all references)</span>'),
-        { t: '<span class="ok">## Added — scaffold these, never touch existing members</span>', pre: 300 },
-        s('- New class Kennel  <span class="comment">(new type — create the file)</span>'),
-        s('- Owner: + method Count() : int'),
-        s(''),
-        { t: '<span class="comment">…the agent reads this report and implements it.</span>', pre: 300 },
-      ],
       agent: [
+        p('artisan status'),
+        s('Diagram: 4 types, 3 relations (has project notes)'),
+        s('Unseen human changes (AI: run <span class="file">artisan diff</span>): 0'),
+        s('Pending AI changes (human: review in the editor): 0'),
+        { t: '<span class="prompt">$</span> <span class="cmd">/artisan-architect</span>  <span class="comment"># the agent implements: create Cat, add Bark</span>', pre: 200, post: 900 },
+        p('artisan mark-ai'),
+        { t: '3 AI change(s) marked pending. The human sees them highlighted in the editor and confirms with <span class="file">artisan ack</span> or the editor\'s "Mark seen" button.', pre: 200, post: 600, amber: true },
         p('artisan status'),
         s('Diagram: 5 types, 4 relations (has project notes)'),
         s('Unseen human changes (AI: run <span class="file">artisan diff</span>): 0'),
-        s('Pending AI changes (human: review in the editor): 0'),
-        { t: '<span class="prompt">$</span> <span class="cmd">/artisan-architect</span>  <span class="comment"># the agent proposes: introduce Kennel, add Bark</span>', pre: 200, post: 900 },
-        p('artisan mark-ai'),
-        { t: '2 AI change(s) marked pending. The human sees them highlighted in the editor and confirms with <span class="file">artisan ack</span> or the editor\'s "Mark seen" button.', pre: 200, post: 600, amber: true },
-        p('artisan status'),
-        s('Diagram: 6 types, 5 relations (has project notes)'),
-        s('Unseen human changes (AI: run <span class="file">artisan diff</span>): 0'),
-        s('Pending AI changes (human: review in the editor): 2'),
-        s('  - [modified] Dog: added member Bark'),
-        s('  - [added] new class Kennel'),
+        s('Pending AI changes (human: review in the editor): 3'),
+        s('  - [modified] Dog: + method Bark() : void'),
+        s('  - [added] new class Cat'),
+        s('  - [added] new relation Cat -> Animal'),
         { t: '<span class="prompt">$</span> <span class="cmd">artisan ack</span>', pre: 200, post: 700, ack: true },
-        { t: '<span class="done">Acknowledged 2 AI change(s). Highlights cleared.</span>', pre: 200, post: 400, calm: true },
+        { t: '<span class="done">Acknowledged 3 AI change(s). Highlights cleared.</span>', pre: 200, post: 400, calm: true },
       ],
       edit: [
-        p('artisan add node Kennel --kind class'),
-        s('Added class Kennel at (412, 288).'),
+        p('artisan add node Cat --kind class'),
+        { t: 'Added class Cat at (30, 280).', cat: true },
+        p('artisan add edge Cat Animal --kind inheritance'),
+        { t: 'Added inheritance relation Cat -> Animal.', edge: true },
         p('artisan add member Dog method Bark --type void'),
-        s('Added method Dog.Bark(): void'),
+        { t: 'Added method Dog.Bark(): void', bark: true },
+        p('artisan remove member Dog Fetch'),
+        { t: 'Removed Dog.Fetch.', rm: true },
         p('artisan edit node Animal --note "no default implementation — every animal overrides"'),
         s('Updated abstract Animal.'),
-        { ...p('artisan remove node Cat'), post: 750 },
-        { t: 'Removed Cat (and 1 relation).', gone: 'n-cat', e: 'e-cat' },
         s(''),
         { t: '<span class="comment">…artisan diff turns all of it into the agent\'s report.</span>', pre: 300 },
       ],
@@ -869,15 +852,23 @@
       clearTimers();
       term.textContent = '';
       term.appendChild(caret);
+      const cat = document.getElementById('n-cat');
+      const ecat = document.getElementById('e-cat');
+      const bark = document.getElementById('m-bark');
       if (key === 'scan') {
         nodeIds.forEach(id => { document.getElementById(id).classList.remove('in', 'ai-change'); document.getElementById(id).style.opacity = ''; });
         document.getElementById('edges-g').classList.remove('in');
-        document.getElementById('e-cat').style.opacity = '';
       } else {
-        nodeIds.forEach(id => document.getElementById(id).classList.add('in'));
+        nodeIds.forEach(id => { document.getElementById(id).classList.add('in'); document.getElementById(id).classList.remove('ai-change'); });
         document.getElementById('edges-g').classList.add('in');
-        document.getElementById('e-cat').style.opacity = '';
       }
+      // Cat: appears only when the story adds it
+      cat.classList.remove('in', 'ai-change');
+      ecat.style.opacity = '0';
+      ecat.classList.remove('amber');
+      bark.style.display = 'none';
+      bark.classList.remove('ai-change');
+      document.getElementById('m-fetch').style.display = '';
       let t = 350;
       const lines = SCRIPTS[key];
       lines.forEach((line, i) => {
@@ -897,10 +888,22 @@
             nodeIds.forEach((id, k) => showNode(id, 200 + k * 240));
             timers.push(setTimeout(() => document.getElementById('edges-g').classList.add('in'), 1400));
           }
-          if (line.gone) document.getElementById(line.gone).classList.remove('in');
-          if (line.e) document.getElementById(line.e).style.opacity = '0';
-          if (line.amber) document.getElementById('n-dog').classList.add('ai-change');
-          if (line.calm) setTimeout(() => document.getElementById('n-dog').classList.remove('ai-change'), 500);
+          if (line.cat) cat.classList.add('in');
+          if (line.edge) ecat.style.opacity = '';
+          if (line.bark) bark.style.display = '';
+          if (line.rm) document.getElementById('m-fetch').style.display = 'none';
+          if (line.amber) {
+            document.getElementById('n-dog').classList.add('ai-change');
+            bark.style.display = ''; bark.classList.add('ai-change');
+            cat.classList.add('in', 'ai-change');
+            ecat.style.opacity = '1'; ecat.classList.add('amber');
+          }
+          if (line.calm) setTimeout(() => {
+            document.getElementById('n-dog').classList.remove('ai-change');
+            bark.classList.remove('ai-change');
+            cat.classList.remove('ai-change');
+            ecat.classList.remove('amber');
+          }, 500);
         }, t));
         t += (line.post || 0);
         if (line.t) t += line.t.replace(/<[^>]*>/g, '').length * 9; // typing speed
