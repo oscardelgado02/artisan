@@ -38,7 +38,7 @@ commands into your agents' command folders (opencode, Claude Code, Codex).
 Then, in any project:
 
 ```bash
-cd your-unity-project
+cd your-project
 artisan scan
 ```
 

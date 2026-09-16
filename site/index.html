@@ -488,7 +488,7 @@
         <div class="panel">
           <div class="panel-bar">
             <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
-            <span class="panel-title">my-unity-project — zsh</span>
+            <span class="panel-title">your-project — zsh</span>
             <div class="tabs" id="tabs">
               <button class="tab is-active" data-sc="scan">scan</button>
               <button class="tab" data-sc="agent">mark-ai</button>
@@ -733,8 +733,7 @@
 <span class="prompt">$</span> ./install.sh
 <span class="cm"># installs artisan-uml-cli globally + copies the six /artisan-* commands
 # into opencode, Claude Code and Codex command folders</span>
-
-<span class="prompt">$</span> cd your-unity-project
+<span class="prompt">$</span> cd your-project
 <span class="prompt">$</span> artisan scan</pre>
       </div>
       <p class="install-alt reveal">Don't use the packs? <code>npm i -g artisan-uml-cli</code> and point any agent at <code>artisan diff</code> — <a href="/docs/#/agent-packs">full guide</a>.</p>
@@ -795,7 +794,7 @@
     const pause = (ms) => ({ t: null, post: ms });
     const SCRIPTS = {
       scan: [
-        p('cd my-csharp-project'),
+        p('cd your-project'),
         p('artisan scan'),
         pause(700),
         s(''),
