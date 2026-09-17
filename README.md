@@ -45,6 +45,9 @@ artisan scan
 Open `.artisan/diagram.html` and click **Connect file** once — your edits autosave
 to `.artisan/diagram.json`.
 
+No project at hand? Run it on the bundled demo: `cd examples/petshop` and scan —
+5 types, 5 relations, ready in seconds. See [`examples/petshop`](examples/petshop/).
+
 ## The packages
 
 | Package | Role | Source of truth |

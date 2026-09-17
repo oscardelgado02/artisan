@@ -1,5 +1,10 @@
 # Devlog
 
+## 17.09.2026
+- Bundled demo: `examples/petshop` — five C# files and a README walk-through, verified end to end with a real `artisan scan`; the hub quickstart now points to it.
+- The starter diagram now says what the code does: Owner owns `IPet` (not Dog) and the `Mood` node is gone from the editor's seed — the relation corrected everywhere it appears (site canvas, social cards, default diagram).
+- Social preview cards for the hub and the editor (`assets/social-card*.html`): 1280×640, light shell over a dark editor window, relation shapes matching the editor exactly.
+
 ## 16.09.2026
 - Landing hub built at the apex of artisan-uml.dev: hero with animated terminal (scan / mark-ai / edit scenarios driving the editor's real seed diagram), the agent loop, packages and the personal note — `site/` ships as the GitHub Pages root, docs moved to `/docs/`.
 

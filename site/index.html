@@ -241,7 +241,7 @@
     .edges-g { opacity: 0; transition: opacity .6s ease; }
     .edges-g.in { opacity: 1; }
     .mkf { fill: var(--edge-default); }
-    .mkt { fill: var(--card); stroke: var(--edge-default); stroke-width: 1.2; }
+    .mkt { fill: var(--card); stroke: var(--edge-default); stroke-width: 1.5; }
     .mka { fill: var(--ai-change); }
     @media (max-width: 900px) { .plane { zoom: 0.62; } }
     @media (max-width: 420px) { .plane { zoom: 0.44; } }
@@ -434,7 +434,7 @@
 
   <nav class="nav">
     <a class="nav" href="#" aria-label="Artisan home">
-      <svg class="wordmark" viewBox="0 0 180 64" width="150" height="53" role="img" aria-label="Artisan">
+      <svg class="wordmark" viewBox="25 10 130 40" width="140" height="43" role="img" aria-label="Artisan">
         <defs>
           <linearGradient id="brass" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0" style="stop-color: var(--primary-from);"/>
@@ -501,6 +501,16 @@
       </div>
     </div>
 
+    <!-- Demo video: drop site/demo.mp4 (30s loop, 1080p60, muted) and uncomment.
+    <div class="wrap" style="margin-top: 26px;">
+      <div class="panel reveal" style="background: #0d0b08; border-radius: 16px;">
+        <video style="display:block; width:100%; border-radius:16px;" autoplay muted loop playsinline poster="docs/assets/hero.png">
+          <source src="demo.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
+    -->
+
     <!-- Diagram showcase: real editor components -->
     <div class="wrap" style="margin-top: 26px;">
       <div class="panel reveal">
@@ -513,27 +523,27 @@
             <!-- edges — hidden until the story reveals them -->
             <svg class="edges" width="880" height="460">
               <defs>
-                <marker id="mk-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-                  <path d="M0,1 L9,5 L0,9 Z" class="mkf"/>
+                <marker id="mk-arrow" viewBox="0 0 12 14" refX="10" refY="7" markerWidth="12" markerHeight="14" orient="auto" markerUnits="userSpaceOnUse">
+                  <path d="M1,1 L11,7 L1,13" fill="none" stroke="var(--edge-default)" stroke-width="1.5"/>
                 </marker>
                 <marker id="mk-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
                   <path d="M0,1 L9,5 L0,9 Z" class="mka"/>
                 </marker>
-                <marker id="mk-tri" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="13" markerHeight="13" orient="auto">
-                  <path d="M1,1 L11,6 L1,11 Z" class="mkt"/>
+                <marker id="mk-tri" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="14" markerHeight="14" orient="auto" markerUnits="userSpaceOnUse">
+                  <path d="M1,1 L13,7 L1,13 Z" class="mkt"/>
                 </marker>
-                <marker id="mk-dia" viewBox="0 0 12 12" refX="1" refY="6" markerWidth="11" markerHeight="11" orient="auto">
-                  <path d="M1,6 L6,2.5 L11,6 L6,9.5 Z" class="mkf"/>
+                <marker id="mk-dia" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="16" markerHeight="10" orient="auto" markerUnits="userSpaceOnUse">
+                  <path d="M1,5 L8,1 L15,5 L8,9 Z" class="mkf"/>
                 </marker>
               </defs>
               <g id="edges-g" class="edges-g">
                 <path class="edge-line" d="M 440,262 L 226,194" marker-end="url(#mk-tri)"/>
                 <path class="edge-line" id="e-cat" d="M 135,276 L 146,195" marker-end="url(#mk-tri)"/>
                 <path class="edge-line" d="M 510,262 L 714,172" stroke-dasharray="6 4" marker-end="url(#mk-tri)"/>
-                <path class="edge-line" d="M 586,330 L 556,330" marker-start="url(#mk-dia)" marker-end="url(#mk-arrow)"/>
-                <text class="edge-label" x="571" y="316" text-anchor="middle">owns</text>
-                <text class="edge-label" x="583" y="345" text-anchor="middle">1</text>
-                <text class="edge-label" x="556" y="346" text-anchor="middle">0..*</text>
+                <path class="edge-line" d="M 695,290 L 713,132" marker-start="url(#mk-dia)" marker-end="url(#mk-arrow)"/>
+                <text class="edge-label" x="720" y="214" text-anchor="middle">owns</text>
+                <text class="edge-label" x="709" y="272" text-anchor="middle">1</text>
+                <text class="edge-label" x="732" y="152" text-anchor="middle">0..*</text>
               </g>
             </svg>
 
