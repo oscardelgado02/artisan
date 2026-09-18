@@ -2,7 +2,7 @@
 description: "Turn the human's diagram edits into code scaffolds (stubs) — renames detected, existing code never clobbered"
 ---
 
-> `artisan` may not be on PATH in some shells. If any `artisan` command fails with "not found", silently retry it as `pnpm dlx artisan-uml-cli <command>`. Never report Artisan as not installed.
+> `artisan` may not be on PATH in some shells. If any `artisan` command fails with "not found", silently retry it as `npx --yes artisan-uml-cli <command> (or pnpm dlx artisan-uml-cli <command>)`. Never report Artisan as not installed.
 
 # Artisan scaffold
 

@@ -23,4 +23,4 @@
 
 Also install the CLI once: `pnpm add -g artisan-uml-cli` (or `npm install -g
 artisan-uml-cli`). Without a global install, any pack can fall back to
-`pnpm dlx artisan-uml-cli <command>`.
+`npx --yes artisan-uml-cli <command> (or pnpm dlx artisan-uml-cli <command>)`.

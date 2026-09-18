@@ -1,5 +1,9 @@
 # Devlog
 
+## 18.09.2026
+- Real favicon: a brass tile with the serif "A" (`assets/favicon.svg`) replaces the misdrawn glyph — the hub and the docs now ship the same mark as the wordmark.
+- `install.sh` fixes the silent-PATH failure: when `artisan` is installed but not resolvable, it appends the global bin to the existing shell rc files (idempotent, marker-checked) and always points to the `npx` fallback.
+
 ## 17.09.2026
 - Bundled demo: `examples/petshop` — five C# files and a README walk-through, verified end to end with a real `artisan scan`; the hub quickstart now points to it.
 - The starter diagram now says what the code does: Owner owns `IPet` (not Dog) and the `Mood` node is gone from the editor's seed — the relation corrected everywhere it appears (site canvas, social cards, default diagram).

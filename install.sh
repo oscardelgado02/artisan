@@ -7,8 +7,10 @@ set -e
 echo "→ Installing artisan-uml-cli"
 if command -v pnpm >/dev/null 2>&1; then
   pnpm add -g artisan-uml-cli
+  GLOBAL_BIN="$(pnpm bin -g 2>/dev/null || true)"
 elif command -v npm >/dev/null 2>&1; then
   npm install -g artisan-uml-cli
+  GLOBAL_BIN="$(npm prefix -g 2>/dev/null)/bin"
 else
   echo "  (no pnpm/npm on PATH — install Node 18+ first)" >&2
   exit 1
@@ -35,4 +37,25 @@ fi
 echo
 echo "Done. Restart your agentic tool, then in any project:"
 echo "  artisan scan"
+if command -v artisan >/dev/null 2>&1; then
+  echo "CLI on PATH: $(command -v artisan)"
+elif [ -n "$GLOBAL_BIN" ] && [ -x "$GLOBAL_BIN/artisan" ]; then
+  PATH="$GLOBAL_BIN:$PATH"; export PATH
+  MARKER="# artisan (added by install.sh)"
+  for rc in "$HOME/.profile" "$HOME/.bashrc" "$HOME/.zshrc"; do
+    if [ -f "$rc" ] && ! grep -qF "$MARKER" "$rc"; then
+      printf '\n%s\nexport PATH="%s:$PATH"\n' "$MARKER" "$GLOBAL_BIN" >> "$rc"
+      echo "Added $GLOBAL_BIN to PATH in $rc"
+    fi
+  done
+  if command -v artisan >/dev/null 2>&1; then
+    echo "CLI on PATH: $(command -v artisan) (open a new shell to pick it up everywhere)"
+  else
+    echo "Note: $GLOBAL_BIN/artisan exists but this shell's PATH was not updated (add $GLOBAL_BIN manually)."
+  fi
+  echo "Agents without PATH can always run: npx --yes artisan-uml-cli <command>"
+else
+  echo "Note: 'artisan' is not on this shell's PATH (open a new shell to pick it up)."
+  echo "      Agents without PATH can always run: npx --yes artisan-uml-cli <command>"
+fi
 echo "Missing a tool folder above? Copy its packs manually (see agents/README.md)."
