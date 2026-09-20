@@ -37,7 +37,9 @@ artisan scan
 ```
 
 Open `.artisan/diagram.html` — the full editor as a single self-contained file.
-Click **Connect file** once so your edits autosave to `.artisan/diagram.json`.
+Click **Connect file** once so your edits autosave to `.artisan/diagram.json`
+(Chrome/Edge), or run `artisan serve` for a localhost editor with autosave that
+works in any browser.
 
 ## The workflow
 
