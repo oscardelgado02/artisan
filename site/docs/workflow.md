@@ -51,8 +51,8 @@ interface), it edits the diagram and runs `artisan mark-ai`: the changes become
 
 Changes made from the terminal (`artisan add`/`edit`/`remove`) light the same
 highlights — they are recorded in `pending.json` too, so they survive a page
-reload and clear with **Mark seen**. Removals delete from the diagram silently
-(there is nothing left to highlight).
+reload and clear with **Mark AI changes seen**. Removals render as tombstones
+until you confirm them.
 
 > **Scan caveat:** `artisan scan` re-syncs the diagram from your C# source.
 > Classes that exist only in the diagram (not yet implemented) are dropped on
@@ -60,8 +60,11 @@ reload and clear with **Mark seen**. Removals delete from the diagram silently
 
 ## 5. You confirm
 
-You review the highlights, keep what you like, and run `artisan ack` (or the
-editor's **Mark seen** button). Now both sides have seen the same state.
+You review the highlights and decide per item: **✓** accepts it, **✕** rejects it
+(removals show as struck-through tombstones — dragging one just moves it). The ✓✕
+chips map to `artisan ack` / `artisan reject` with ref keys, and the editor's
+**Mark AI changes seen** / **Reject AI changes** buttons handle everything at once.
+Rejecting reverts the diagram, so your agent never acts on a proposal you turned down.
 
 ## 6. Scan again
 
