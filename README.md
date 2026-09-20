@@ -32,7 +32,7 @@ cd artisan
 ./install.sh
 ```
 
-The installer runs `pnpm add -g artisan-uml-cli` and copies the five `/artisan-*`
+The installer runs `pnpm add -g artisan-uml-cli` and copies the seven `/artisan-*`
 commands into your agents' command folders (opencode, Claude Code, Codex).
 
 Then, in any project:

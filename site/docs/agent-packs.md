@@ -5,6 +5,7 @@ Six slash commands, identical in opencode, Claude Code and Codex:
 | Command | What it does |
 | --- | --- |
 | `/artisan-scan` | scan the code into a class diagram, open it in the editor, summarize the architecture |
+| `/artisan-serve` | serve the editor at `localhost:4173` with live autosave to `diagram.json` (the Firefox/Safari path — no Connect file there) |
 | `/artisan-scaffold` | turn your diagram edits into code stubs: renames refactored, new types scaffolded, existing members untouched |
 | `/artisan-implement` | same, plus real method bodies following your notes |
 | `/artisan-architect` | the agent proposes an architecture change directly in the diagram; you review the amber highlights |

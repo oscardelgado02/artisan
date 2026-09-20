@@ -1,10 +1,11 @@
 # Agent packs
 
-`/artisan-*` chat commands for each agentic tool. Same six commands everywhere:
+`/artisan-*` chat commands for each agentic tool. Same seven commands everywhere:
 
 | Command | What it does |
 |---------|--------------|
 | `/artisan-scan` | scan code → class diagram + PlantUML, open in editor |
+| `/artisan-serve` | serve the editor at localhost:4173 with live autosave (for Firefox/Safari, no Connect file) |
 | `/artisan-scaffold` | your diagram edits → code stubs (renames detected, existing code untouched) |
 | `/artisan-implement` | your diagram edits → real code with bodies, per notes |
 | `/artisan-architect` | AI proposes an architecture change in the diagram (amber highlights); you review |
@@ -23,4 +24,4 @@
 
 Also install the CLI once: `pnpm add -g artisan-uml-cli` (or `npm install -g
 artisan-uml-cli`). Without a global install, any pack can fall back to
-`pnpm dlx artisan-uml-cli <command>`.
+`npx --yes artisan-uml-cli <command> (or pnpm dlx artisan-uml-cli <command>)`.

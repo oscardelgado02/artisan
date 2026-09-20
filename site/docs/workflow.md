@@ -24,6 +24,8 @@ all six relation kinds and lays the diagram out in layers, roots on top. Re-scan
 merge: your positions, notes and relations survive.
 
 Open `diagram.html`, click **Connect file** once, and your edits autosave to disk.
+No file-handle API in your browser (Firefox/Safari)? Run `artisan serve` instead
+(`localhost:4173`, live autosave) — or just `/artisan-serve` with your agent pack.
 
 ## 2. You redesign
 
@@ -47,10 +49,22 @@ notes. When the agent itself wants to change the architecture (new class, new
 interface), it edits the diagram and runs `artisan mark-ai`: the changes become
 **amber highlights** in your editor.
 
+Changes made from the terminal (`artisan add`/`edit`/`remove`) light the same
+highlights — they are recorded in `pending.json` too, so they survive a page
+reload and clear with **Mark AI changes seen**. Removals render as tombstones
+until you confirm them.
+
+> **Scan caveat:** `artisan scan` re-syncs the diagram from your C# source.
+> Classes that exist only in the diagram (not yet implemented) are dropped on
+> a re-scan — run `/artisan-implement` before scanning again.
+
 ## 5. You confirm
 
-You review the highlights, keep what you like, and run `artisan ack` (or the
-editor's **Mark seen** button). Now both sides have seen the same state.
+You review the highlights and decide per item: **✓** accepts it, **✕** rejects it
+(removals show as struck-through tombstones — dragging one just moves it). The ✓✕
+chips map to `artisan ack` / `artisan reject` with ref keys, and the editor's
+**Mark AI changes seen** / **Reject AI changes** buttons handle everything at once.
+Rejecting reverts the diagram, so your agent never acts on a proposal you turned down.
 
 ## 6. Scan again
 

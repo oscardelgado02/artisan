@@ -37,7 +37,9 @@ artisan scan
 ```
 
 Open `.artisan/diagram.html` — the full editor as a single self-contained file.
-Click **Connect file** once so your edits autosave to `.artisan/diagram.json`.
+Click **Connect file** once so your edits autosave to `.artisan/diagram.json`
+(Chrome/Edge), or run `artisan serve` for a localhost editor with autosave that
+works in any browser.
 
 ## The workflow
 
@@ -46,14 +48,14 @@ Click **Connect file** once so your edits autosave to `.artisan/diagram.json`.
 3. `artisan diff` — a markdown report of your changes for the agent
 4. The agent refactors code (renames stay renames; existing members untouched)
 5. `artisan mark-ai` — the agent's own architecture proposals appear amber in your editor
-6. `artisan ack` — you confirm; both sides are synced
+6. You confirm: ✓ per item (`artisan ack`), ✕ reverts it (`artisan reject`) — both sides sync
 
 Full loop in [the workflow](workflow.md); every command in the
 [CLI docs](https://cli.artisan-uml.dev/).
 
 ## Agent packs
 
-Six commands, same behavior in all three tools:
+Seven commands, same behavior in all three tools:
 
 | Command | What it does |
 | --- | --- |
