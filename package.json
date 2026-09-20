@@ -6,7 +6,7 @@
   "type": "module",
   "license": "MIT",
   "dependencies": {
-    "artisan-uml-cli": "^0.1.0"
+    "artisan-uml-cli": "^0.2.0"
   },
   "scripts": {
     "artisan": "artisan"
