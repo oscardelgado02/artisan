@@ -11,6 +11,10 @@ Apply the human's diagram edits to the C# code as stubs. Argument (optional): `$
 The human owns the architecture. You execute what the diagram says — nothing more.
 
 1. Run `artisan diff`. It prints a markdown change report (the human's diagram edits since last time, with renames detected as renames) and consumes it.
+   Then run `artisan impl-diff` — it compares the diagram against the actual code (read-only):
+   - **In the diagram, missing from the code**: scaffold these too (the regular diff misses them once acked or scanned out-of-band).
+   - **In the code, not in the diagram**: do not adopt silently — list these and ask the human (drift or a diagram edit still pending).
+   - **Signature mismatches**: change only the differing signature parts in the code to match the diagram.
 2. Apply the report to the C# code:
    - **renames**: rename the class/member and refactor call sites.
    - **added**: create the new class/member as a stub (empty or `throw new NotImplementedException()` bodies).
