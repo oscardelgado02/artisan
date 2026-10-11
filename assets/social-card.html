@@ -23,7 +23,7 @@
     display: flex; gap: 64px; align-items: center;
   }
   .left { flex: 1.1; }
-  .wordmark { display: block; width: 300px; height: auto; }
+  .wordmark { display: block; width: 280px; height: 64px; }
 
   .tag { margin-top: 22px; font-size: 27px; line-height: 1.5; color: rgba(43, 35, 32, 0.85); max-width: 560px; }
   .tag strong { color: #b45309; }
@@ -80,18 +80,23 @@
 <body>
   <div class="card">
     <div class="left">
-      <svg class="wordmark" viewBox="25 10 130 40" role="img" aria-label="Artisan">
+      <svg class="wordmark" viewBox="0 0 280 64" width="280" height="64" role="img" aria-label="Artisan UML">
         <defs>
           <linearGradient id="brass" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0" stop-color="#b45309"/>
             <stop offset="1" stop-color="#c2711c"/>
           </linearGradient>
-          <filter id="glow" x="-20%" y="-40%" width="140%" height="180%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="1.2" result="b"/>
-            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
         </defs>
-        <text x="90" y="42" text-anchor="middle" font-family="Lora, Georgia, 'Times New Roman', serif" font-size="34" font-weight="600" fill="url(#brass)" filter="url(#glow)">Artisan</text>
+        <g transform="translate(0 9) scale(1.4375)">
+          <rect width="32" height="32" rx="7" fill="#b45309"/>
+          <g fill="none" stroke-linecap="round">
+            <path d="M14.6 11 L9.2 22.4" stroke="#faf8f5" stroke-width="2.2"/>
+            <path d="M17.4 11 L22.8 22.4" stroke="#faf8f5" stroke-width="2.2"/>
+            <circle cx="16" cy="8.2" r="2.4" stroke="#faf8f5" stroke-width="2"/>
+            <path d="M10.6 25 Q16 28.8 21.4 25" stroke="#faf8f5" stroke-width="1.8"/>
+          </g>
+        </g>
+        <text x="60" y="42" text-anchor="start" font-family="Lora, Georgia, 'Times New Roman', serif" font-size="34" font-weight="600" fill="url(#brass)">Artisan UML</text>
       </svg>
       <p class="tag">Architecture control for <strong>agentic workflows</strong>. Scan C# into a living class diagram: you design, the agent implements, nothing drifts.</p>
       <div class="chips">

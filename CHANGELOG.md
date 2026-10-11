@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0 — 11.10.2026
+
+### Added
+- `impl-diff` support in the agent packs: `/artisan-implement` and `/artisan-scaffold` (all three agent dirs) now run `artisan impl-diff` right after `diff` — diagram items missing from the code get implemented/scaffolded too (the regular diff misses them once acked or scanned out-of-band), code drift is surfaced to the human instead of silently adopted, and signature mismatches get aligned.
+- Workflow docs updated: `site/docs/workflow.md` explains the new step and points to the editor's **"Code out of sync"** badge.
+
+### Notes
+- Consumes `artisan-uml` 1.2.0 (impl-sync badge) and `artisan-uml-cli` 0.3.0 (`impl-diff` command, `GET /api/impl`). Requires those versions to be installed for the full loop.
+
 ## 0.2.0 — 20.09.2026
 
 ### Added

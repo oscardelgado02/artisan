@@ -1,12 +1,12 @@
 {
   "name": "artisan-ai",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "Architecture control for agentic coding workflows: slash-command packs for opencode, Claude Code and Codex around the artisan-uml editor and CLI.",
   "type": "module",
   "license": "MIT",
   "dependencies": {
-    "artisan-uml-cli": "^0.2.0"
+    "artisan-uml-cli": "^0.3.0"
   },
   "scripts": {
     "artisan": "artisan"

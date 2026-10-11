@@ -1,7 +1,8 @@
 <div align="center">
-  <img src="assets/wordmark.svg" alt="Artisan" width="180" />
+  <img src="assets/wordmark.svg" alt="Artisan UML" width="280" />
 
-  <h2>Architecture control for agentic workflows</h2>
+  <h2>The agentic plugin</h2>
+  <p>Architecture control for agentic workflows</p>
 </div>
 
 Your coding agent writes great code, but architecture needs a human. Artisan gives
