@@ -4,8 +4,8 @@
 
 Only the latest release of Artisan (this repo) receives security fixes. The editor
 and the CLI have their own policies:
-[`artisan-uml`](https://github.com/oscardelgado02/artisan-uml/blob/main/SECURITY.md),
-[`artisan-uml-cli`](https://github.com/oscardelgado02/artisan-uml-cli/blob/main/SECURITY.md).
+[`artisan-uml`](https://github.com/oscardelgado02/artisan-uml/blob/dev/SECURITY.md),
+[`artisan-uml-cli`](https://github.com/oscardelgado02/artisan-uml-cli/blob/dev/SECURITY.md).
 
 ## Reporting a vulnerability
 
