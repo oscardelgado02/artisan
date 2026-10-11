@@ -42,6 +42,12 @@ The agent runs `artisan diff` and reads the markdown report:
 - **Added** — scaffold it, without touching any existing member
 - **Removed** — always asks you before deleting
 
+Right after it runs `artisan impl-diff` — the diagram compared against the actual
+code (read-only, marks nothing seen): **diagram items missing from the code**
+(the regular diff misses those once acked or scanned out-of-band), **code drift
+not in the diagram**, and **signature mismatches**. While they exist, your editor
+shows a **"Code out of sync"** badge — hover it for what to do.
+
 ## 4. The agent works
 
 Refactors renames across the codebase, scaffolds the new types, implements per your

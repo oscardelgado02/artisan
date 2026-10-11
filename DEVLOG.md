@@ -1,5 +1,8 @@
 # Devlog
 
+## 22.09.2026
+- `/artisan-implement` and `/artisan-scaffold` (all three agent dirs) now run `artisan impl-diff` right after `diff`: diagram items missing from the code get implemented too (the regular diff misses them once acked or scanned out-of-band), code drift is surfaced to the human instead of silently adopted, signature mismatches get aligned.
+
 ## 20.09.2026
 - New pack: `/artisan-serve` — starts the localhost editor (`localhost:4173`, live autosave to `diagram.json`) for browsers without the file-handle API (Firefox/Safari). Backgrounded run + `/api/status` verification + stop instructions baked in. Seven `/artisan-*` commands now ship for opencode, Claude Code and Codex; README tables and counts updated.
 

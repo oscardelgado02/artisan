@@ -10,7 +10,7 @@ and Codex, plus the installer. The editor and the CLI ship as npm packages and a
 imported from there.
 
 - [`artisan-uml`](https://www.npmjs.com/package/artisan-uml) — the editor (source of truth: `.artisan/diagram.json`)
-- [`artisan-uml-cli`](https://www.npmjs.com/package/artisan-uml-cli) — the CLI (`scan`, `diff`, `mark-ai`, `ack`, `status`, `add`/`edit`/`remove`, `editor`, `serve`)
+- [`artisan-uml-cli`](https://www.npmjs.com/package/artisan-uml-cli) — the CLI (`scan`, `diff`, `impl-diff`, `mark-ai`, `ack`, `status`, `add`/`edit`/`remove`, `editor`, `serve`)
 
 ## Install
 

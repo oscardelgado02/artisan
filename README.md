@@ -53,7 +53,7 @@ No project at hand? Run it on the bundled demo: `cd examples/petshop` and scan â
 | Package | Role | Source of truth |
 | --- | --- | --- |
 | [`artisan-uml`](https://www.npmjs.com/package/artisan-uml) | the class diagram editor (also a web app) | `diagram.json` |
-| [`artisan-uml-cli`](https://www.npmjs.com/package/artisan-uml-cli) | `scan`, `diff`, `mark-ai`, `ack`, `status`, `add`/`edit`/`remove`, `editor`, `serve` | `.artisan/` |
+| [`artisan-uml-cli`](https://www.npmjs.com/package/artisan-uml-cli) | `scan`, `diff`, `impl-diff`, `mark-ai`, `ack`, `status`, `add`/`edit`/`remove`, `editor`, `serve` | `.artisan/` |
 
 > **Language support:** C# only, for now. More languages are planned.
 
