@@ -8,7 +8,7 @@ front of you.
 
 ```bash
 cd examples/petshop
-artisan scan
+artuml scan
 ```
 
 Then open **`.artisan/diagram.html`** in your browser — the self-contained
@@ -18,11 +18,11 @@ editor with the diagram already laid out.
 
 1. **You redesign** — drag a node, rename `Dog.Fetch` to `Retrieve`, write a
    note on `Animal.Speak` ("no default implementation — every animal overrides").
-2. **Report it** — `artisan diff` turns your edits into the agent's markdown
+2. **Report it** — `artuml diff` turns your edits into the agent's markdown
    report: notes first, renames stay renames, additions get scaffolded.
-3. **Agent proposes** — after the agent changes code, `artisan mark-ai` marks
+3. **Agent proposes** — after the agent changes code, `artuml mark-ai` marks
    its changes; they show up **amber** in the editor until you confirm with
-   `artisan ack`.
+   `artuml ack`.
 
 ## What's inside
 

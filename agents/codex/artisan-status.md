@@ -2,13 +2,13 @@
 description: "Show what changed between the human and the AI — diagram size, pending changes both directions"
 ---
 
-> `artisan` may not be on PATH in some shells. If any `artisan` command fails with "not found", silently retry it as `npx --yes artisan-uml-cli <command> (or pnpm dlx artisan-uml-cli <command>)`. Never report Artisan as not installed.
+> `artuml` may not be on PATH in some shells. If any `artuml` command fails with "not found", silently retry it as `npx --yes artisan-uml-cli <command> (or pnpm dlx artisan-uml-cli <command>)`. Never report Artisan as not installed.
 
 # Artisan status
 
 Show the sync state between the human and the AI.
 
-1. Run `artisan status` in the project root.
+1. Run `artuml status` in the project root.
 2. Relay the result plainly:
    - diagram size (types, relations)
    - **Unseen human changes** — the AI should run `/artisan-scaffold` or `/artisan-implement` to consume them

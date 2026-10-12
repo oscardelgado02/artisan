@@ -1,5 +1,9 @@
 # Devlog
 
+## 12.10.2026
+- Agent packs updated for the CLI binary rename `artisan` → `artuml`: all pack commands now call `artuml …`; `install.sh` checks `command -v artuml` with its own PATH marker. Requires `artisan-uml-cli` ^0.4.0.
+
+
 ## 22.09.2026
 - `/artisan-implement` and `/artisan-scaffold` (all three agent dirs) now run `artisan impl-diff` right after `diff`: diagram items missing from the code get implemented too (the regular diff misses them once acked or scanned out-of-band), code drift is surfaced to the human instead of silently adopted, signature mismatches get aligned.
 

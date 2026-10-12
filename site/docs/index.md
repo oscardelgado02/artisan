@@ -3,7 +3,7 @@
 Architecture control for agentic coding workflows. Artisan turns your codebase into
 a living **class diagram** that you design, and that your coding agent implements:
 you make the architectural decisions in a fluid visual editor, the agent does the
-typing at full speed, and `artisan` keeps both sides honest about who changed what.
+typing at full speed, and `artuml` keeps both sides honest about who changed what.
 
 This repository is the **plugin hub**: slash-command packs for opencode, Claude Code
 and Codex, plus the installer. The editor and the CLI ship as npm packages and are
@@ -18,7 +18,7 @@ Requires [Node.js](https://nodejs.org) 18+ and [pnpm](https://pnpm.io) (npm work
 
 ```bash
 git clone https://github.com/oscardelgado02/artisan
-cd artisan
+cd artuml
 ./install.sh
 ```
 
@@ -33,22 +33,22 @@ Then, in any project:
 
 ```bash
 cd your-unity-project
-artisan scan
+artuml scan
 ```
 
 Open `.artisan/diagram.html` — the full editor as a single self-contained file.
 Click **Connect file** once so your edits autosave to `.artisan/diagram.json`
-(Chrome/Edge), or run `artisan serve` for a localhost editor with autosave that
+(Chrome/Edge), or run `artuml serve` for a localhost editor with autosave that
 works in any browser.
 
 ## The workflow
 
-1. `artisan scan` — C# → diagram + PlantUML mirror agents can read
+1. `artuml scan` — C# → diagram + PlantUML mirror agents can read
 2. You redesign: drag, rewire, rename, add classes, write notes
-3. `artisan diff` — a markdown report of your changes for the agent
+3. `artuml diff` — a markdown report of your changes for the agent
 4. The agent refactors code (renames stay renames; existing members untouched)
-5. `artisan mark-ai` — the agent's own architecture proposals appear amber in your editor
-6. You confirm: ✓ per item (`artisan ack`), ✕ reverts it (`artisan reject`) — both sides sync
+5. `artuml mark-ai` — the agent's own architecture proposals appear amber in your editor
+6. You confirm: ✓ per item (`artuml ack`), ✕ reverts it (`artuml reject`) — both sides sync
 
 Full loop in [the workflow](workflow.md); every command in the
 [CLI docs](https://cli.artisan-uml.dev/).

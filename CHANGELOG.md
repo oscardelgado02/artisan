@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.0 — 12.10.2026
+
+### Changed
+- All agent packs invoke the CLI as `artuml` (the binary's new name; `artisan` collided with Laravel's). Requires `artisan-uml-cli` ^0.4.0.
+- `install.sh` checks `command -v artuml` and grows the `# artuml` PATH marker if needed. Slash-pack names `/artisan-*` unchanged.
 ## 0.3.0 — 11.10.2026
 
 ### Added

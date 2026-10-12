@@ -7,11 +7,11 @@
 
 Your coding agent writes great code, but architecture needs a human. Artisan gives
 you a living **class diagram** of your project: you design in a fluid visual editor,
-the agent implements at full speed, and `artisan` keeps track of who changed what.
+the agent implements at full speed, and `artuml` keeps track of who changed what.
 
 - The agent reads the architecture from `.artisan/diagram.puml` before touching code
 - You make the decisions in `.artisan/diagram.html` (the full editor, one file)
-- `artisan diff` turns your edits into a markdown report the agent executes:
+- `artuml diff` turns your edits into a markdown report the agent executes:
   renames stay renames, notes are honored, existing members are never touched
 - The agent's own proposals appear **amber** in your editor until you confirm
 
@@ -29,7 +29,7 @@ Requires [Node.js](https://nodejs.org) 18+ and [pnpm](https://pnpm.io) (npm work
 
 ```bash
 git clone https://github.com/oscardelgado02/artisan
-cd artisan
+cd artuml
 ./install.sh
 ```
 
@@ -40,7 +40,7 @@ Then, in any project:
 
 ```bash
 cd your-project
-artisan scan
+artuml scan
 ```
 
 Open `.artisan/diagram.html` and click **Connect file** once — your edits autosave
@@ -60,12 +60,12 @@ No project at hand? Run it on the bundled demo: `cd examples/petshop` and scan �
 
 ## The agent loop
 
-1. **`artisan scan`** — C# → diagram: all six UML relations, layered layout, notes preserved
+1. **`artuml scan`** — C# → diagram: all six UML relations, layered layout, notes preserved
 2. **You redesign** — drag, rename, rewire, write notes
 3. **`/artisan-scaffold`** — stubs for what you added, renames refactored
 4. **`/artisan-implement`** — real bodies, honoring your notes
 5. **`/artisan-architect`** — the agent proposes; you review amber highlights
-6. **`artisan scan`** again — the picture stays current
+6. **`artuml scan`** again — the picture stays current
 
 Full loop: [the workflow docs](https://artisan-uml.dev/docs/#/workflow).
 Every command: [CLI docs](https://cli.artisan-uml.dev/).
@@ -85,7 +85,7 @@ Codex:
 | `/artisan-status` | pending changes in both directions |
 
 Any agent works without packs too — Cursor, Windsurf, Gemini CLI, anything that
-runs commands. Install the CLI, then point the agent at `artisan diff` and the
+runs commands. Install the CLI, then point the agent at `artuml diff` and the
 rules in [agents/README.md](agents/README.md). Full guide:
 [Any other agent](https://artisan-uml.dev/docs/#/agent-packs).
 

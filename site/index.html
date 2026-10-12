@@ -6,7 +6,7 @@
   <title>Artisan UML — Architecture control for agentic workflows</title>
   <meta name="description" content="Artisan turns your codebase into a living class diagram you design, and your coding agent implements. You keep the architecture; the agent keeps the speed." />
   <meta property="og:title" content="Artisan UML — Architecture control for agentic workflows" />
-  <meta property="og:description" content="A living class diagram of your project: you design in a fluid visual editor, the agent implements at full speed, and artisan keeps track of who changed what." />
+  <meta property="og:description" content="A living class diagram of your project: you design in a fluid visual editor, the agent implements at full speed, and artuml keeps track of who changed what." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://artisan-uml.dev/" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -471,7 +471,7 @@
         <p class="sub">
           Artisan turns your codebase into a living <strong>class diagram</strong>:
           you design in a fluid visual editor, the agent implements at full speed,
-          and <code>artisan</code> keeps track of who changed what.
+          and <code>artuml</code> keeps track of who changed what.
         </p>
         <div class="cta-row">
           <button class="install-chip" data-copy="npm i -g artisan-uml-cli" title="Copy install command">
@@ -623,11 +623,11 @@
     <div class="wrap">
       <p class="kicker reveal">The workflow</p>
       <h2 class="reveal">One loop. Two sides.</h2>
-      <p class="lede reveal">The human designs, the agent implements, and <code>artisan</code> tracks every change in both directions.</p>
+      <p class="lede reveal">The human designs, the agent implements, and <code>artuml</code> tracks every change in both directions.</p>
       <div class="steps">
         <div class="step reveal">
           <span class="n">01</span>
-          <h3><code>artisan scan</code></h3>
+          <h3><code>artuml scan</code></h3>
           <p>C# → diagram: every class, all six UML relations, layered layout, notes preserved. Re-scans merge; nothing you did is lost.</p>
           <span class="arrow">→</span>
         </div>
@@ -639,7 +639,7 @@
         </div>
         <div class="step reveal">
           <span class="n">03</span>
-          <h3><code>artisan diff</code></h3>
+          <h3><code>artuml diff</code></h3>
           <p>Your diagram edits become a markdown report: notes first, renames stay renames, additions are scaffolded.</p>
           <span class="arrow">→</span>
         </div>
@@ -657,7 +657,7 @@
         </div>
         <div class="step reveal">
           <span class="n">06</span>
-          <h3><code>artisan ack</code></h3>
+          <h3><code>artuml ack</code></h3>
           <p>You confirm, both sides sync, and the next <code>scan</code> keeps the picture current. Then the loop runs again.</p>
         </div>
       </div>
@@ -675,7 +675,7 @@
             <li>Design the architecture in a fluid, click-to-edit canvas</li>
             <li>Every class, member and relation carries a note the agent must honor</li>
             <li>Review the agent's proposals in amber — accept or push back</li>
-            <li>Dictate changes from the terminal with <code>artisan add/edit/remove</code></li>
+            <li>Dictate changes from the terminal with <code>artuml add/edit/remove</code></li>
           </ul>
           <p class="rule">The agent reads the architecture from <code>.artisan/diagram.puml</code> before touching code.</p>
         </div>
@@ -688,7 +688,7 @@
             <li>Existing members are never modified; additions scaffold or implement</li>
             <li>Its own architecture ideas wait for your confirmation</li>
           </ul>
-          <p class="rule">No pack needed — any agent that can run <code>artisan diff</code> works.</p>
+          <p class="rule">No pack needed — any agent that can run <code>artuml diff</code> works.</p>
         </div>
       </div>
     </div>
@@ -702,7 +702,7 @@
       <div class="pkgs">
         <div class="pkg reveal">
           <span class="role">GitHub · the hub</span>
-          <h3><code>artisan</code></h3>
+          <h3><code>artuml</code></h3>
           <p>Installer and slash-command packs for opencode, Claude Code and Codex. The entry point.</p>
           <div class="grow"></div>
           <a class="get" href="https://github.com/oscardelgado02/artisan">github.com/oscardelgado02/artisan →</a>
@@ -745,14 +745,14 @@
       <div class="install-box reveal">
         <div class="panel-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="panel-title">installer</span></div>
         <pre><span class="prompt">$</span> git clone https://github.com/oscardelgado02/artisan
-<span class="prompt">$</span> cd artisan
+<span class="prompt">$</span> cd artuml
 <span class="prompt">$</span> ./install.sh
 <span class="cm"># installs artisan-uml-cli globally + copies the six /artisan-* commands
 # into opencode, Claude Code and Codex command folders</span>
 <span class="prompt">$</span> cd your-project
-<span class="prompt">$</span> artisan scan</pre>
+<span class="prompt">$</span> artuml scan</pre>
       </div>
-      <p class="install-alt reveal">Don't use the packs? <code>npm i -g artisan-uml-cli</code> and point any agent at <code>artisan diff</code> — <a href="/docs/#/agent-packs">full guide</a>.</p>
+      <p class="install-alt reveal">Don't use the packs? <code>npm i -g artisan-uml-cli</code> and point any agent at <code>artuml diff</code> — <a href="/docs/#/agent-packs">full guide</a>.</p>
     </div>
   </section>
 
@@ -785,7 +785,7 @@
         <a href="https://editor.artisan-uml.dev/" target="_blank" rel="noopener">Editor</a>
         <a href="https://cli.artisan-uml.dev/">CLI</a>
         <a href="https://github.com/oscardelgado02/artisan" target="_blank" rel="noopener">GitHub</a>
-        <a href="https://github.com/oscardelgado02/artisan/blob/dev/CHANGELOG.md">Changelog</a>
+        <a href="https://github.com/oscardelgado02/artisan/blob/main/CHANGELOG.md">Changelog</a>
       </nav>
     </div>
   </footer>
@@ -811,7 +811,7 @@
     const SCRIPTS = {
       scan: [
         p('cd your-project'),
-        p('artisan scan'),
+        p('artuml scan'),
         pause(700),
         s(''),
         { t: '<span class="comment">  (parsing 128 C# files…)</span>', post: 900 },
@@ -822,39 +822,39 @@
         s('  <span class="file">.artisan/diagram.puml</span>  (PlantUML mirror for AI)'),
         s('  <span class="file">.artisan/map.json</span>      (type → source file)'),
         s(''),
-        s('  Open the editor:  double-click .artisan/diagram.html  (or: artisan serve)'),
+        s('  Open the editor:  double-click .artisan/diagram.html  (or: artuml serve)'),
       ],
       agent: [
-        p('artisan status'),
+        p('artuml status'),
         s('Diagram: 4 types, 3 relations (has project notes)'),
-        s('Unseen human changes (AI: run <span class="file">artisan diff</span>): 0'),
+        s('Unseen human changes (AI: run <span class="file">artuml diff</span>): 0'),
         s('Pending AI changes (human: review in the editor): 0'),
         { t: '<span class="prompt">$</span> <span class="cmd">/artisan-architect</span>  <span class="comment"># the agent implements: create Cat, add Bark</span>', pre: 200, post: 900 },
-        p('artisan mark-ai'),
-        { t: '3 AI change(s) marked pending. The human sees them highlighted in the editor and confirms with <span class="file">artisan ack</span> or the editor\'s "Mark seen" button.', pre: 200, post: 600, amber: true },
-        p('artisan status'),
+        p('artuml mark-ai'),
+        { t: '3 AI change(s) marked pending. The human sees them highlighted in the editor and confirms with <span class="file">artuml ack</span> or the editor\'s "Mark seen" button.', pre: 200, post: 600, amber: true },
+        p('artuml status'),
         s('Diagram: 5 types, 4 relations (has project notes)'),
-        s('Unseen human changes (AI: run <span class="file">artisan diff</span>): 0'),
+        s('Unseen human changes (AI: run <span class="file">artuml diff</span>): 0'),
         s('Pending AI changes (human: review in the editor): 3'),
         s('  - [modified] Dog: + method Bark() : void'),
         s('  - [added] new class Cat'),
         s('  - [added] new relation Cat -> Animal'),
-        { t: '<span class="prompt">$</span> <span class="cmd">artisan ack</span>', pre: 200, post: 700, ack: true },
+        { t: '<span class="prompt">$</span> <span class="cmd">artuml ack</span>', pre: 200, post: 700, ack: true },
         { t: '<span class="done">Acknowledged 3 AI change(s). Highlights cleared.</span>', pre: 200, post: 400, calm: true },
       ],
       edit: [
-        p('artisan add node Cat --kind class'),
+        p('artuml add node Cat --kind class'),
         { t: 'Added class Cat at (30, 280).', cat: true },
-        p('artisan add edge Cat Animal --kind inheritance'),
+        p('artuml add edge Cat Animal --kind inheritance'),
         { t: 'Added inheritance relation Cat -> Animal.', edge: true },
-        p('artisan add member Dog method Bark --type void'),
+        p('artuml add member Dog method Bark --type void'),
         { t: 'Added method Dog.Bark(): void', bark: true },
-        p('artisan remove member Dog Fetch'),
+        p('artuml remove member Dog Fetch'),
         { t: 'Removed Dog.Fetch.', rm: true },
-        p('artisan edit node Animal --note "no default implementation — every animal overrides"'),
+        p('artuml edit node Animal --note "no default implementation — every animal overrides"'),
         s('Updated abstract Animal.'),
         s(''),
-        { t: '<span class="comment">…artisan diff turns all of it into the agent\'s report.</span>', pre: 300 },
+        { t: '<span class="comment">…artuml diff turns all of it into the agent\'s report.</span>', pre: 300 },
       ],
     };
 

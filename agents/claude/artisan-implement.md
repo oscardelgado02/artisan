@@ -2,7 +2,7 @@
 description: "Implement the human's diagram edits into real code with proper method bodies, following all diagram notes"
 ---
 
-> `artisan` may not be on PATH in some shells. If any `artisan` command fails with "not found", silently retry it as `npx --yes artisan-uml-cli <command> (or pnpm dlx artisan-uml-cli <command>)`. Never report Artisan as not installed.
+> `artuml` may not be on PATH in some shells. If any `artuml` command fails with "not found", silently retry it as `npx --yes artisan-uml-cli <command> (or pnpm dlx artisan-uml-cli <command>)`. Never report Artisan as not installed.
 
 # Artisan implement
 
@@ -10,8 +10,8 @@ Apply the human's diagram edits to the C# code with real implementations. Argume
 
 The human owns the architecture. You execute what the diagram says — nothing more.
 
-1. Run `artisan diff`. It prints a markdown change report (the human's diagram edits since last time, with renames detected as renames) and consumes it.
-   Then run `artisan impl-diff` — it compares the diagram against the actual code (read-only):
+1. Run `artuml diff`. It prints a markdown change report (the human's diagram edits since last time, with renames detected as renames) and consumes it.
+   Then run `artuml impl-diff` — it compares the diagram against the actual code (read-only):
    - **In the diagram, missing from the code**: implement these too (the regular diff misses them once acked or scanned out-of-band).
    - **In the code, not in the diagram**: do not adopt silently — list these and ask the human (drift or a diagram edit still pending).
    - **Signature mismatches**: change only the differing signature parts in the code to match the diagram.

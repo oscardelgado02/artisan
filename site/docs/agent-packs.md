@@ -48,7 +48,7 @@ pnpm add -g artisan-uml-cli
 
 ```bash
 cd your-unity-project
-artisan scan
+artuml scan
 ```
 
 You get `.artisan/diagram.html` (the editor, for you) and `.artisan/diagram.puml`
@@ -61,17 +61,17 @@ or just paste it at the start of a session:
 
 > This project uses Artisan for architecture. The class diagram lives in
 > `.artisan/diagram.json`; read `.artisan/diagram.puml` to see the architecture.
-> - To see my design changes: run `artisan diff` and follow the markdown report.
+> - To see my design changes: run `artuml diff` and follow the markdown report.
 >   Refactor renames, scaffold additions, honor the notes, and never modify
 >   existing members or delete anything without asking me.
 > - To implement: write the code the report describes, following every note.
 > - If you propose architecture changes: edit `.artisan/diagram.json`, run
->   `artisan mark-ai`, and wait for my confirmation.
+>   `artuml mark-ai`, and wait for my confirmation.
 > - I design the architecture; you implement it. Ask before anything destructive.
 
 **4. Work the loop**
 
-You redesign in the editor → `artisan diff` tells the agent → it codes → its own
+You redesign in the editor → `artuml diff` tells the agent → it codes → its own
 architecture proposals come back as amber highlights for you to confirm. Same
 loop, any agent.
 

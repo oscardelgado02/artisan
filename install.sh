@@ -36,26 +36,26 @@ fi
 
 echo
 echo "Done. Restart your agentic tool, then in any project:"
-echo "  artisan scan"
-if command -v artisan >/dev/null 2>&1; then
-  echo "CLI on PATH: $(command -v artisan)"
-elif [ -n "$GLOBAL_BIN" ] && [ -x "$GLOBAL_BIN/artisan" ]; then
+echo "  artuml scan"
+if command -v artuml >/dev/null 2>&1; then
+  echo "CLI on PATH: $(command -v artuml)"
+elif [ -n "$GLOBAL_BIN" ] && [ -x "$GLOBAL_BIN/artuml" ]; then
   PATH="$GLOBAL_BIN:$PATH"; export PATH
-  MARKER="# artisan (added by install.sh)"
+  MARKER="# artuml (added by install.sh)"
   for rc in "$HOME/.profile" "$HOME/.bashrc" "$HOME/.zshrc"; do
     if [ -f "$rc" ] && ! grep -qF "$MARKER" "$rc"; then
       printf '\n%s\nexport PATH="%s:$PATH"\n' "$MARKER" "$GLOBAL_BIN" >> "$rc"
       echo "Added $GLOBAL_BIN to PATH in $rc"
     fi
   done
-  if command -v artisan >/dev/null 2>&1; then
-    echo "CLI on PATH: $(command -v artisan) (open a new shell to pick it up everywhere)"
+  if command -v artuml >/dev/null 2>&1; then
+    echo "CLI on PATH: $(command -v artuml) (open a new shell to pick it up everywhere)"
   else
-    echo "Note: $GLOBAL_BIN/artisan exists but this shell's PATH was not updated (add $GLOBAL_BIN manually)."
+    echo "Note: $GLOBAL_BIN/artuml exists but this shell's PATH was not updated (add $GLOBAL_BIN manually)."
   fi
   echo "Agents without PATH can always run: npx --yes artisan-uml-cli <command>"
 else
-  echo "Note: 'artisan' is not on this shell's PATH (open a new shell to pick it up)."
+  echo "Note: 'artuml' is not on this shell's PATH (open a new shell to pick it up)."
   echo "      Agents without PATH can always run: npx --yes artisan-uml-cli <command>"
 fi
 echo "Missing a tool folder above? Copy its packs manually (see agents/README.md)."
