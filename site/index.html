@@ -726,12 +726,12 @@
       <table class="packs-table reveal">
         <thead><tr><th>Command</th><th>What it does</th></tr></thead>
         <tbody>
-          <tr><td class="cmd">/artisan-scan</td><td>scan code → diagram + PlantUML, open the editor</td></tr>
+          <tr><td class="cmd">/artisan-scan</td><td>scan code → diagram + PlantUML, open the editor (C# only today)</td></tr>
           <tr><td class="cmd">/artisan-scaffold</td><td>diagram edits → code stubs</td></tr>
           <tr><td class="cmd">/artisan-implement</td><td>diagram edits → real code, per notes</td></tr>
           <tr><td class="cmd">/artisan-architect</td><td>agent proposes an architecture change; you review</td></tr>
-          <tr><td class="cmd">/artisan-edit</td><td>applies your dictated architecture changes to the diagram</td></tr>
           <tr><td class="cmd">/artisan-status</td><td>pending changes in both directions</td></tr>
+          <tr><td class="cmd">artisan-cli</td><td>skill: artuml CLI reference — commands, flags, config locations</td></tr>
         </tbody>
       </table>
     </div>
@@ -747,7 +747,7 @@
         <pre><span class="prompt">$</span> git clone https://github.com/oscardelgado02/artisan
 <span class="prompt">$</span> cd artuml
 <span class="prompt">$</span> ./install.sh
-<span class="cm"># installs artisan-uml-cli globally + copies the six /artisan-* commands
+<span class="cm"># installs artisan-uml-cli globally + copies the /artisan-* packs
 # into opencode, Claude Code and Codex command folders</span>
 <span class="prompt">$</span> cd your-project
 <span class="prompt">$</span> artuml scan</pre>

@@ -33,6 +33,11 @@ if [ -d "$HOME/.codex" ]; then
   cp agents/codex/artisan-*.md "$HOME/.codex/prompts/"
   echo "  Codex:        $HOME/.codex/prompts/"
 fi
+if [ -d "$HOME/.config/opencode" ]; then
+  mkdir -p "$HOME/.config/opencode/skills/artisan-cli"
+  cp skills/artisan-cli/SKILL.md "$HOME/.config/opencode/skills/artisan-cli/"
+  echo "  opencode skill: $HOME/.config/opencode/skills/artisan-cli/"
+fi
 
 echo
 echo "Done. Restart your agentic tool, then in any project:"

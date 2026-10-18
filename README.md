@@ -33,8 +33,9 @@ cd artuml
 ./install.sh
 ```
 
-The installer runs `pnpm add -g artisan-uml-cli` and copies the seven `/artisan-*`
-commands into your agents' command folders (opencode, Claude Code, Codex).
+The installer runs `pnpm add -g artisan-uml-cli` and copies the `/artisan-*`
+packs — six workflow commands and a CLI reference — into your agents' command
+folders (opencode, Claude Code, Codex).
 
 Then, in any project:
 
@@ -56,7 +57,9 @@ No project at hand? Run it on the bundled demo: `cd examples/petshop` and scan �
 | [`artisan-uml`](https://www.npmjs.com/package/artisan-uml) | the class diagram editor (also a web app) | `diagram.json` |
 | [`artisan-uml-cli`](https://www.npmjs.com/package/artisan-uml-cli) | `scan`, `diff`, `impl-diff`, `mark-ai`, `ack`, `status`, `add`/`edit`/`remove`, `editor`, `serve` | `.artisan/` |
 
-> **Language support:** C# only, for now. More languages are planned.
+> **Language support:** C# only, for now. The CLI's shared extractor
+> (`lib/extract.mjs` in `artisan-uml-cli`) is the single seam a new parser
+> plugs into — see the CLI README's *Supported languages*.
 
 ## The agent loop
 
@@ -72,17 +75,20 @@ Every command: [CLI docs](https://cli.artisan-uml.dev/).
 
 ## The packs
 
-Six commands, same behavior in [opencode](https://opencode.ai), Claude Code and
-Codex:
+Six workflow commands, same behavior in [opencode](https://opencode.ai), Claude
+Code and Codex. Additionally a `artisan-cli` skill for opencode provides the
+`artuml` reference — flags, config paths, file meanings — that the agent loads
+when it needs them:
 
 | Command | What it does |
 | --- | --- |
-| `/artisan-scan` | scan code → diagram + PlantUML, open the editor |
+| `/artisan-scan` | scan code → diagram + PlantUML, open the editor (language support: C# only today) |
+| `/artisan-serve` | live editor server on localhost — recommended for editing the architecture |
 | `/artisan-scaffold` | diagram edits → code stubs |
 | `/artisan-implement` | diagram edits → real code, per notes |
 | `/artisan-architect` | agent proposes an architecture change; you review |
-| `/artisan-edit` | applies your dictated architecture changes to the diagram |
 | `/artisan-status` | pending changes in both directions |
+| `artisan-cli` (skill) | `artuml` CLI reference — commands, flags, config locations |
 
 Any agent works without packs too — Cursor, Windsurf, Gemini CLI, anything that
 runs commands. Install the CLI, then point the agent at `artuml diff` and the

@@ -21,4 +21,4 @@ Start the local editor server. Use this when the human edits in Firefox/Safari (
 
 - Never kill the server without asking unless the human asks to stop it.
 - The human's diagram edits and notes always win over your preferences.
-- C# only in v1 (Unity-friendly); the diagram is the source of architectural truth.
+- Work in the project's stack and follow its conventions — today the scanner supports C# only; the diagram is the source of architectural truth.
