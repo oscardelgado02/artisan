@@ -12,9 +12,6 @@
 ### Changed
 - The install snippet said `cd artuml`; the clone directory is `artisan` (README, site docs, site page).
 
-### Release order
-- `artisan-uml-cli@0.5.1` has to be on npm first. After it is published: run `pnpm install` in this repo and commit the refreshed `pnpm-lock.yaml` (it still pins 0.1.0).
-
 ## 0.5.0 — 18.10.2026
 
 ### Changed
