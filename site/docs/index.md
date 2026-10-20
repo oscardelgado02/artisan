@@ -18,7 +18,7 @@ Requires [Node.js](https://nodejs.org) 18+ and [pnpm](https://pnpm.io) (npm work
 
 ```bash
 git clone https://github.com/oscardelgado02/artisan
-cd artuml
+cd artisan
 ./install.sh
 ```
 

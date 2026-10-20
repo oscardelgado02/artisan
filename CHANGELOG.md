@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.5.1 — 20.10.2026
+
+### Fixed
+- `install.sh` installs the CLI version pinned in `package.json` (`artisan-uml-cli@^0.5.1`). A bare `pnpm add -g artisan-uml-cli` can resolve an OLDER release (pnpm's 24 h `minimumReleaseAge` ignores `latest`), which paired the packs with a CLI that lacked `diff --peek` and the `status` peek.
+- `install.sh` no longer dies when the global package dir is not writable (no sudo): it retries with a user-local `PNPM_HOME` (`~/.local/share/pnpm`), and if the CLI install fails anyway the packs are still copied and the failure is reported (exit 1) instead of the whole script aborting.
+- `install.sh` no longer swallows the `pnpm bin -g` error — the PATH fix used to be skipped silently. It now prints the exact `export PATH=…` line, because agent shells (opencode, Claude Code, Codex) do not read `~/.profile` or `~/.bashrc`.
+- The opencode packs are copied to `~/.config/opencode/commands/` — opencode reads the plural directory, the installer wrote to `command/` and the packs never loaded.
+- `install.sh` verifies the result (`artuml --version`).
+
+### Changed
+- The install snippet said `cd artuml`; the clone directory is `artisan` (README, site docs, site page).
+
+### Release order
+- `artisan-uml-cli@0.5.1` has to be on npm first. After it is published: run `pnpm install` in this repo and commit the refreshed `pnpm-lock.yaml` (it still pins 0.1.0).
+
 ## 0.5.0 — 18.10.2026
 
 ### Changed
