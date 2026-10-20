@@ -1,16 +1,20 @@
 # Agent packs
 
-Six slash commands, identical in opencode, Claude Code and Codex:
+Six workflow slash commands, identical in opencode, Claude Code and Codex, plus
+an `artisan-cli` skill (opencode) holding the CLI reference:
 
 | Command | What it does |
 | --- | --- |
-| `/artisan-scan` | scan the code into a class diagram, open it in the editor, summarize the architecture |
+| `/artisan-scan` | scan the code into a class diagram, open it in the editor, summarize the architecture (scanner speaks C# only today — see the `artisan-cli` skill's language note) |
 | `/artisan-serve` | serve the editor at `localhost:4173` with live autosave to `diagram.json` (the Firefox/Safari path — no Connect file there) |
 | `/artisan-scaffold` | turn your diagram edits into code stubs: renames refactored, new types scaffolded, existing members untouched |
 | `/artisan-implement` | same, plus real method bodies following your notes |
 | `/artisan-architect` | the agent proposes an architecture change directly in the diagram; you review the amber highlights |
-| `/artisan-edit` | the agent applies your dictated architecture changes to the diagram (add/edit/remove) — counted as human edits |
 | `/artisan-status` | report pending changes in both directions and who made them |
+
+The `artisan-cli` reference ships as a **skill**, not a slash command: repo
+source `skills/artisan-cli/SKILL.md`, installed to
+`~/.config/opencode/skills/artisan-cli/`.
 
 ## Install
 
@@ -80,6 +84,6 @@ loop, any agent.
 Every pack ends with the same ground rules:
 
 - The human's diagram edits and notes always win.
-- C# only in v1 (Unity-friendly); the diagram is the source of architectural truth.
+- Work in the project's stack and follow its conventions — today the scanner supports C# only; the diagram is the source of architectural truth.
 - The human decides the architecture, the agent implements it.
 - Anything destructive requires explicit human approval.

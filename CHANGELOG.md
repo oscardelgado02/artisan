@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5.0 — 18.10.2026
+
+### Changed
+- **BREAKING: `/artisan-edit` removed** from all three packs — `/artisan-architect` covers it (and now prefers the `artuml add/edit/remove` CLI over direct `diagram.json` edits; direct edits are a documented last resort, followed by one `mark-ai`).
+- New `artisan-cli` **skill** (not a slash command) — an `artuml` reference: commands, flags, config paths and precedence, `.artisan` file roles; opencode loads it automatically when running or debugging commands. Repo source `skills/artisan-cli/SKILL.md`, installed to `~/.config/opencode/skills/artisan-cli/`.
+- `/artisan-scan` runs `mark-ai` after scanning and points the human at `/artisan-serve` for editing (a standalone `diagram.html` is read-only).
+- `/artisan-scaffold` + `/artisan-implement` run `mark-ai` right after `diff`, and handle removals in ONE explicit prompt ("The following classes will be removed. Do you want to continue?") — skippable via the new `askBeforeRemove` config.
+- `/artisan-status` shows the actual human change report (CLI's non-consuming peek) plus counters, then runs `mark-ai`.
+- All packs are language-agnostic in wording — today the scanner supports C# only (see the README's *Supported languages*).
+- Requires `artisan-uml-cli` ^0.5.0 (config files, `diff --peek`, merged pending refs).
+
 ## 0.4.0 — 12.10.2026
 
 ### Changed

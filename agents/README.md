@@ -1,16 +1,20 @@
 # Agent packs
 
-`/artisan-*` chat commands for each agentic tool. Same seven commands everywhere:
+`/artisan-*` chat commands for each agentic tool. Six everywhere:
 
 | Command | What it does |
 |---------|--------------|
-| `/artisan-scan` | scan code → class diagram + PlantUML, open in editor |
+| `/artisan-scan` | scan code → class diagram + PlantUML, open in editor (scanner speaks C# today; see the CLI reference for language support) |
 | `/artisan-serve` | serve the editor at localhost:4173 with live autosave (for Firefox/Safari, no Connect file) |
 | `/artisan-scaffold` | your diagram edits → code stubs (renames detected, existing code untouched) |
 | `/artisan-implement` | your diagram edits → real code with bodies, per notes |
 | `/artisan-architect` | AI proposes an architecture change in the diagram (amber highlights); you review |
-| `/artisan-edit` | your spoken architecture changes applied to the diagram (add/edit/remove, counted as human edits) |
 | `/artisan-status` | who changed what, what's pending |
+
+Plus an `artisan-cli` **skill** (not a command): an `artuml` reference — commands,
+flags, config paths and precedence, `.artisan` file roles — that opencode loads
+automatically when running or debugging commands. Repo source:
+`skills/artisan-cli/SKILL.md`, installed to `~/.config/opencode/skills/artisan-cli/`.
 
 | Tool | Pack | Install (project root) |
 |------|------|------------------------|

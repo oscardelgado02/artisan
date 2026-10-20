@@ -18,7 +18,8 @@ every change in both directions.
 
 ## 1. Scan
 
-`artuml scan` parses your C# into `.artisan/diagram.json` (source of truth),
+`artuml scan` parses your C# — the language the scanner supports today — into
+`.artisan/diagram.json` (source of truth),
 `diagram.puml` (the mirror agents read) and `diagram.html` (the editor). It detects
 all six relation kinds and lays the diagram out in layers, roots on top. Re-scans
 merge: your positions, notes and relations survive.

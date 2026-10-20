@@ -25,7 +25,7 @@ cd artuml
 What it does:
 
 1. installs the CLI globally: `pnpm add -g artisan-uml-cli`
-2. copies the five `/artisan-*` commands into your agents' command folders
+2. copies the `/artisan-*` packs (six workflow commands + a CLI reference) into your agents' command folders
    (opencode: `~/.config/opencode/command/`, Claude Code: `~/.claude/commands/`,
    Codex: `~/.codex/prompts/`)
 
@@ -55,16 +55,19 @@ Full loop in [the workflow](workflow.md); every command in the
 
 ## Agent packs
 
-Seven commands, same behavior in all three tools:
+Six workflow commands, same behavior in all three tools — plus an `artisan-cli`
+reference skill (opencode) that the agent loads when it needs flags, config
+paths or file meanings:
 
 | Command | What it does |
 | --- | --- |
-| `/artisan-scan` | scan code → class diagram + PlantUML, open the editor |
+| `/artisan-scan` | scan code → class diagram + PlantUML, open the editor (C# only for the scanner, today) |
+| `/artisan-serve` | live editor server on localhost — recommended for editing the architecture |
 | `/artisan-scaffold` | diagram edits → code stubs (renames detected, existing code untouched) |
 | `/artisan-implement` | diagram edits → real code with bodies, per notes |
 | `/artisan-architect` | agent proposes an architecture change; you review amber highlights |
-| `/artisan-edit` | applies your dictated architecture changes to the diagram (add/edit/remove) |
 | `/artisan-status` | who changed what, what is pending |
+| `artisan-cli` (skill) | `artuml` CLI reference — commands, flags, config locations |
 
 Details and manual install: [agent packs](agent-packs.md).
 
