@@ -29,11 +29,11 @@ Requires [Node.js](https://nodejs.org) 18+ and [pnpm](https://pnpm.io) (npm work
 
 ```bash
 git clone https://github.com/oscardelgado02/artisan
-cd artuml
+cd artisan
 ./install.sh
 ```
 
-The installer runs `pnpm add -g artisan-uml-cli` and copies the `/artisan-*`
+The installer installs the CLI (`pnpm add -g artisan-uml-cli`) and copies the `/artisan-*`
 packs — six workflow commands and a CLI reference — into your agents' command
 folders (opencode, Claude Code, Codex).
 
