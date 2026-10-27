@@ -18,17 +18,17 @@ source `skills/artisan-cli/SKILL.md`, installed to
 
 ## Install
 
-From this repo:
+One command (published to npm as [`artisan-agent`](https://www.npmjs.com/package/artisan-agent)):
 
 ```bash
-./install.sh
+npx artisan-agent install
 ```
 
 Or copy the files by hand:
 
 | Tool | Copy from | To (global) | To (per project) |
 | --- | --- | --- | --- |
-| opencode | `agents/opencode/artisan-*.md` | `~/.config/opencode/command/` | `.opencode/command/` |
+| opencode | `agents/opencode/artisan-*.md` | `~/.config/opencode/commands/` | `.opencode/commands/` |
 | Claude Code | `agents/claude/artisan-*.md` | `~/.claude/commands/` | `.claude/commands/` |
 | Codex | `agents/codex/artisan-*.md` | `~/.codex/prompts/` | — |
 

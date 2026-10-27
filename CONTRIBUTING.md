@@ -1,7 +1,8 @@
 # Contributing to Artisan
 
 Thanks for wanting to make Artisan better. This repo is the plugin hub: agent packs
-(`agents/`), the installer (`install.sh`) and docs (`docs/`). The editor and the CLI
+(`agents/`), the installer (`bin/artisan-agent.mjs`, published to npm as
+`artisan-agent`) and docs (`docs/`). The editor and the CLI
 live in their own repositories ([artisan-uml](https://github.com/oscardelgado02/artisan-uml),
 [artisan-uml-cli](https://github.com/oscardelgado02/artisan-uml-cli)) — please file
 code changes there.
@@ -18,8 +19,8 @@ pnpm run artuml help    # the CLI, from your local install
 ## Ground rules
 
 - **One PR per feature.** Small, focused pull requests get reviewed faster.
-- **Test your change**: run `./install.sh` in a scratch environment and try the
-  affected pack in a real agent session.
+- **Test your change**: run `node bin/artisan-agent.mjs install` in a scratch
+  environment and try the affected pack in a real agent session.
 - **No new dependencies.** The packages are zero-dependency by design; this repo
   only pulls the CLI from npm.
 - **Packs stay in sync.** The three tools must behave the same: if you change one

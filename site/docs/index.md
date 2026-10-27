@@ -14,20 +14,21 @@ imported from there.
 
 ## Install
 
-Requires [Node.js](https://nodejs.org) 18+ and [pnpm](https://pnpm.io) (npm works too).
+Requires [Node.js](https://nodejs.org) 18+ (pnpm or npm for the CLI install).
 
 ```bash
-git clone https://github.com/oscardelgado02/artisan
-cd artisan
-./install.sh
+npx artisan-agent install
 ```
 
 What it does:
 
 1. installs the CLI globally: `pnpm add -g artisan-uml-cli`
 2. copies the `/artisan-*` packs (six workflow commands + a CLI reference) into your agents' command folders
-   (opencode: `~/.config/opencode/command/`, Claude Code: `~/.claude/commands/`,
+   (opencode: `~/.config/opencode/commands/`, Claude Code: `~/.claude/commands/`,
    Codex: `~/.codex/prompts/`)
+
+Flags: `--all` (install even if a tool isn't detected), `--project` (per-project
+copies), `--tool opencode,claude,codex` (subset), `list` and `uninstall` commands.
 
 Then, in any project:
 
