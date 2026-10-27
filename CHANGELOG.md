@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.6.0 — 27.10.2026
+
+### Added
+- The repo publishes to npm as **`artisan-agent`**: `npx artisan-agent install` — one command, no git clone.
+- New installer `bin/artisan-agent.mjs` (Node ≥ 18, zero dependencies) replaces `install.sh`. Commands: `install`, `list`, `uninstall`. Flags: `--all`, `--project`, `--tool opencode,claude,codex`, `--cli global|local|no` (also `ARTISAN_CLI`), `--help`.
+- `--cli auto` (default) tries the global install first; when the global bin dir is not writable it asks before installing user-locally to `~/.local/share/pnpm` (non-interactive shells just report, no silent switches).
+
+### Changed
+- No PATH/rc-file editing anymore: the CLI is installed (or left to the packs' own `npx artisan-uml-cli` fallback) and the installer never touches shell files.
+- Undetected tools are no longer skipped silently — the installer prints what to rerun (`--all` / `--tool <name>`).
+
+### Removed
+- `install.sh`.
+
 ## 0.5.1 — 20.10.2026
 
 ### Fixed
