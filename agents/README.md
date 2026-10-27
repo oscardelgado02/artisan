@@ -16,16 +16,23 @@ flags, config paths and precedence, `.artisan` file roles — that opencode load
 automatically when running or debugging commands. Repo source:
 `skills/artisan-cli/SKILL.md`, installed to `~/.config/opencode/skills/artisan-cli/`.
 
-| Tool | Pack | Install (project root) |
-|------|------|------------------------|
-| opencode | `agents/opencode/artisan-*.md` | copy to `~/.config/opencode/command/` (global) or `.opencode/command/` (per project) |
-| Claude Code | `agents/claude/artisan-*.md` | copy to `~/.claude/commands/` (global) or `.claude/commands/` (per project) |
-| Codex | `agents/codex/artisan-*.md` | copy to `~/.codex/prompts/` |
+| Tool | Pack | Installed by |
+|------|------|--------------|
+| opencode | `agents/opencode/artisan-*.md` | `~/.config/opencode/commands/` (global) or `.opencode/commands/` (per project) |
+| Claude Code | `agents/claude/artisan-*.md` | `~/.claude/commands/` (global) or `.claude/commands/` (per project) |
+| Codex | `agents/codex/artisan-*.md` | `~/.codex/prompts/` |
 
 ```bash
-./install.sh   # or copy the files manually as shown above
+npx artisan-agent install            # detects your tools, installs CLI + packs
+npx artisan-agent install --project  # per-project copies instead
+npx artisan-agent install --tool opencode,claude,--all
+npx artisan-agent list              # what is installed where
+npx artisan-agent uninstall         # remove the copied packs
 ```
 
+Or copy the files manually as shown in the table above.
+
 Also install the CLI once: `pnpm add -g artisan-uml-cli` (or `npm install -g
-artisan-uml-cli`). Without a global install, any pack can fall back to
-`npx --yes artisan-uml-cli <command> (or pnpm dlx artisan-uml-cli <command>)`.
+artisan-uml-cli`). The installer does it for you when `artuml` is not on PATH;
+without it, any pack can fall back to
+`npx --yes artisan-uml-cli <command>` (or `pnpm dlx artisan-uml-cli <command>`).

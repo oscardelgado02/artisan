@@ -1,9 +1,20 @@
 {
-  "name": "artisan-ai",
+  "name": "artisan-agent",
   "version": "0.5.1",
-  "description": "Architecture control for agentic coding workflows: slash-command packs for opencode, Claude Code and Codex around the artisan-uml editor and CLI.",
+  "description": "Architecture control for agentic coding workflows: installer for the /artisan-* slash-command packs of opencode, Claude Code and Codex around the artisan-uml editor and CLI.",
   "type": "module",
   "license": "MIT",
+  "bin": {
+    "artisan-agent": "bin/artisan-agent.mjs"
+  },
+  "files": [
+    "agents",
+    "skills",
+    "bin"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
     "artisan-uml-cli": "^0.5.1"
   },
@@ -22,9 +33,12 @@
     "uml",
     "class-diagram",
     "agentic",
+    "agent-packs",
     "opencode",
     "claude-code",
     "codex",
+    "claude",
+    "installer",
     "architecture"
   ]
 }

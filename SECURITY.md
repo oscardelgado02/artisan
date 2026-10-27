@@ -15,9 +15,10 @@ instead of a public issue. Include steps to reproduce; we respond as fast as we 
 
 ## Scope
 
-- **`install.sh`**: must only write to the documented destinations
-  (`pnpm add -g artisan-uml-cli`, the agents' command folders), must not execute
-  downloaded content, and must not copy files outside the listed paths.
+- **`bin/artisan-agent.mjs`**: must only write to the documented destinations
+  (`pnpm add -g artisan-uml-cli` / `npm install -g artisan-uml-cli` and the agents'
+  command folders), must not execute downloaded content, and must not copy files
+  outside the listed paths.
 - **Agent packs (`agents/*.md`)**: prompt content only, never instructions that
   execute or exfiltrate data.
 - **This repo ships no code that processes untrusted input** — the parser, server
