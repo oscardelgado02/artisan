@@ -4,6 +4,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { homedir, platform } from "node:os";
 import { spawnSync } from "node:child_process";
+import { createInterface } from "node:readline";
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const PKG = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"));
@@ -97,7 +98,74 @@ function canRun(cmd) {
   return spawnSync(cmd, ["--version"], { stdio: "pipe" }).status === 0;
 }
 
-function cliInstall() {
+function cliMode(args) {
+  const env = process.env.ARTISAN_CLI;
+  if (args.includes("--cli")) {
+    const v = argValue(args, "--cli");
+    if (!["global", "local", "no"].includes(v)) {
+      err(`--cli must be global, local or no (got "${v}")`);
+      process.exit(2);
+    }
+    return v;
+  }
+  if (["global", "local", "no"].includes(env)) return env;
+  return "auto";
+}
+
+function cliHome() {
+  return join(HOME, ".local/share/pnpm");
+}
+
+function cliLocalBin() {
+  return join(cliHome(), "bin");
+}
+
+function tryCli(cmd, args, env) {
+  if (!canRun(cmd)) return null;
+  const r = spawnSync(cmd, args, { stdio: "inherit", env: env ? { ...process.env, ...env } : undefined });
+  if (r.status === 0) {
+    const v = spawnSync("artuml", ["--version"], { encoding: "utf8" }).stdout?.trim() || "installed";
+    return `artuml ${v}`;
+  }
+  return null;
+}
+
+function cliInstallGlobal(spec) {
+  return tryCli("pnpm", ["add", "-g", spec]) || tryCli("npm", ["install", "-g", spec]);
+}
+
+function cliInstallLocal(spec) {
+  const env = { PNPM_HOME: cliHome(), PATH: `${cliLocalBin()}:${process.env.PATH}` };
+  return tryCli("pnpm", ["add", "-g", spec], env)
+    || tryCli("npm", ["install", "-g", "--prefix", join(HOME, ".local"), spec]);
+}
+
+async function askLocalCli() {
+  if (!process.stdin.isTTY) {
+    console.error("  global CLI install failed and this is not an interactive terminal.");
+    console.error("  Rerun as a human, or choose explicitly: npx artisan-agent install --cli local|no");
+    return false;
+  }
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  const answer = await new Promise((res) => rl.question(`Install the CLI in ${cliLocalBin()} instead? [Y/n] `, res));
+  rl.close();
+  if (/^n/i.test(answer.trim())) {
+    console.log("  Skipped the local CLI install.");
+    return false;
+  }
+  return true;
+}
+
+function cliFail(spec) {
+  const npx = platform() === "win32" ? "npx" : "npx --yes";
+  console.error("  The CLI could NOT be installed — the packs above are still in place.");
+  console.error(`  Run it without installing: ${npx} ${spec} <command>`);
+  console.error(`  Or install manually:       pnpm add -g "${spec}"`);
+  console.error(`  Or user-locally:           npx artisan-agent install --cli local`);
+  return 0;
+}
+
+async function cliInstall(args, mode) {
   if (canRun("artuml")) {
     const v = spawnSync("artuml", ["--version"], { encoding: "utf8" }).stdout?.trim();
     console.log(`CLI already on PATH: artuml ${v || ""}`);
@@ -105,23 +173,47 @@ function cliInstall() {
   }
   const spec = `artisan-uml-cli@${CLI_SPEC}`;
   console.log(`→ Installing ${spec}`);
-  for (const cmd of ["pnpm", "npm"]) {
-    if (!canRun(cmd)) continue;
-    const args = cmd === "pnpm" ? ["add", "-g", spec] : ["install", "-g", spec];
-    if (spawnSync(cmd, args, { stdio: "inherit" }).status === 0) {
-      const where = spawnSync("artuml", ["--version"], { encoding: "utf8" }).stdout?.trim() || "installed";
-      console.log(`CLI done: artuml ${where} (open a new shell so it is on PATH everywhere)`);
+  if (mode === "no") return 1;
+  if (mode === "global") {
+    const ok = cliInstallGlobal(spec);
+    if (ok) {
+      console.log(`CLI done: ${ok} (open a new shell so it is on PATH everywhere)`);
+      return 1;
+    }
+    return cliFail(spec);
+  }
+  if (mode === "local") {
+    const ok = cliInstallLocal(spec);
+    if (ok) {
+      console.log(`CLI done: ${ok} (installed in ${cliLocalBin()})`);
+      localNote();
+      return 1;
+    }
+    return cliFail(spec);
+  }
+  const ok = cliInstallGlobal(spec);
+  if (ok) {
+    console.log(`CLI done: ${ok} (open a new shell so it is on PATH everywhere)`);
+    return 1;
+  }
+  if (await askLocalCli()) {
+    const ok2 = cliInstallLocal(spec);
+    if (ok2) {
+      console.log(`CLI done: ${ok2} (installed in ${cliLocalBin()})`);
+      localNote();
       return 1;
     }
   }
-  const npx = platform() === "win32" ? "npx" : "npx --yes";
-  console.error("  The CLI could NOT be installed — the packs above are still in place.");
-  console.error(`  Run it without installing: ${npx} ${spec} <command>`);
-  console.error(`  Or install manually:       pnpm add -g "${spec}"`);
-  return 0;
+  return cliFail(spec);
 }
 
-function doInstall(args) {
+function localNote() {
+  console.log(`Note: agent shells do not read your rc files. Give them the CLI with:`);
+  console.log(`  export PNPM_HOME="${cliHome()}"; export PATH="$PNPM_HOME/bin:$PATH"`);
+  console.log(`Or let the packs run it on the fly: npx --yes artisan-uml-cli@${CLI_SPEC} <command>`);
+}
+
+async function doInstall(args) {
   const all = args.includes("--all");
   const project = args.includes("--project");
   const tools = selectedTools(args);
@@ -156,12 +248,12 @@ function doInstall(args) {
   }
 
   console.log(`Packs: ${counts.added} added, ${counts.updated} updated, ${counts.unchanged} unchanged`);
-  const cliStatus = args.includes("--no-cli") ? 1 : cliInstall();
+  const cliStatus = await cliInstall(args, cliMode(args));
   console.log("");
   for (const line of GET_STARTED) console.log(line);
   if (missing.length && !all && !project) {
     console.log("");
-    console.log(`Missing a tool? Rerun with --all (or --tool <name>) — the list above explains.`);
+    console.log("Missing a tool? Rerun with --all (or --tool <name>) — the list above explains.");
   }
   process.exit(cliStatus);
 }
@@ -236,11 +328,11 @@ Usage:
   npx artisan-agent uninstall       remove the copied packs again
 
 Flags:
-  --all          install even where an agentic tool is not detected
-  --project      install into the current project instead of globally
-  --tool <list>  comma-separated subset: opencode,claude,codex
-  --no-cli       skip installing the artisan-uml-cli
-  --help         this text
+  --all                  install even where an agentic tool is not detected
+  --project              install into the current project instead of globally
+  --tool <list>          comma-separated subset: opencode,claude,codex
+  --cli global|local|no  how to install the artisan-uml-cli (default: global, ask to fall back local; env ARTISAN_CLI)
+  --help                 this text
 
 Tools per project:
   opencode      ~/.config/opencode/commands/   (+ skill: ~/.config/opencode/skills/artisan-cli/)

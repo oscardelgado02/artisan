@@ -36,7 +36,9 @@ The installer installs the CLI (`pnpm add -g artisan-uml-cli`) and copies the
 `/artisan-*` packs — six workflow commands and the `artisan-cli` skill — into
 your agents' command folders (opencode, Claude Code, Codex). It detects which
 tools you have; use `npx artisan-agent install --all`, `--project` or
-`--tool opencode` to control it, `npx artisan-agent list` to see what's installed.
+`--tool opencode` to control it, and `--cli global|local|no` for the CLI install
+(if the global install is not permitted, `--cli local` installs it to
+`~/.local/share/pnpm`). `npx artisan-agent list` shows what's installed.
 
 Then, in any project:
 

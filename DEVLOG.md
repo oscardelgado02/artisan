@@ -1,7 +1,7 @@
 # Devlog
 
 ## 27.10.2026
-- This repo now publishes to npm as **`artisan-agent`**: `npx artisan-agent install` installs the `artisan-uml-cli` and copies the six `/artisan-*` packs plus the `artisan-cli` skill into your agents' command folders. New installer `bin/artisan-agent.mjs` replaces `install.sh` — Node instead of bash, no PATH/rc-file editing (packs keep their own `npx artisan-uml-cli` fallback), flags `--all`, `--project`, `--tool opencode,claude,codex`, and `list` / `uninstall` commands. Undetected tools are no longer skipped silently: the installer tells you to rerun with `--all`.
+- This repo now publishes to npm as **`artisan-agent`**: `npx artisan-agent install` installs the `artisan-uml-cli` and copies the six `/artisan-*` packs plus the `artisan-cli` skill into your agents' command folders. New installer `bin/artisan-agent.mjs` replaces `install.sh` — Node instead of bash, no PATH/rc-file editing (packs keep their own `npx artisan-uml-cli` fallback), flags `--all`, `--project`, `--tool opencode,claude,codex`, `--cli global|local|no` (auto: global first, then asks to install user-locally to `~/.local/share/pnpm`), and `list` / `uninstall` commands. Undetected tools are no longer skipped silently: the installer tells you to rerun with `--all`.
 
 ## 12.10.2026
 - Agent packs updated for the CLI binary rename `artisan` → `artuml`: all pack commands now call `artuml …`; `install.sh` checks `command -v artuml` with its own PATH marker. Requires `artisan-uml-cli` ^0.4.0.
