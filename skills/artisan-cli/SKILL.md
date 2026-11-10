@@ -47,8 +47,8 @@ Read config as `JSON.parse(fs.readFileSync('.artisan/config.json'))` with a fall
 |------|------|
 | `diagram.json` | source of truth; the editor autosaves here |
 | `diagram.puml` | PlantUML mirror for quick reading |
-| `last-ai.json` | baseline of what the AI last consumed/produced — `diff` compares against it |
-| `last-human.json` | baseline of what the human last acked — `mark-ai` compares against it |
+| `last-ai.json` | baseline of what the AI last consumed/produced — `diff` and `mark-ai` compare against it |
+| `last-human.json` | baseline of what the human last acked |
 | `pending.json` | amber refs awaiting human review (AI + human edits both) |
 | `config.json` | settings (see Config) |
 | `impl-diff.json` | last impl-diff summary badge; also embedded in `diagram.html` |

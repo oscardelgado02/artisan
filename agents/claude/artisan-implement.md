@@ -10,7 +10,7 @@ Apply the human's diagram edits to the project's code with real implementations.
 
 The human owns the architecture. You execute what the diagram says — nothing more.
 
-1. Run `artuml diff`. It prints a markdown change report (the human's diagram edits since last time, with renames detected as renames) and consumes it. Then run `artuml mark-ai`.
+1. Run `artuml diff`. It prints a markdown change report (the human's diagram edits since last time, with renames detected as renames) and consumes it.
 2. Run `artuml scaffold` first. It does all the mechanical work itself — stub files/members, signature patches, silent renames, `dir` moves, gated removals (see `/artisan-scaffold` for the report walkthrough) — and refreshes `impl-diff.json`. The scaffolds it emits are your to-do list.
 3. Write real method bodies (not stubs) — every **note** in the report is the spec and a binding instruction from the human.
 4. Handle what needs judgement, from the scaffold report:

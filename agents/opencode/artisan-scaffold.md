@@ -10,7 +10,7 @@ Apply the human's diagram edits to the project's code as stubs. Argument (option
 
 The human owns the architecture. You execute what the diagram says — nothing more.
 
-1. Run `artuml diff`. It prints a markdown change report (the human's diagram edits since last time, with renames detected as renames) and consumes it. Then run `artuml mark-ai`.
+1. Run `artuml diff`. It prints a markdown change report (the human's diagram edits since last time, with renames detected as renames) and consumes it.
 2. Run `artuml scaffold`. It applies the mechanical diagram-to-code mapping itself and refreshes `impl-diff.json` when done:
    - **created**: stub files for diagrammed-but-missing classes, stub members spliced into existing files (body style from the `stubBody` config; diagram notes emitted as `// NOTE:` comments above the stub).
    - **patched**: signature mismatches — only the differing parts change.

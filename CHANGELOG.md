@@ -10,6 +10,8 @@
 
 ### Fixed
 - Pack files were byte-identical across tools despite per-tool headers claiming otherwise; each tool's packs are now written in that tool's own format again.
+- `/artisan-status` no longer runs `artuml mark-ai` unconditionally, and `/artisan-scaffold`//`artisan-implement` no longer run it after their consuming `diff` — the CLI (0.6.0) fixed `mark-ai`'s baseline, and calling it when the agent never edited the diagram only risked re-queueing the human's own unacked edits as pending "AI changes". The calls stay where the agent actually changes the diagram: `/artisan-scan` and `/artisan-architect`.
+- The `artisan-cli` skill's file table names `last-ai.json` as the baseline for both `diff` and `mark-ai` (matches the CLI fix above).
 
 ## 0.6.0 — 27.10.2026
 
