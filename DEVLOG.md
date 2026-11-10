@@ -1,5 +1,9 @@
 # Devlog
 
+## 10.11.2026
+- Packs rewritten for the new `artuml scaffold` (artisan-uml-cli 0.6.0): `/artisan-scaffold` now runs `artuml diff` + `artuml mark-ai`, then `artuml scaffold` — the CLI creates the stub class files, splices members, patches signatures, applies renames and moves files; the agent does only the judgement work (call-site refactors outside the renamed file, relaying removal candidates once, re-running `scaffold --yes` only after an explicit human yes, multi-type files and namespace drift). Review of code-not-in-the-diagram and the file-by-file report kept. `/artisan-implement` scaffolds first (the stubs are the to-do list), then writes the real bodies honoring notes. All six pack files across opencode, Claude Code and Codex updated (they had drifted into identical copies). Requires `artisan-uml-cli` ^0.6.0.
+- The `artisan-cli` opencode skill documents `scaffold` and `config`, the per-node `--dir` flag on `add`/`edit node`, the `scaffoldDir`/`stubBody` config keys and the `impl-diff.json` refresh rule; mirrored into the repo's `skills/`.
+
 ## 27.10.2026
 - This repo now publishes to npm as **`artisan-agent`**: `npx artisan-agent install` installs the `artisan-uml-cli` and copies the six `/artisan-*` packs plus the `artisan-cli` skill into your agents' command folders. New installer `bin/artisan-agent.mjs` replaces `install.sh` — Node instead of bash, no PATH/rc-file editing (packs keep their own `npx artisan-uml-cli` fallback), flags `--all`, `--project`, `--tool opencode,claude,codex`, `--cli global|local|no` (auto: global first, then asks to install user-locally to `~/.local/share/pnpm`), and `list` / `uninstall` commands. Undetected tools are no longer skipped silently: the installer tells you to rerun with `--all`.
 

@@ -1,6 +1,6 @@
 {
   "name": "artisan-agent",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Architecture control for agentic coding workflows: installer for the /artisan-* slash-command packs of opencode, Claude Code and Codex around the artisan-uml editor and CLI.",
   "type": "module",
   "license": "MIT",
@@ -16,7 +16,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "artisan-uml-cli": "^0.5.1"
+    "artisan-uml-cli": "^0.6.0"
   },
   "scripts": {
     "artuml": "artuml"

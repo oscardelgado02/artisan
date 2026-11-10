@@ -58,7 +58,7 @@ No project at hand? Run it on the bundled demo: `cd examples/petshop` and scan �
 | Package | Role | Source of truth |
 | --- | --- | --- |
 | [`artisan-uml`](https://www.npmjs.com/package/artisan-uml) | the class diagram editor (also a web app) | `diagram.json` |
-| [`artisan-uml-cli`](https://www.npmjs.com/package/artisan-uml-cli) | `scan`, `diff`, `impl-diff`, `mark-ai`, `ack`, `status`, `add`/`edit`/`remove`, `editor`, `serve` | `.artisan/` |
+| [`artisan-uml-cli`](https://www.npmjs.com/package/artisan-uml-cli) | `scan`, `diff`, `impl-diff`, `scaffold`, `mark-ai`, `ack`, `status`, `add`/`edit`/`remove`, `config`, `editor`, `serve` | `.artisan/` |
 
 > **Language support:** C# only, for now. The CLI's shared extractor
 > (`lib/extract.mjs` in `artisan-uml-cli`) is the single seam a new parser
@@ -68,7 +68,7 @@ No project at hand? Run it on the bundled demo: `cd examples/petshop` and scan �
 
 1. **`artuml scan`** — C# → diagram: all six UML relations, layered layout, notes preserved
 2. **You redesign** — drag, rename, rewire, write notes
-3. **`/artisan-scaffold`** — stubs for what you added, renames refactored
+3. **`/artisan-scaffold`** — `artuml scaffold` applies the diff to the code: stubs, renames, moves, patches; the agent handles the judgement calls
 4. **`/artisan-implement`** — real bodies, honoring your notes
 5. **`/artisan-architect`** — the agent proposes; you review amber highlights
 6. **`artuml scan`** again — the picture stays current
@@ -87,7 +87,7 @@ when it needs them:
 | --- | --- |
 | `/artisan-scan` | scan code → diagram + PlantUML, open the editor (language support: C# only today) |
 | `/artisan-serve` | live editor server on localhost — recommended for editing the architecture |
-| `/artisan-scaffold` | diagram edits → code stubs |
+| `/artisan-scaffold` | diagram edits → code: `artuml scaffold` does the mechanical part, the agent refactors call sites and relays removal candidates |
 | `/artisan-implement` | diagram edits → real code, per notes |
 | `/artisan-architect` | agent proposes an architecture change; you review |
 | `/artisan-status` | pending changes in both directions |

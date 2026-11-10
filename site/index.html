@@ -640,23 +640,29 @@
         <div class="step reveal">
           <span class="n">03</span>
           <h3><code>artuml diff</code></h3>
-          <p>Your diagram edits become a markdown report: notes first, renames stay renames, additions are scaffolded.</p>
+          <p>Your diagram edits become a markdown report: notes first, renames stay renames, then <code>artuml scaffold</code> applies them to the code.</p>
           <span class="arrow">→</span>
         </div>
         <div class="step reveal">
           <span class="n">04</span>
-          <h3>The agent implements</h3>
-          <p><code>/artisan-scaffold</code> and <code>/artisan-implement</code> turn the report into code. Existing members are never touched.</p>
+          <h3><code>artuml scaffold</code></h3>
+          <p><code>/artisan-scaffold</code> runs the CLI: stubs created, renames applied, signatures patched, moves done — removals gated in one prompt.</p>
           <span class="arrow">→</span>
         </div>
         <div class="step reveal">
           <span class="n">05</span>
+          <h3>The agent implements</h3>
+          <p><code>/artisan-implement</code> finishes the judgement items: call-site refactors and real method bodies, honoring every note.</p>
+          <span class="arrow">→</span>
+        </div>
+        <div class="step reveal">
+          <span class="n">06</span>
           <h3>The agent proposes</h3>
           <p><code>/artisan-architect</code> lets the agent suggest structure. Its changes appear <strong style="color:var(--ai-change)">amber</strong> in your editor until you confirm.</p>
           <span class="arrow">→</span>
         </div>
         <div class="step reveal">
-          <span class="n">06</span>
+          <span class="n">07</span>
           <h3><code>artuml ack</code></h3>
           <p>You confirm, both sides sync, and the next <code>scan</code> keeps the picture current. Then the loop runs again.</p>
         </div>
@@ -684,8 +690,9 @@
           <h3>The agent does the typing</h3>
           <ul>
             <li>Reads a markdown <code>diff</code> report instead of guessing intent</li>
-            <li>Renames are refactored — never delete-and-recreate</li>
-            <li>Existing members are never modified; additions scaffold or implement</li>
+            <li><code>artuml scaffold</code> does the mechanical work — the CLI, not freehand edits</li>
+            <li>Renames get call sites refactored, stubs get real bodies — never delete-and-recreate</li>
+            <li>Removals are gated: listed in one prompt, deleted only with your <code>--yes</code></li>
             <li>Its own architecture ideas wait for your confirmation</li>
           </ul>
           <p class="rule">No pack needed — any agent that can run <code>artuml diff</code> works.</p>
@@ -717,7 +724,7 @@
         <div class="pkg reveal">
           <span class="role">npm · the CLI</span>
           <h3><code>artisan-uml-cli</code></h3>
-          <p><code>scan</code>, <code>diff</code>, <code>mark-ai</code>, <code>ack</code>, <code>status</code>, <code>add</code>/<code>edit</code>/<code>remove</code>, <code>editor</code>, <code>serve</code> — everything the loop needs.</p>
+          <p><code>scan</code>, <code>diff</code>, <code>impl-diff</code>, <code>scaffold</code>, <code>config</code>, <code>mark-ai</code>, <code>ack</code>, <code>status</code>, <code>add</code>/<code>edit</code>/<code>remove</code>, <code>editor</code>, <code>serve</code> — everything the loop needs.</p>
           <div class="grow"></div>
           <div class="links"><a href="https://cli.artisan-uml.dev/">cli.artisan-uml.dev</a><a href="https://www.npmjs.com/package/artisan-uml-cli" target="_blank" rel="noopener">npm</a></div>
         </div>
@@ -727,8 +734,8 @@
         <thead><tr><th>Command</th><th>What it does</th></tr></thead>
         <tbody>
           <tr><td class="cmd">/artisan-scan</td><td>scan code → diagram + PlantUML, open the editor (C# only today)</td></tr>
-          <tr><td class="cmd">/artisan-scaffold</td><td>diagram edits → code stubs</td></tr>
-          <tr><td class="cmd">/artisan-implement</td><td>diagram edits → real code, per notes</td></tr>
+          <tr><td class="cmd">/artisan-scaffold</td><td>diff → <code>artuml scaffold</code>: the CLI applies the mechanical work, agent keeps judgement calls</td></tr>
+          <tr><td class="cmd">/artisan-implement</td><td>scaffold first, then real bodies per notes</td></tr>
           <tr><td class="cmd">/artisan-architect</td><td>agent proposes an architecture change; you review</td></tr>
           <tr><td class="cmd">/artisan-status</td><td>pending changes in both directions</td></tr>
           <tr><td class="cmd">artisan-cli</td><td>skill: artuml CLI reference — commands, flags, config locations (<code>npx artisan-agent install</code>)</td></tr>

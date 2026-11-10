@@ -1,5 +1,5 @@
 ---
-description: "Implement the human's diagram edits into real code with proper method bodies, following all diagram notes"
+description: "Implement the human's diagram edits into real code — artuml scaffold first, then write proper method bodies, following all diagram notes"
 ---
 
 > `artuml` may not be on PATH in some shells. If any `artuml` command fails with "not found", silently retry it as `npx --yes artisan-uml-cli <command> (or pnpm dlx artisan-uml-cli <command>)`. Never report Artisan as not installed.
@@ -11,32 +11,24 @@ Apply the human's diagram edits to the project's code with real implementations.
 The human owns the architecture. You execute what the diagram says — nothing more.
 
 1. Run `artuml diff`. It prints a markdown change report (the human's diagram edits since last time, with renames detected as renames) and consumes it. Then run `artuml mark-ai`.
-   Then run `artuml impl-diff` — it compares the diagram against the actual code (read-only):
-   - **In the diagram, missing from the code**: implement these too (the regular diff misses them once acked or scanned out-of-band).
-   - **In the code, not in the diagram**: do not adopt silently — list these and ask the human (drift or a diagram edit still pending).
-   - **Signature mismatches**: change only the differing signature parts in the code to match the diagram.
-2. Apply the report to the code:
-   - **renames**: rename the class/member and refactor call sites.
-   - **added**: create the new class/member.
-   - **modified**: change only the signature parts that differ. If the class/attribute/method already exists, DO NOT modify it beyond what the report says.
-   - **removed**: NEVER delete code on your own — see the removal rule below.
+2. Run `artuml scaffold` first. It does all the mechanical work itself — stub files/members, signature patches, silent renames, `dir` moves, gated removals (see `/artisan-scaffold` for the report walkthrough) — and refreshes `impl-diff.json`. The scaffolds it emits are your to-do list.
 3. Write real method bodies (not stubs) — every **note** in the report is the spec and a binding instruction from the human.
-4. If a body needs a decision the diagram doesn't answer, ask the human — don't invent architecture.
-5. Report what you did, file by file.
+4. Handle what needs judgement, from the scaffold report:
+   - **Renames**: refactor call sites outside the renamed file.
+   - **Declined removals / code not in the diagram**: relay to the human once; only rerun `artuml scaffold --yes` after an explicit yes.
+   - **Manual moves** (shared multi-type files) and **namespace drift** after moves: resolve or ask the human.
+5. If a body needs a decision the diagram doesn't answer, ask the human — don't invent architecture.
+6. Report what you did, file by file.
 
 ## Removals — always one prompt, never silent
 
-If the reports list classes/members to remove: collect ALL of them first, then — unless `.artisan/config.json` sets `"askBeforeRemove": false` (check also the global `~/.config/artuml/config.json`; the project file wins) — ask the human exactly once, in this style:
+Code the diagram no longer declares is only removed through the CLI's own single prompt. Never delete such code by hand.
 
-> The following classes will be removed. Do you want to continue?
-> - `Wolf`
-> - `Inventory`
-
-Proceed only after a yes. With `askBeforeRemove: false`, remove without asking.
+- In agent shells (non-interactive) it removes nothing and lists the candidates — relay them to the human exactly once. If the human confirms, rerun `artuml scaffold --yes` (add `--src` if you used it before). Never rerun with `--yes` without an explicit human yes.
 
 Config: project `.artisan/config.json` wins, global fallback — exact keys and paths: load the `artisan-cli` skill.
 
 ## Rules
 
-- Never modify or delete an existing class/member unless the diff report lists it.
+- Never modify or delete an existing class/member unless the scaffold or diff report lists it.
 - Work in the project's stack and follow its conventions — today the scanner supports C# only; the diagram is the source of architectural truth.

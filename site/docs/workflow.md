@@ -11,8 +11,10 @@ every change in both directions.
   .artisan/diagram.json ── edits ───┘  │  (amber highlights in the editor)
       │  artuml diff                  │
       ▼                             ack │
-  markdown report → agent            │
-      │  refactor + scaffold         │
+  markdown report → artuml scaffold   │
+      │  mechanical work done         │
+      ▼                               │
+  agent: judgement + real bodies      │
       └── new code ────► artuml scan again …
 ```
 
@@ -41,18 +43,36 @@ The agent runs `artuml diff` and reads the markdown report:
 - **Notes to honor** first
 - **Renames** — refactor, never delete-and-recreate
 - **Added** — scaffold it, without touching any existing member
-- **Removed** — always asks you before deleting
+- **Removed** — scaffold lists them in one prompt, nothing deleted without your go
 
-Right after it runs `artuml impl-diff` — the diagram compared against the actual
-code (read-only, marks nothing seen): **diagram items missing from the code**
-(the regular diff misses those once acked or scanned out-of-band), **code drift
-not in the diagram**, and **signature mismatches**. While they exist, your editor
-shows a **"Code out of sync"** badge — hover it for what to do.
+Right after, the agent runs `artuml impl-diff` — the diagram compared against the
+actual code (read-only, marks nothing seen): diagram items missing from the code,
+code drift not in the diagram, and signature mismatches. This read is what
+`scaffold` consumes (and refreshes).
 
-## 4. The agent works
+## 4. `artuml scaffold`
 
-Refactors renames across the codebase, scaffolds the new types, implements per your
-notes. When the agent itself wants to change the architecture (new class, new
+The agent runs `artuml scaffold`, which applies the diff to the code mechanically:
+
+- **Created** — stub classes for missing diagram classes (`NotImplementedException` bodies, notes as `// NOTE:` comments, placed via the node's `dir` folder), plus new members spliced into existing files
+- **Renamed** — class file, declaration and in-file members renamed; call sites outside the file stay agent work
+- **Patched** — changed member signatures updated, kind changes applied
+- **Moved** — a class whose folder drifted from its `dir` is moved into place
+- **Removed** — code drift candidates listed in one prompt (`--yes` skips; nothing is deleted without your go)
+
+Whatever still needs judgement is printed under *For the agent*: refactor call
+sites, declined removals, multi-type files. The agent fills the stubs with real
+bodies following the notes (`/artisan-implement` does exactly this).
+
+`scaffold` consumes and refreshes `impl-diff.json` (it never touches
+`last-ai.json` or `pending.json`) — run it after `impl-diff`, before judging the
+leftovers. While mismatches exist, your editor shows a **"Code out of sync"**
+badge — hover it for what to do.
+
+## 5. The agent works
+
+Refactors rename call sites, implements the real method bodies per your notes.
+When the agent itself wants to change the architecture (new class, new
 interface), it edits the diagram and runs `artuml mark-ai`: the changes become
 **amber highlights** in your editor.
 
@@ -63,9 +83,9 @@ until you confirm them.
 
 > **Scan caveat:** `artuml scan` re-syncs the diagram from your C# source.
 > Classes that exist only in the diagram (not yet implemented) are dropped on
-> a re-scan — run `/artisan-implement` before scanning again.
+> a re-scan — run `artuml scaffold` (or `/artisan-implement`) before scanning again.
 
-## 5. You confirm
+## 6. You confirm
 
 You review the highlights and decide per item: **✓** accepts it, **✕** rejects it
 (removals show as struck-through tombstones — dragging one just moves it). The ✓✕
@@ -73,7 +93,7 @@ chips map to `artuml ack` / `artuml reject` with ref keys, and the editor's
 **Mark AI changes seen** / **Reject AI changes** buttons handle everything at once.
 Rejecting reverts the diagram, so your agent never acts on a proposal you turned down.
 
-## 6. Scan again
+## 7. Scan again
 
 After the agent writes code, `artuml scan` picks up the new classes and merges
 them into the diagram. The loop continues, with the picture always current.
