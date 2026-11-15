@@ -12,7 +12,7 @@ The human owns the architecture. You execute what the diagram says — nothing m
 
 1. Run `artuml diff`. It prints a markdown change report (the human's diagram edits since last time, with renames detected as renames) and consumes it.
 2. Run `artuml scaffold`. It applies the mechanical diagram-to-code mapping itself and refreshes `impl-diff.json` when done:
-   - **created**: stub files for diagrammed-but-missing classes, stub members spliced into existing files (body style from the `stubBody` config; diagram notes emitted as `// NOTE:` comments above the stub).
+   - **created**: stub files for diagrammed-but-missing classes, stub members spliced into existing files (body style from the `stubBody` config; diagram notes emitted as `// ARTISAN-NOTE:` comments above the stub).
    - **patched**: signature mismatches — only the differing parts change.
    - **renamed**: applied silently — for a class the file (sole-type files), the declaration and in-file member identifiers; for a member its identifier in its own file.
    - **moved**: files relocated when a node's directory (`dir`) was edited — sole-type files only.

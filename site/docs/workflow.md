@@ -54,7 +54,7 @@ code drift not in the diagram, and signature mismatches. This read is what
 
 The agent runs `artuml scaffold`, which applies the diff to the code mechanically:
 
-- **Created** — stub classes for missing diagram classes (`NotImplementedException` bodies, notes as `// NOTE:` comments, placed via the node's `dir` folder), plus new members spliced into existing files
+- **Created** — stub classes for missing diagram classes (`NotImplementedException` bodies, notes as `// ARTISAN-NOTE:` comments, placed via the node's `dir` folder), plus new members spliced into existing files
 - **Renamed** — class file, declaration and in-file members renamed; call sites outside the file stay agent work
 - **Patched** — changed member signatures updated, kind changes applied
 - **Moved** — a class whose folder drifted from its `dir` is moved into place

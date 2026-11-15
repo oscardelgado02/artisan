@@ -8,14 +8,14 @@ description: "Serve the Artisan editor at localhost:4173 with live autosave to .
 
 Start the local editor server. Use this when the human edits in Firefox/Safari (no Connect file there) or wants live autosave.
 
-1. Run `artuml serve` in the project root (blocks — run it in the background: `(artuml serve &>/tmp/artisan-serve.log &)`).
+1. Run `artuml serve` in the project root (blocks — run it in the background: `(ARTISAN_NO_BROWSER=1 artuml serve &>/tmp/artisan-serve.log &)`).
 2. Verify it is up: `curl -s http://localhost:4173/api/status` → expect `{"server":true,...}`. If it fails, check `.artisan/editor/` exists — if not, run `artuml scan` first, then retry.
 3. Tell the human: "Editor at **http://localhost:4173** — open it in your browser; edits autosave to `.artisan/diagram.json`. Leave the server running while you edit."
-4. Note: `artuml serve` also auto-opens the default browser (xdg-open/open) when run interactively.
+4. Note: `artuml serve` also auto-opens the default browser (xdg-open/open) — pass `ARTISAN_NO_BROWSER=1` to skip.
 
 ## Stopping
 
-- Kill with: `pkill -f "artisan.mjs serve"` (or stop the process started in step 1). A new `serve` on a busy port fails — use `--port N` for a different port.
+- Kill with: `pkill -f "artuml.mjs serve"` (or stop the process started in step 1). A new `serve` on a busy port fails — use `--port N` for a different port.
 
 ## Rules
 
