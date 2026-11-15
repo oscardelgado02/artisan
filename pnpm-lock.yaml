@@ -9,23 +9,23 @@ importers:
   .:
     dependencies:
       artisan-uml-cli:
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.6.0
+        version: 0.6.0
 
 packages:
 
-  artisan-uml-cli@0.1.0:
-    resolution: {integrity: sha512-cxfKTADaDuRS55mI0n9t5jMCB8nA5nWO7p+vfjW1tLAWg39J4hGcnAy+Wv9u8Kg7kJzKU1jCvKcoG6/6lF5jjQ==}
+  artisan-uml-cli@0.6.0:
+    resolution: {integrity: sha512-moh4OkuB9ToMQib38GpxQlne7j/9bWy/CiTJ7H+XjrUdsmNDH9SidIqrzF7N6As/pFdr712KU5zgesWtUCcOkw==}
     engines: {node: '>=18'}
     hasBin: true
 
-  artisan-uml@1.0.0:
-    resolution: {integrity: sha512-eMMRhE/0pRIJhWWSXH92p4tP83QroPmEmM9dx87qY+xYZImGqSjniwJ0LKRaWbGQOj/P1uMgev6DCaYbcm9O6g==}
+  artisan-uml@1.3.0:
+    resolution: {integrity: sha512-2Eejkh3hU4BKPWfMsnMBZ5/+cTNDN+gHavgEuo5t1afwL+f0hDnn48BtN9NHOI9QFzSuF41cofSopM1YS5eS6w==}
 
 snapshots:
 
-  artisan-uml-cli@0.1.0:
+  artisan-uml-cli@0.6.0:
     dependencies:
-      artisan-uml: 1.0.0
+      artisan-uml: 1.3.0
 
-  artisan-uml@1.0.0: {}
+  artisan-uml@1.3.0: {}
