@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.7.0 — 10.11.2026
+
+### Changed
+- The agent packs ride the CLI's new `scaffold` (0.6.0): `/artisan-scaffold` is now "apply the diff to the code" — `diff` + `mark-ai`, then `artuml scaffold` does the mechanical work (stubs, patches, renames, gated removals), and the agent handles only the judgement calls (call-site refactors outside renamed files, declined removals → one explicit yes → `artuml scaffold --yes`, manual moves of multi-type files, namespace drift). `/artisan-implement` scaffolds first and fills the stubs with real bodies. All six pack files (`opencode`, `claude`, `codex` × scaffold/implement) rewritten — they had drifted into identical copies.
+- `/artisan-architect` can place classes in folders: `--dir PATH` on `add`/`edit node` (bare `--dir` clears).
+- The `artisan-cli` skill documents `scaffold`, `config`, `--dir`, the new `scaffoldDir`/`stubBody` keys and the `impl-diff.json` consume/refresh contract.
+- The packages table and the agent loop in the README include `scaffold` + `config` (`artuml scaffold` applies the diff to the code: stubs, renames, moves, patches; the agent handles the judgement calls). A hub DEVLOG entry covers the pack rewrite.
+
+### Fixed
+- Pack files were byte-identical across tools despite per-tool headers claiming otherwise; each tool's packs are now written in that tool's own format again.
+- `/artisan-status` no longer runs `artuml mark-ai` unconditionally, and `/artisan-scaffold`//`artisan-implement` no longer run it after their consuming `diff` — the CLI (0.6.0) fixed `mark-ai`'s baseline, and calling it when the agent never edited the diagram only risked re-queueing the human's own unacked edits as pending "AI changes". The calls stay where the agent actually changes the diagram: `/artisan-scan` and `/artisan-architect`.
+- The `artisan-cli` skill's file table names `last-ai.json` as the baseline for both `diff` and `mark-ai` (matches the CLI fix above).
+- The scaffold packs and the workflow docs said scaffold emits diagram notes as `// NOTE:` comments — the CLI (0.6.0) switched to the unique `// ARTISAN-NOTE:` marker (it is load-bearing: `scan` extracts it back into diagram notes, and `scaffold` finds and removes its own comments without touching hand-written ones). Corrected in all three `/artisan-scaffold` packs and `site/docs/workflow.md`.
+- The serve packs' kill command `pkill -f "artisan.mjs serve"` never matched the server process (`node <path>/artuml.mjs serve`) — the pattern is now `pkill -f "artuml.mjs serve"`.
+- The serve packs said `artuml serve` auto-opens the browser "when run interactively" — it actually opens unless `ARTISAN_NO_BROWSER=1` is set, including the packs' own backgrounded start; the background command in step 1 now sets `ARTISAN_NO_BROWSER=1` and the note states the rule.
+- The `artisan-cli` skill's command table now lists the flags it omitted: `scan [--lang csharp]` (the one language-seam flag) and `impl-diff [--src DIR]`.
+
 ## 0.6.0 — 27.10.2026
 
 ### Added

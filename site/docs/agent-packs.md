@@ -7,7 +7,7 @@ an `artisan-cli` skill (opencode) holding the CLI reference:
 | --- | --- |
 | `/artisan-scan` | scan the code into a class diagram, open it in the editor, summarize the architecture (scanner speaks C# only today — see the `artisan-cli` skill's language note) |
 | `/artisan-serve` | serve the editor at `localhost:4173` with live autosave to `diagram.json` (the Firefox/Safari path — no Connect file there) |
-| `/artisan-scaffold` | turn your diagram edits into code stubs: renames refactored, new types scaffolded, existing members untouched |
+| `/artisan-scaffold` | run `artuml scaffold` after `diff`: the CLI does the mechanical work (stub classes, member splices, signature patches, renames, moves, one gated removal prompt), the agent finishes what needs judgement — call sites, real bodies per notes |
 | `/artisan-implement` | same, plus real method bodies following your notes |
 | `/artisan-architect` | the agent proposes an architecture change directly in the diagram; you review the amber highlights |
 | `/artisan-status` | report pending changes in both directions and who made them |
@@ -65,19 +65,20 @@ or just paste it at the start of a session:
 
 > This project uses Artisan for architecture. The class diagram lives in
 > `.artisan/diagram.json`; read `.artisan/diagram.puml` to see the architecture.
-> - To see my design changes: run `artuml diff` and follow the markdown report.
->   Refactor renames, scaffold additions, honor the notes, and never modify
->   existing members or delete anything without asking me.
-> - To implement: write the code the report describes, following every note.
+> - To see my design changes: run `artuml diff`, then `artuml scaffold` — the
+>   CLI applies the mechanical work (stubs, renames, patches, moves; removals
+>   are gated, never delete anything by hand). Finish only the judgement items:
+>   call sites of renamed classes, real method bodies, anything listed under
+>   *For the agent*. Honor every note.
 > - If you propose architecture changes: edit `.artisan/diagram.json`, run
 >   `artuml mark-ai`, and wait for my confirmation.
 > - I design the architecture; you implement it. Ask before anything destructive.
 
 **4. Work the loop**
 
-You redesign in the editor → `artuml diff` tells the agent → it codes → its own
-architecture proposals come back as amber highlights for you to confirm. Same
-loop, any agent.
+You redesign in the editor → `artuml diff` + `artuml scaffold` do the mechanical
+work → the agent finishes the judgement calls → its own architecture proposals
+come back as amber highlights for you to confirm. Same loop, any agent.
 
 ## Pack rules
 

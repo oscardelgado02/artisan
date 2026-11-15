@@ -10,7 +10,7 @@ and Codex, plus the installer. The editor and the CLI ship as npm packages and a
 imported from there.
 
 - [`artisan-uml`](https://www.npmjs.com/package/artisan-uml) — the editor (source of truth: `.artisan/diagram.json`)
-- [`artisan-uml-cli`](https://www.npmjs.com/package/artisan-uml-cli) — the CLI (`scan`, `diff`, `impl-diff`, `mark-ai`, `ack`, `status`, `add`/`edit`/`remove`, `editor`, `serve`)
+- [`artisan-uml-cli`](https://www.npmjs.com/package/artisan-uml-cli) — the CLI (`scan`, `diff`, `impl-diff`, `scaffold`, `config`, `mark-ai`, `ack`, `status`, `add`/`edit`/`remove`, `editor`, `serve`)
 
 ## Install
 
@@ -47,8 +47,8 @@ works in any browser.
 1. `artuml scan` — C# → diagram + PlantUML mirror agents can read
 2. You redesign: drag, rewire, rename, add classes, write notes
 3. `artuml diff` — a markdown report of your changes for the agent
-4. The agent refactors code (renames stay renames; existing members untouched)
-5. `artuml mark-ai` — the agent's own architecture proposals appear amber in your editor
+4. `artuml scaffold` — applies the diff to the code: stubs, renames, moves, patches, gated removals
+5. The agent finishes: call-site refactors, real method bodies per your notes; its own proposals via `mark-ai` appear amber
 6. You confirm: ✓ per item (`artuml ack`), ✕ reverts it (`artuml reject`) — both sides sync
 
 Full loop in [the workflow](workflow.md); every command in the
@@ -64,7 +64,7 @@ paths or file meanings:
 | --- | --- |
 | `/artisan-scan` | scan code → class diagram + PlantUML, open the editor (C# only for the scanner, today) |
 | `/artisan-serve` | live editor server on localhost — recommended for editing the architecture |
-| `/artisan-scaffold` | diagram edits → code stubs (renames detected, existing code untouched) |
+| `/artisan-scaffold` | `artuml scaffold` applies the diff mechanically: stubs created, signatures patched, renames applied — agent keeps the judgement calls |
 | `/artisan-implement` | diagram edits → real code with bodies, per notes |
 | `/artisan-architect` | agent proposes an architecture change; you review amber highlights |
 | `/artisan-status` | who changed what, what is pending |
