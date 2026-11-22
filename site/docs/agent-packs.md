@@ -10,7 +10,7 @@ an `artisan-cli` skill (opencode) holding the CLI reference:
 | `/artisan-serve` | serve the editor at `localhost:4173` with live autosave to `diagram.json` (the Firefox/Safari path — no Connect file there) |
 | `/artisan-context` | create or review `.artisan/context.md` — the project intent doc (Overview, Glossary, Requirements, Invariants, Roadmap, Non-goals) the other packs read |
 | `/artisan-scaffold` | run `artuml scaffold` after `diff`: the CLI does the mechanical work (stub classes, member splices, signature patches, renames, moves, one gated removal prompt), the agent finishes what needs judgement — call sites, real bodies per notes |
-| `/artisan-implement` | same, plus real method bodies following your notes |
+| `/artisan-implement` | same, plus real method bodies following your notes; if the code seems to need classes/methods beyond the diagram, it proposes the diagram change and waits for your approval |
 | `/artisan-architect` | the agent proposes an architecture change directly in the diagram; you review the amber highlights |
 | `/artisan-status` | report pending changes in both directions and who made them |
 

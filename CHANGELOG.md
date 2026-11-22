@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.1 — 22.11.2026
+
+### Changed
+- `/artisan-implement` (all three tools) hard-stops on out-of-diagram architecture changes: when the implementation seems to need a class or method the diagram doesn't declare, the agent stops writing code, puts the change in the diagram (`artuml add/edit` + `artuml mark-ai` → amber pending), explains why, and waits for explicit approval (editor **Mark seen**, `artuml ack`, or a reply) before re-running `artuml scaffold` and continuing. New Rule: never hand-create a class or member the diagram doesn't declare. `agents/README.md`, `site/docs/agent-packs.md` and `site/docs/workflow.md` mention the pause.
+
 ## 0.8.0 — 22.11.2026
 
 ### Added

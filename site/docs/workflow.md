@@ -79,8 +79,9 @@ badge — hover it for what to do.
 
 Refactors rename call sites, implements the real method bodies per your notes.
 When the agent itself wants to change the architecture (new class, new
-interface), it edits the diagram and runs `artuml mark-ai`: the changes become
-**amber highlights** in your editor.
+interface), it puts the change in the diagram and runs `artuml mark-ai` — the
+changes become **amber highlights** in your editor — then asks you to review
+and waits for your approval before writing any code.
 
 Changes made from the terminal (`artuml add`/`edit`/`remove`) light the same
 highlights — they are recorded in `pending.json` too, so they survive a page
