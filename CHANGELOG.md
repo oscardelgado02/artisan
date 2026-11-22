@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.8.1 — 22.11.2026
+
+### Added
+- New workflow pack **`/artisan-bugfix`** in all three tools: for a bug report, the agent diagnoses first (reads the code paths and the diagram), explains bug → root cause → proposed solution in plain words, expresses any diagram change through `artuml add/edit` + `artuml mark-ai` (amber pending) — or says explicitly that none is needed — and waits for explicit approval (Mark seen / `artuml ack` / reply) before writing any code; after approval it runs `artuml scaffold` when the diagram changed, writes the fix honoring notes, refactors call sites and reports file by file. Rules: no edits before confirmation, never hand-create undiagrammed types/members, the human's diagnosis always wins. Pack count is now nine per flavor; `agents/README.md`, the root `README.md`, the `artisan-cli` skill, `site/docs/agent-packs.md`, `site/docs/index.md` and the landing page (pack table + agent-loop steps) document it.
+
+### Changed
+- Proposals are questions, not recommendations (all three tools): `/artisan-context` phrases section drafts, keep/edit/rewrite offers and new Glossary lines as 🎨 asks with the draft attached ("Should the Glossary name X as ...? Here's a draft line:"), and the human approves or edits before anything is written — new Rule in the pack. The same phrasing lands in `/artisan-scan`, `/artisan-scaffold`, `/artisan-implement`, `/artisan-architect` (Glossary lines inside proposals) and `/artisan-status`. `agents/README.md` and `site/docs/agent-packs.md` mention it.
+- `/artisan-implement` (all three tools) hard-stops on out-of-diagram architecture changes: when the implementation seems to need a class or method the diagram doesn't declare, the agent stops writing code, puts the change in the diagram (`artuml add/edit` + `artuml mark-ai` → amber pending), explains why, and waits for explicit approval (editor **Mark seen**, `artuml ack`, or a reply) before re-running `artuml scaffold` and continuing. New Rule: never hand-create a class or member the diagram doesn't declare. `agents/README.md`, `site/docs/agent-packs.md` and `site/docs/workflow.md` mention the pause.
+
 ## 0.8.0 — 22.11.2026
 
 ### Added

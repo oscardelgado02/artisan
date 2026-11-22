@@ -20,9 +20,10 @@ The human owns the architecture. You execute what the diagram says — nothing m
    - **Renames**: refactor call sites outside the renamed file.
    - **Declined removals / code not in the diagram**: relay to the human once; only rerun `artuml scaffold --yes` after an explicit yes.
    - **Manual moves** (shared multi-type files) and **namespace drift** after moves: resolve or ask the human.
-   - **Glossary drift**: if the report added, renamed or removed types and `.artisan/context.md` exists, propose matching `## Glossary` lines to the human — propose once, never edit the file silently.
-6. If a body needs a decision neither the diagram nor `.artisan/context.md` answers, ask the human — don't invent architecture.
-7. Report what you did, file by file.
+   - **Glossary drift**: if the report added, renamed or removed types and `.artisan/context.md` exists, ask `🎨 Should the Glossary name X as "..."? Here's a draft line: ...` for each new node — ask once, never edit the file silently.
+6. **Architecture change mid-implement — hard stop.** If the work seems to need a class or method that isn't in the diagram (new class, new member, member moved across types), stop writing code. Put the change in the diagram first — `artuml add/edit node|member` (or the editor), then `artuml mark-ai` so it queues as amber pending — and explain why you believe it's needed. Ask the human: `🎨 Tell me when you've finished checking the last diagram change`, and wait for approval (Mark seen in the editor, `artuml ack`, or a reply). Only after approval re-run `artuml scaffold` to apply it, then continue with the bodies. Never hand-write a class or member the diagram doesn't declare.
+7. If a body needs a decision neither the diagram nor `.artisan/context.md` answers, ask the human — don't invent architecture.
+8. Report what you did, file by file.
 
 ## Removals — always one prompt, never silent
 
@@ -35,4 +36,5 @@ Config: project `.artisan/config.json` wins, global fallback — exact keys and 
 ## Rules
 
 - Never modify or delete an existing class/member unless the scaffold or diff report lists it.
+- Never hand-create a class or member the diagram doesn't declare — propose it in the diagram and wait for human approval (step 6).
 - Work in the project's stack and follow its conventions — today the scanner supports C# only; the diagram is the source of architectural truth.

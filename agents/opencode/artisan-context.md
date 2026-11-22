@@ -22,7 +22,7 @@ The human owns this file. You propose; they approve every line.
 
 1. Read `.artisan/diagram.json` / `.artisan/diagram.puml` if present: pre-draft the Overview (what the project is) and Glossary (one term per diagram node name) from real node names.
 2. Walk the sections in order — Overview, Glossary, Requirements (`- R1: ...`), Invariants, Roadmap (Now / Next / Later), Non-goals:
-   - Propose a draft for the section; the human edits/approves; write it to the file before moving on.
+   - Propose as a question, never a recommendation: `🎨 Should the Overview say ...? Here's a draft:` — attach the draft, the human edits/approves; write it to the file before moving on.
    - Every section is optional except Overview — skip what the human doesn't want.
    - Ask follow-ups a form can't: "who is this for?", "what must never happen?"
 3. Keep the doc to exactly those six `##` sections — no extras.
@@ -30,9 +30,9 @@ The human owns this file. You propose; they approve every line.
 
 ## Review
 
-1. Read the file. Walk section by section: for each, offer keep / edit / rewrite. Never silently rewrite human prose — propose, human approves.
+1. Read the file. Walk section by section: for each, ask keep / edit / rewrite as a question. Never silently rewrite human prose — ask, human approves.
 2. Reconcile against the current diagram (`artuml diff --peek` + `.artisan/diagram.json`):
-   - node names missing from the Glossary → propose lines
+   - node names missing from the Glossary → ask `🎨 Should the Glossary name X as "..."? Here's a draft line: ...`
    - Glossary terms with no node anymore → flag
    - Invariants that contradict the diagram → surface
    - Roadmap "Now" items already reflected in the diagram → suggest moving them on
@@ -41,5 +41,6 @@ The human owns this file. You propose; they approve every line.
 ## Rules
 
 - The human's word always wins over your drafts.
+- Proposals are questions, not recommendations — draft attached, human approves or edits before anything is written.
 - Propose once per question; don't re-ask what they declined.
 - If `$ARGUMENTS` names a section, work on that section only.

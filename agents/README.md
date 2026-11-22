@@ -1,16 +1,17 @@
 # Agent packs
 
-`/artisan-*` chat commands for each agentic tool. Eight everywhere:
+`/artisan-*` chat commands for each agentic tool. Nine everywhere:
 
 | Command | What it does |
 |---------|--------------|
 | `/artisan-set-up` | day-zero: scan the project + create `.artisan/context.md` in one guided pass |
 | `/artisan-scan` | scan code → class diagram + PlantUML, open in editor (scanner speaks C# today; see the CLI reference for language support) |
 | `/artisan-serve` | serve the editor at localhost:4173 with live autosave (for Firefox/Safari, no Connect file) |
-| `/artisan-context` | create or review `.artisan/context.md` — the project intent doc (Overview, Glossary, Requirements, Invariants, Roadmap, Non-goals) that the other packs read |
+| `/artisan-context` | create or review `.artisan/context.md` — the project intent doc (Overview, Glossary, Requirements, Invariants, Roadmap, Non-goals) that the other packs read; every proposal arrives as a question with a draft attached |
 | `/artisan-scaffold` | your diagram edits → code stubs (renames detected, existing code untouched) |
-| `/artisan-implement` | your diagram edits → real code with bodies, per notes |
+| `/artisan-implement` | your diagram edits → real code with bodies, per notes; if the code seems to need classes/methods beyond the diagram, proposes the diagram change and waits for your approval |
 | `/artisan-architect` | AI proposes an architecture change in the diagram (amber highlights); you review |
+| `/artisan-bugfix` | bug reports → diagnose first, propose the fix and any diagram change, wait for your approval, then the fix |
 | `/artisan-status` | who changed what, what's pending |
 
 `.artisan/context.md` is the human-authored intent doc: `/artisan-set-up` and

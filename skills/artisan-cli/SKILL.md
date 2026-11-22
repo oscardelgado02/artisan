@@ -6,7 +6,7 @@ description: "artuml (artisan-uml-cli) command reference — commands, flags, co
 
 # artuml CLI reference
 
-This skill is a reference, not a workflow — the workflow packs (`/artisan-scan`, `/artisan-serve`, `/artisan-scaffold`, `/artisan-implement`, `/artisan-architect`, `/artisan-status`) tell you *when* to run what. Load this one when you need exact flags, config paths, or file semantics.
+This skill is a reference, not a workflow — the workflow packs (`/artisan-scan`, `/artisan-serve`, `/artisan-scaffold`, `/artisan-implement`, `/artisan-architect`, `/artisan-bugfix`, `/artisan-status`) tell you *when* to run what. Load this one when you need exact flags, config paths, or file semantics.
 
 ## Commands
 

@@ -25,7 +25,7 @@ The human owns the architecture. You execute what the diagram says — nothing m
    - **Declined removals / code not in the diagram**: do not adopt silently. Ask the human once (removal rule below); if they confirm, rerun `artuml scaffold --yes` to complete the removals.
    - **Manual moves**: shared multi-type files are listed for hand-moving — move them, keeping one type per file where practical.
    - **Namespace drift**: after a move, the folder/namespace mismatch is reported — align it, or ask the human.
-   - **Glossary drift**: if the report added, renamed or removed types and `.artisan/context.md` exists, propose matching `## Glossary` lines to the human — propose once, never edit the file silently.
+   - **Glossary drift**: if the report added, renamed or removed types and `.artisan/context.md` exists, ask `🎨 Should the Glossary name X as "..."? Here's a draft line: ...` for each new node — ask once, never edit the file silently.
 4. Report what you did, file by file.
 
 ## Removals — always one prompt, never silent
