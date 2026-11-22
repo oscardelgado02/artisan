@@ -16,7 +16,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "artisan-uml-cli": "^0.7.0"
+    "artisan-uml-cli": "^0.7.1"
   },
   "scripts": {
     "artuml": "artuml"
