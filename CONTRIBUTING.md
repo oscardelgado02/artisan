@@ -32,7 +32,7 @@ pnpm run artuml help    # the CLI, from your local install
 
 ## Pull requests
 
-1. Fork, create a branch from `dev`.
+1. Fork, create a branch from `main`.
 2. Keep the wording style of the existing packs (short, imperative, tool-agnostic).
 3. If user-facing, update the docs (`docs/`).
 4. Open the PR describing what a user will notice after merging.
