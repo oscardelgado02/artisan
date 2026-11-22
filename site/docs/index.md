@@ -23,7 +23,7 @@ npx artisan-agent install
 What it does:
 
 1. installs the CLI globally: `pnpm add -g artisan-uml-cli`
-2. copies the `/artisan-*` packs (six workflow commands + a CLI reference) into your agents' command folders
+2. copies the `/artisan-*` packs (eight workflow commands + a CLI reference) into your agents' command folders
    (opencode: `~/.config/opencode/commands/`, Claude Code: `~/.claude/commands/`,
    Codex: `~/.codex/prompts/`)
 
@@ -44,7 +44,7 @@ works in any browser.
 
 ## The workflow
 
-1. `artuml scan` — C# → diagram + PlantUML mirror agents can read
+1. `artuml scan` — C# → diagram + PlantUML mirror agents can read; seeds `.artisan/context.md` (the intent doc — you fill it, agents read it)
 2. You redesign: drag, rewire, rename, add classes, write notes
 3. `artuml diff` — a markdown report of your changes for the agent
 4. `artuml scaffold` — applies the diff to the code: stubs, renames, moves, patches, gated removals
@@ -56,14 +56,16 @@ Full loop in [the workflow](workflow.md); every command in the
 
 ## Agent packs
 
-Six workflow commands, same behavior in all three tools — plus an `artisan-cli`
+Eight workflow commands, same behavior in all three tools — plus an `artisan-cli`
 reference skill (opencode) that the agent loads when it needs flags, config
 paths or file meanings:
 
 | Command | What it does |
 | --- | --- |
+| `/artisan-set-up` | day zero: scan + create `.artisan/context.md` (the project intent doc) in one pass |
 | `/artisan-scan` | scan code → class diagram + PlantUML, open the editor (C# only for the scanner, today) |
 | `/artisan-serve` | live editor server on localhost — recommended for editing the architecture |
+| `/artisan-context` | create or review `.artisan/context.md` — Overview, Glossary, Requirements, Invariants, Roadmap, Non-goals |
 | `/artisan-scaffold` | `artuml scaffold` applies the diff mechanically: stubs created, signatures patched, renames applied — agent keeps the judgement calls |
 | `/artisan-implement` | diagram edits → real code with bodies, per notes |
 | `/artisan-architect` | agent proposes an architecture change; you review amber highlights |

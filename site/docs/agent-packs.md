@@ -1,16 +1,25 @@
 # Agent packs
 
-Six workflow slash commands, identical in opencode, Claude Code and Codex, plus
+Eight workflow slash commands, identical in opencode, Claude Code and Codex, plus
 an `artisan-cli` skill (opencode) holding the CLI reference:
 
 | Command | What it does |
 | --- | --- |
+| `/artisan-set-up` | day zero: scan the project into `.artisan/` and create `.artisan/context.md` in one guided pass |
 | `/artisan-scan` | scan the code into a class diagram, open it in the editor, summarize the architecture (scanner speaks C# only today — see the `artisan-cli` skill's language note) |
 | `/artisan-serve` | serve the editor at `localhost:4173` with live autosave to `diagram.json` (the Firefox/Safari path — no Connect file there) |
+| `/artisan-context` | create or review `.artisan/context.md` — the project intent doc (Overview, Glossary, Requirements, Invariants, Roadmap, Non-goals) the other packs read |
 | `/artisan-scaffold` | run `artuml scaffold` after `diff`: the CLI does the mechanical work (stub classes, member splices, signature patches, renames, moves, one gated removal prompt), the agent finishes what needs judgement — call sites, real bodies per notes |
 | `/artisan-implement` | same, plus real method bodies following your notes |
 | `/artisan-architect` | the agent proposes an architecture change directly in the diagram; you review the amber highlights |
 | `/artisan-status` | report pending changes in both directions and who made them |
+
+`.artisan/context.md` is the human-authored intent doc: `artuml scan` seeds it
+as a template once (the tool never rewrites it), `/artisan-set-up` and
+`/artisan-context` fill or review it with you, and the other packs read it —
+architect/implement/scaffold follow its Requirements and Invariants (cited in
+their output, e.g. "follows R2"), and five packs propose Glossary updates when
+the diagram's node names change. Proposals only — the packs never edit it.
 
 The `artisan-cli` reference ships as a **skill**, not a slash command: repo
 source `skills/artisan-cli/SKILL.md`, installed to
@@ -65,6 +74,8 @@ or just paste it at the start of a session:
 
 > This project uses Artisan for architecture. The class diagram lives in
 > `.artisan/diagram.json`; read `.artisan/diagram.puml` to see the architecture.
+> If `.artisan/context.md` exists, read it first — it holds the project intent,
+> requirements and invariants that bind your proposals and code.
 > - To see my design changes: run `artuml diff`, then `artuml scaffold` — the
 >   CLI applies the mechanical work (stubs, renames, patches, moves; removals
 >   are gated, never delete anything by hand). Finish only the judgement items:
@@ -88,3 +99,5 @@ Every pack ends with the same ground rules:
 - Work in the project's stack and follow its conventions — today the scanner supports C# only; the diagram is the source of architectural truth.
 - The human decides the architecture, the agent implements it.
 - Anything destructive requires explicit human approval.
+- Questions go through the harness's own question UI (options / multiple-choice / free text) with 🎨 in the question text; when no question UI exists, the line starts with 🎨❓ — artisan asks are always identifiable.
+- `.artisan/context.md` is human-authored: packs read it and propose Glossary updates; only `/artisan-context`, `/artisan-set-up` and you change it.

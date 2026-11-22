@@ -628,7 +628,7 @@
         <div class="step reveal">
           <span class="n">01</span>
           <h3><code>artuml scan</code></h3>
-          <p>C# → diagram: every class, all six UML relations, layered layout, notes preserved. Re-scans merge; nothing you did is lost.</p>
+          <p>C# → diagram: every class, all six UML relations, layered layout, notes preserved. Re-scans merge; nothing you did is lost. Also seeds <code>.artisan/context.md</code> — the intent doc you fill, the agent reads.</p>
           <span class="arrow">→</span>
         </div>
         <div class="step reveal">
@@ -733,7 +733,9 @@
       <table class="packs-table reveal">
         <thead><tr><th>Command</th><th>What it does</th></tr></thead>
         <tbody>
+          <tr><td class="cmd">/artisan-set-up</td><td>day zero: scan the project + create <code>.artisan/context.md</code> in one guided pass</td></tr>
           <tr><td class="cmd">/artisan-scan</td><td>scan code → diagram + PlantUML, open the editor (C# only today)</td></tr>
+          <tr><td class="cmd">/artisan-context</td><td>create or review <code>.artisan/context.md</code> — the intent doc (Overview, Glossary, Requirements, Invariants, Roadmap, Non-goals) the other packs read</td></tr>
           <tr><td class="cmd">/artisan-scaffold</td><td>diff → <code>artuml scaffold</code>: the CLI applies the mechanical work, agent keeps judgement calls</td></tr>
           <tr><td class="cmd">/artisan-implement</td><td>scaffold first, then real bodies per notes</td></tr>
           <tr><td class="cmd">/artisan-architect</td><td>agent proposes an architecture change; you review</td></tr>
