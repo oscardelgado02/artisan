@@ -13,7 +13,7 @@ Show the sync state between the human and the AI.
 1. Run `artuml status` in the project root. It reports the counters AND — when there are unseen human changes — the actual change report (as a non-consuming peek; nothing is marked seen).
 2. Relay the result plainly:
    - diagram size (types, relations)
-   - **Unseen human changes** — show them from the peek; the AI should run `/artisan-scaffold` or `/artisan-implement` to consume them. If they add, rename or remove types and `.artisan/context.md` exists, offer matching `## Glossary` updates once (skip if the human declined before)
+   - **Unseen human changes** — show them from the peek; the AI should run `/artisan-scaffold` or `/artisan-implement` to consume them. If they add, rename or remove types and `.artisan/context.md` exists, ask matching `## Glossary` questions once — `🎨 Should the Glossary name X as "..."? Here's a draft line: ...` (skip if the human declined before)
    - **Pending AI changes** — the human should review them in the editor (amber highlights) and confirm with "Mark seen"
 3. If both counters are zero, say the human and AI are in sync.
 

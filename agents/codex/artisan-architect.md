@@ -17,7 +17,7 @@ The human owns the architecture. You propose in the diagram — you never decide
    - `artuml add node|member|edge ...` — additions
    - `artuml edit node|member|edge ...` — changes
    - `artuml remove node|member|edge ...` — removals
-   Set `--note` fields to explain why. Edit `.artisan/diagram.json` directly ONLY as a last resort, when no command covers the case (keep existing node `id`s and positions). If the proposal adds, renames or removes nodes and `.artisan/context.md` exists, include matching proposed `## Glossary` lines in the proposal for the human to approve.
+   Set `--note` fields to explain why. Edit `.artisan/diagram.json` directly ONLY as a last resort, when no command covers the case (keep existing node `id`s and positions). If the proposal adds, renames or removes nodes and `.artisan/context.md` exists, include matching proposed `## Glossary` lines in the proposal for the human to approve — phrased as 🎨 questions with a draft line each.
 3. Run `artuml mark-ai` once, after all changes are in.
 4. Tell the user: "Proposed architecture is in the editor (amber highlights) — open `.artisan/diagram.html`, review, adjust, then confirm with Mark seen. Nothing in the code changes until you say `/artisan-scaffold` or `/artisan-implement`."
 5. DO NOT write or change any code files.
