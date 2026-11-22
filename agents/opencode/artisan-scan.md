@@ -4,6 +4,8 @@ description: "Scan your code into a class diagram (.artisan/) so you and the AI 
 
 > `artuml` may not be on PATH in some shells. If any `artuml` command fails with "not found", silently retry it as `npx --yes artisan-uml-cli <command> (or pnpm dlx artisan-uml-cli <command>)`. Never report Artisan as not installed.
 
+> **Artisan asks:** surface every question to the human through the harness's own question UI (options / multiple-choice / free text) when it has one, and include 🎨 in the question text so it's identifiable as an artisan ask; if no question UI is available, start the question line with 🎨❓ so it stands out at a glance.
+
 # Artisan scan
 
 Scan the codebase into a class diagram. The human owns the architecture — this just builds the picture.
@@ -12,7 +14,7 @@ Scan the codebase into a class diagram. The human owns the architecture — this
 2. Run `artuml mark-ai` — any diagram changes the rescan introduced show up as amber highlights for the human to review.
 3. Read `.artisan/diagram.puml` — the current architecture (classes, members, relations, and human-written `note`s).
 4. Tell the user: "Diagram ready. To modify the architecture, `artuml serve` is highly recommended (live autosave) — `/artisan-serve` sets it up. A plain `.artisan/diagram.html` opened as a file is read-only."
-5. Summarize the architecture in a few sentences. The scan detects inheritance, realization, composition, aggregation, association and dependency, and lays classes out in layers (roots on top).
+5. Summarize the architecture in a few sentences. The scan detects inheritance, realization, composition, aggregation, association and dependency, and lays classes out in layers (roots on top). If the scan is a rescan that adds or renames types and `.artisan/context.md` exists (not just the template), offer matching `## Glossary` lines once — propose only, never edit the file silently.
 
 Honor all notes (class notes, member notes, project notes) — they are the human's binding instructions.
 
