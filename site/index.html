@@ -663,6 +663,12 @@
         </div>
         <div class="step reveal">
           <span class="n">07</span>
+          <h3>The agent fixes bugs</h3>
+          <p><code>/artisan-bugfix</code> diagnoses before code: root cause explained, fix proposed in the diagram as <strong style="color:var(--ai-change)">amber</strong>, nothing written until you approve.</p>
+          <span class="arrow">→</span>
+        </div>
+        <div class="step reveal">
+          <span class="n">08</span>
           <h3><code>artuml ack</code></h3>
           <p>You confirm, both sides sync, and the next <code>scan</code> keeps the picture current. Then the loop runs again.</p>
         </div>
@@ -739,6 +745,7 @@
           <tr><td class="cmd">/artisan-scaffold</td><td>diff → <code>artuml scaffold</code>: the CLI applies the mechanical work, agent keeps judgement calls</td></tr>
           <tr><td class="cmd">/artisan-implement</td><td>scaffold first, then real bodies per notes</td></tr>
           <tr><td class="cmd">/artisan-architect</td><td>agent proposes an architecture change; you review</td></tr>
+          <tr><td class="cmd">/artisan-bugfix</td><td>bug reports → diagnose, propose the fix + diagram change, waits for your approval</td></tr>
           <tr><td class="cmd">/artisan-status</td><td>pending changes in both directions</td></tr>
           <tr><td class="cmd">artisan-cli</td><td>skill: artuml CLI reference — commands, flags, config locations (<code>npx artisan-agent install</code>)</td></tr>
         </tbody>

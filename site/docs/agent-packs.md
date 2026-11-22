@@ -1,6 +1,6 @@
 # Agent packs
 
-Eight workflow slash commands, identical in opencode, Claude Code and Codex, plus
+Nine workflow slash commands, identical in opencode, Claude Code and Codex, plus
 an `artisan-cli` skill (opencode) holding the CLI reference:
 
 | Command | What it does |
@@ -12,6 +12,7 @@ an `artisan-cli` skill (opencode) holding the CLI reference:
 | `/artisan-scaffold` | run `artuml scaffold` after `diff`: the CLI does the mechanical work (stub classes, member splices, signature patches, renames, moves, one gated removal prompt), the agent finishes what needs judgement — call sites, real bodies per notes |
 | `/artisan-implement` | same, plus real method bodies following your notes; if the code seems to need classes/methods beyond the diagram, it proposes the diagram change and waits for your approval |
 | `/artisan-architect` | the agent proposes an architecture change directly in the diagram; you review the amber highlights |
+| `/artisan-bugfix` | for bug reports: the agent diagnoses first, explains the root cause, proposes the fix (and any diagram change as amber pending), waits for your approval — only then writes the fix |
 | `/artisan-status` | report pending changes in both directions and who made them |
 
 `.artisan/context.md` is the human-authored intent doc: `artuml scan` seeds it

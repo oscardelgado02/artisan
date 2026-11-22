@@ -33,7 +33,7 @@ npx artisan-agent install
 ```
 
 The installer installs the CLI (`pnpm add -g artisan-uml-cli`) and copies the
-`/artisan-*` packs — eight workflow commands and the `artisan-cli` skill — into
+`/artisan-*` packs — nine workflow commands and the `artisan-cli` skill — into
 your agents' command folders (opencode, Claude Code, Codex). It detects which
 tools you have; use `npx artisan-agent install --all`, `--project` or
 `--tool opencode` to control it, and `--cli global|local|no` for the CLI install
@@ -78,7 +78,7 @@ Every command: [CLI docs](https://cli.artisan-uml.dev/).
 
 ## The packs
 
-Eight workflow commands, same behavior in [opencode](https://opencode.ai), Claude
+Nine workflow commands, same behavior in [opencode](https://opencode.ai), Claude
 Code and Codex. Additionally a `artisan-cli` skill for opencode provides the
 `artuml` reference — flags, config paths, file meanings — that the agent loads
 when it needs them:
@@ -92,6 +92,7 @@ when it needs them:
 | `/artisan-scaffold` | diagram edits → code: `artuml scaffold` does the mechanical part, the agent refactors call sites and relays removal candidates |
 | `/artisan-implement` | diagram edits → real code, per notes |
 | `/artisan-architect` | agent proposes an architecture change; you review |
+| `/artisan-bugfix` | bug reports → diagnose, propose the fix + diagram change, wait for your approval, then the fix |
 | `/artisan-status` | pending changes in both directions |
 | `artisan-cli` (skill) | `artuml` CLI reference — commands, flags, config locations |
 

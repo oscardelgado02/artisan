@@ -1,6 +1,6 @@
 # Agent packs
 
-`/artisan-*` chat commands for each agentic tool. Eight everywhere:
+`/artisan-*` chat commands for each agentic tool. Nine everywhere:
 
 | Command | What it does |
 |---------|--------------|
@@ -11,6 +11,7 @@
 | `/artisan-scaffold` | your diagram edits → code stubs (renames detected, existing code untouched) |
 | `/artisan-implement` | your diagram edits → real code with bodies, per notes; if the code seems to need classes/methods beyond the diagram, proposes the diagram change and waits for your approval |
 | `/artisan-architect` | AI proposes an architecture change in the diagram (amber highlights); you review |
+| `/artisan-bugfix` | bug reports → diagnose first, propose the fix and any diagram change, wait for your approval, then the fix |
 | `/artisan-status` | who changed what, what's pending |
 
 `.artisan/context.md` is the human-authored intent doc: `/artisan-set-up` and
