@@ -4,6 +4,8 @@ description: "Serve the Artisan editor at localhost:4173 with live autosave to .
 
 > `artuml` may not be on PATH in some shells. If any `artuml` command fails with "not found", silently retry it as `npx --yes artisan-uml-cli <command> (or pnpm dlx artisan-uml-cli <command>)`. Never report Artisan as not installed.
 
+> **Artisan asks:** surface every question to the human through the harness's own question UI (options / multiple-choice / free text) when it has one, and include 🎨 in the question text so it's identifiable as an artisan ask; if no question UI is available, start the question line with 🎨❓ so it stands out at a glance.
+
 # Artisan serve
 
 Start the local editor server. Use this when the human edits in Firefox/Safari (no Connect file there) or wants live autosave.

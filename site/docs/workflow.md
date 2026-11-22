@@ -26,6 +26,12 @@ every change in both directions.
 all six relation kinds and lays the diagram out in layers, roots on top. Re-scans
 merge: your positions, notes and relations survive.
 
+`scan` also seeds `.artisan/context.md` — a template for the project intent doc
+(Overview, Glossary, Requirements, Invariants, Roadmap, Non-goals) that the
+agent packs read before proposing or implementing. It is human-authored: the
+tool never rewrites it; fill it with `/artisan-context` (or `/artisan-set-up`,
+which scans and fills it in one pass) or by hand.
+
 Open `diagram.html`, click **Connect file** once, and your edits autosave to disk.
 No file-handle API in your browser (Firefox/Safari)? Run `artuml serve` instead
 (`localhost:4173`, live autosave) — or just `/artisan-serve` with your agent pack.
@@ -103,4 +109,5 @@ them into the diagram. The loop continues, with the picture always current.
 - The human always wins: diagram edits and notes are binding.
 - Agents never delete without asking, and never re-create renamed code.
 - Changes are consumed once: `diff` reports only what the agent has not seen yet.
+- `.artisan/context.md` stays human-owned: the tool seeds the template once and never rewrites it; packs read it and propose Glossary updates, but only you (or `/artisan-context`) change it.
 - Everything lives in `.artisan/` next to your project. Nothing is uploaded.

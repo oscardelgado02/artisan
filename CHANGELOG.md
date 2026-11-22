@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.0 — 22.11.2026
+
+### Added
+- `.artisan/context.md` — the project-intent doc (Overview, Glossary, Requirements `R1…`, Invariants, Roadmap Now/Next/Later, Non-goals; code conventions stay in AGENTS.md/CLAUDE.md). Two new packs in all three tools: **`/artisan-context`** creates it (drafting Overview/Glossary from real node names, walking section by section — every line human-approved) or reviews it (reconciles the doc against the diagram: missing/orphaned glossary terms, contradicted invariants, roadmap progress; pure conversation when run before any scan); **`/artisan-set-up`** is day zero — `artuml scan` with `--src` detection, context creation/review, then wrap-up offering `/artisan-serve` when the editor server isn't running. Requires `artisan-uml-cli@^0.7.0` for the scan seeding. `agents/README.md` documents the convention; the `artisan-cli` skill lists the new packs and the `context.md` file role.
+- Cross-pack integration: `/artisan-architect`, `/artisan-implement` and `/artisan-scaffold` read `.artisan/context.md` first — its Requirements/Invariants bind proposals and method bodies, cited in output ("follows R2") — and `/artisan-scan`, `/artisan-scaffold`, `/artisan-implement`, `/artisan-architect` and `/artisan-status` propose matching `## Glossary` lines whenever their reports show types added/renamed/removed (propose-only, asked once; `/artisan-status` offers from its non-consuming peek). The packs never edit the doc — only `/artisan-context`, `/artisan-set-up` and the human do.
+- Shared **Artisan asks** rule in every pack, right under the `artuml` fallback note: agent questions go through the harness's own question UI (options / multiple-choice / free text) with 🎨 in the question text; when no question UI is available the line starts with 🎨❓ instead — so artisan asks are always identifiable.
+
 ## 0.7.0 — 10.11.2026
 
 ### Changed

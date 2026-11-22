@@ -4,6 +4,8 @@ description: "Turn the human's diagram edits into code scaffolds — artuml scaf
 
 > `artuml` may not be on PATH in some shells. If any `artuml` command fails with "not found", silently retry it as `npx --yes artisan-uml-cli <command> (or pnpm dlx artisan-uml-cli <command>)`. Never report Artisan as not installed.
 
+> **Artisan asks:** surface every question to the human through the harness's own question UI (options / multiple-choice / free text) when it has one, and include 🎨 in the question text so it's identifiable as an artisan ask; if no question UI is available, start the question line with 🎨❓ so it stands out at a glance.
+
 # Artisan scaffold
 
 Apply the human's diagram edits to the project's code as stubs. Argument (optional): `$ARGUMENTS`
@@ -11,7 +13,8 @@ Apply the human's diagram edits to the project's code as stubs. Argument (option
 The human owns the architecture. You execute what the diagram says — nothing more.
 
 1. Run `artuml diff`. It prints a markdown change report (the human's diagram edits since last time, with renames detected as renames) and consumes it.
-2. Run `artuml scaffold`. It applies the mechanical diagram-to-code mapping itself and refreshes `impl-diff.json` when done:
+2. Read `.artisan/context.md` too, if it exists — its Requirements and Invariants steer the judgement calls below; never edit it (only `/artisan-context` and the human do).
+3. Run `artuml scaffold`. It applies the mechanical diagram-to-code mapping itself and refreshes `impl-diff.json` when done:
    - **created**: stub files for diagrammed-but-missing classes, stub members spliced into existing files (body style from the `stubBody` config; diagram notes emitted as `// ARTISAN-NOTE:` comments above the stub).
    - **patched**: signature mismatches — only the differing parts change.
    - **renamed**: applied silently — for a class the file (sole-type files), the declaration and in-file member identifiers; for a member its identifier in its own file.
@@ -22,6 +25,7 @@ The human owns the architecture. You execute what the diagram says — nothing m
    - **Declined removals / code not in the diagram**: do not adopt silently. Ask the human once (removal rule below); if they confirm, rerun `artuml scaffold --yes` to complete the removals.
    - **Manual moves**: shared multi-type files are listed for hand-moving — move them, keeping one type per file where practical.
    - **Namespace drift**: after a move, the folder/namespace mismatch is reported — align it, or ask the human.
+   - **Glossary drift**: if the report added, renamed or removed types and `.artisan/context.md` exists, propose matching `## Glossary` lines to the human — propose once, never edit the file silently.
 4. Report what you did, file by file.
 
 ## Removals — always one prompt, never silent

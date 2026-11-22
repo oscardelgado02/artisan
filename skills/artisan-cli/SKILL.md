@@ -14,7 +14,7 @@ Run in the project root (the directory that owns `.artisan/`).
 
 | Command | Notes |
 |---------|-------|
-| `artuml scan [--src DIR] [--lang csharp]` | parse code → `.artisan/`; merges with prior diagram (ids stable); seeds `config.json`; editor copy requires network only on first install |
+| `artuml scan [--src DIR] [--lang csharp]` | parse code → `.artisan/`; merges with prior diagram (ids stable); seeds `config.json`; seeds `context.md` template once (never rewritten); editor copy requires network only on first install |
 | `artuml serve [--port N]` | live editor at `localhost:4173` (default); autosave PUTs to `diagram.json`; spawn with `ARTISAN_NO_BROWSER=1` to skip opening a browser |
 | `artuml diff [--json] [--peek]` | human changes since AI last looked. Consuming: advances `last-ai.json`. `--peek`: prints the same report, advances nothing — use in status-style checks |
 | `artuml impl-diff [--src DIR]` | diagram vs actual code (read-only); missing-from-code → implement, code-not-in-diagram → ask human |
@@ -53,6 +53,7 @@ Read config as `JSON.parse(fs.readFileSync('.artisan/config.json'))` with a fall
 | `config.json` | settings (see Config) |
 | `impl-diff.json` | last impl-diff summary badge; also embedded in `diagram.html` |
 | `impl-diff` note | scaffold consumes and refreshes this file; it never touches `last-ai.json`/`pending.json` |
+| `context.md` | human-authored project intent (Overview, Glossary, Requirements, Invariants, Roadmap, Non-goals). `scan` seeds the template once and never rewrites it; the `/artisan-context` pack creates/reviews it; architect/implement/scaffold read it and never edit it |
 | `diagram.html`, `editor/` | self-contained editor |
 
 ## Language support

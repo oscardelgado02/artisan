@@ -33,7 +33,7 @@ npx artisan-agent install
 ```
 
 The installer installs the CLI (`pnpm add -g artisan-uml-cli`) and copies the
-`/artisan-*` packs — six workflow commands and the `artisan-cli` skill — into
+`/artisan-*` packs — eight workflow commands and the `artisan-cli` skill — into
 your agents' command folders (opencode, Claude Code, Codex). It detects which
 tools you have; use `npx artisan-agent install --all`, `--project` or
 `--tool opencode` to control it, and `--cli global|local|no` for the CLI install
@@ -78,20 +78,27 @@ Every command: [CLI docs](https://cli.artisan-uml.dev/).
 
 ## The packs
 
-Six workflow commands, same behavior in [opencode](https://opencode.ai), Claude
+Eight workflow commands, same behavior in [opencode](https://opencode.ai), Claude
 Code and Codex. Additionally a `artisan-cli` skill for opencode provides the
 `artuml` reference — flags, config paths, file meanings — that the agent loads
 when it needs them:
 
 | Command | What it does |
 | --- | --- |
+| `/artisan-set-up` | day zero: scan the project + create `.artisan/context.md` in one guided pass |
 | `/artisan-scan` | scan code → diagram + PlantUML, open the editor (language support: C# only today) |
 | `/artisan-serve` | live editor server on localhost — recommended for editing the architecture |
+| `/artisan-context` | create or review `.artisan/context.md` — the project intent doc (Overview, Glossary, Requirements, Invariants, Roadmap, Non-goals) the other packs read |
 | `/artisan-scaffold` | diagram edits → code: `artuml scaffold` does the mechanical part, the agent refactors call sites and relays removal candidates |
 | `/artisan-implement` | diagram edits → real code, per notes |
 | `/artisan-architect` | agent proposes an architecture change; you review |
 | `/artisan-status` | pending changes in both directions |
 | `artisan-cli` (skill) | `artuml` CLI reference — commands, flags, config locations |
+
+`.artisan/context.md` is human-authored: `artuml scan` seeds the template once
+(the tool never rewrites it), the context packs fill or review it with you, and
+the other packs read it — following its Requirements and Invariants and
+proposing Glossary updates when node names change. Only you approve every line.
 
 Any agent works without packs too — Cursor, Windsurf, Gemini CLI, anything that
 runs commands. Install the CLI, then point the agent at `artuml diff` and the
